@@ -20,23 +20,23 @@ class SoundManager {
     return _lowClickSoundId;
   }
 
-  final soundPool = Soundpool(streamType: StreamType.music);
+  final _soundPool = Soundpool(streamType: StreamType.music);
 
   SoundManager._internal() {
     rootBundle.load('assets/sounds/click_high.ogg').then((data) {
-      soundPool.load(data).then((value) {
+      _soundPool.load(data).then((value) {
         _highClickSoundId = value;
         print('High sound id: $_highClickSoundId');
       });
     });
     rootBundle.load('assets/sounds/click_medium.ogg').then((data) {
-      soundPool.load(data).then((value) {
+      _soundPool.load(data).then((value) {
         _mediumClickSoundId = value;
         print('Medium sound id: $_mediumClickSoundId');
       });
     });
     rootBundle.load('assets/sounds/click_low.ogg').then((data) {
-      soundPool.load(data).then((value) {
+      _soundPool.load(data).then((value) {
         _lowClickSoundId = value;
         print('Low sound id: $_lowClickSoundId');
       });
@@ -48,6 +48,6 @@ class SoundManager {
   }
 
   void playSound(int soundId) {
-    soundPool.play(soundId);
+    _soundPool.play(soundId);
   }
 }

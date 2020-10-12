@@ -5,7 +5,6 @@ import 'package:provider/provider.dart';
 import 'providers/metronome.dart';
 import 'providers/setlists_manager.dart';
 import 'screens/simple_metronome_screen.dart';
-import 'sound_manager.dart';
 
 void main() {
   runApp(MyApp());
@@ -20,7 +19,7 @@ class MyApp extends StatelessWidget {
           create: (_) => SetlistManager(),
         ),
         ChangeNotifierProvider(
-          create: (_) => Metronome(SoundManager()),
+          create: (_) => Metronome(),
         ),
       ],
       child: GetMaterialApp(

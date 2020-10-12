@@ -39,9 +39,10 @@ class _PlayComplexTrackPanelState extends State<PlayComplexTrackPanel> {
         _currentSection = _track.currentSection;
 
         widget.metronome.change(
-            _currentSection.tempo, widget.metronome.isPlaying,
-            beatsPerBar: _currentSection.beatsPerBar,
-            clicksPerBeat: _currentSection.clicksPerBeat);
+          tempo: _currentSection.tempo,
+          beatsPerBar: _currentSection.beatsPerBar,
+          clicksPerBeat: _currentSection.clicksPerBeat,
+        );
 
         _carouselController.nextPage(
             duration: Duration(milliseconds: _scrollDuration),

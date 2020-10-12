@@ -84,9 +84,15 @@ class _SetlistScreenState extends State<SetlistScreen>
 
   void _changeMetronomForCurrentSection() {
     final currentSection = _selectedTrack.currentSection;
-    _metronome.change(currentSection.tempo, false,
+    // _metronome.change(currentSection.tempo, false,
+    //     beatsPerBar: currentSection.beatsPerBar,
+    //     clicksPerBeat: currentSection.clicksPerBeat);
+
+    _metronome.change(
+        tempo: currentSection.tempo,
         beatsPerBar: currentSection.beatsPerBar,
-        clicksPerBeat: currentSection.clicksPerBeat);
+        clicksPerBeat: currentSection.clicksPerBeat,
+        play: false);
   }
 
   dynamic _buildPopupMenuItems() {

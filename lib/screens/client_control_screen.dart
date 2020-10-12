@@ -52,8 +52,9 @@ class _ClientControlScreenState extends State<ClientControlScreen> {
       final tempo = int.parse(message.parameters[0]);
       final beats = int.parse(message.parameters[1]);
       final clicks = int.parse(message.parameters[2]);
-      _metronome.change(tempo, false,
-          beatsPerBar: beats, clicksPerBeat: clicks);
+
+      _metronome.change(
+          tempo: tempo, beatsPerBar: beats, clicksPerBeat: clicks, play: false);
 
       final waitTime = DateTime.fromMillisecondsSinceEpoch(message.timestamp)
           .add(Duration(milliseconds: _remoteTimeDiff.abs() + 1000));
