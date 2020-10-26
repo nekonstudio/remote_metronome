@@ -45,7 +45,7 @@ class _HostControlScreenState extends State<HostControlScreen> {
     _btManager.setInputListenerCallback(_onMessageReceived);
 
     _metronome = Provider.of<Metronome>(context);
-    _metronome.setup(120, beatsPerBar: 4, clicksPerBeat: 1);
+    // _metronome.setup(120, beatsPerBar: 4, clicksPerBeat: 1);
 
     _isInitialized = true;
   }
@@ -74,28 +74,37 @@ class _HostControlScreenState extends State<HostControlScreen> {
       if (!_isPlayRequest) return;
 
       BluetoothMessage newMessage;
-      Function action;
+      // Function action;
+      bool start; // BRZYDKO
       if (latency > 70) {
         print('To big latency ($latency ms), trying again');
         newMessage = BluetoothMessage(BluetoothCommand.LatencyTest);
       } else {
         if (_metronome.isPlaying) {
           newMessage = BluetoothMessage(BluetoothCommand.Stop);
-          action = _metronome.stop;
+          // action = _metronome.stop;
+          start = false;
         } else {
           newMessage = BluetoothMessage(BluetoothCommand.Play, parameters: [
             120.toString(),
             4.toString(),
             1.toString(),
           ]);
-          action = _metronome.start;
+          // action = _metronome.start;
+          start = true;
         }
       }
 
       _storedTime = DateTime.now();
       await _btManager.broadcastMessage(newMessage);
-      if (action != null) {
-        Future.delayed(Duration(milliseconds: latency.toInt()), action);
+      if (start != null) {
+        Future.delayed(Duration(milliseconds: latency.toInt()), () {
+          if (start) {
+            _metronome.start(120, 4, 1);
+          } else {
+            _metronome.stop();
+          }
+        });
         setState(() {
           _isPlayRequest = false;
         });
@@ -164,7 +173,9 @@ class _HostControlScreenState extends State<HostControlScreen> {
                   1.toString(),
                 ]);
 
-                Future.delayed(Duration(seconds: 1), _metronome.start);
+                Future.delayed(Duration(seconds: 1), () {
+                  _metronome.start(120, 4, 1);
+                });
               }
 
               msg.timestamp = DateTime.now().millisecondsSinceEpoch;

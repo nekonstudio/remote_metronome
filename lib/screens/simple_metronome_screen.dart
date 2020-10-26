@@ -1,12 +1,8 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:metronom/providers/metronome.dart';
-import 'package:metronom/sound_manager.dart';
 import 'package:provider/provider.dart';
-import 'package:soundpool/soundpool.dart';
 
+import '../providers/metronome.dart';
+import '../sound_manager.dart';
 import '../widgets/app_drawer.dart';
 import '../widgets/visualization.dart';
 
@@ -17,31 +13,48 @@ class SimpleMetronomeScreen extends StatefulWidget {
 }
 
 class _SimpleMetronomeScreenState extends State<SimpleMetronomeScreen> {
+  static const MinTempo = 10;
+  static const MaxTempo = 300;
+
+  static const MinBeatsPerBar = 1;
+  static const MaxBeatsPerBar = 16;
+
+  static const MinClicksPerBeat = 1;
+  static const MaxClicksPerBeat = 16;
+
+  static const MinTempoMultiplier = 0.5;
+  static const DefaultTempoMultiplier = 1.0;
+  static const MaxTempoMultiplier = 2.0;
+
   bool _isPlaying = false;
   int _currentTempo = 120;
   int _beatsPerBar = 4;
   int _clicksPerBeat = 1;
-  double _tempoMultiplier = 1.0;
+  double _tempoMultiplier = DefaultTempoMultiplier;
   Stopwatch _tapTempoStopwatch = Stopwatch();
 
   void _decreaseBeatsPerBar() {
-    if (_beatsPerBar > 1) {
+    if (_beatsPerBar > MinBeatsPerBar) {
       setState(() {
         _beatsPerBar--;
       });
     }
+
+    _restartTapTempoStopwatch();
   }
 
   void _increaseBeatsPerBar() {
-    if (_beatsPerBar < 16) {
+    if (_beatsPerBar < MaxBeatsPerBar) {
       setState(() {
         _beatsPerBar++;
       });
     }
+
+    _restartTapTempoStopwatch();
   }
 
   void _decreaseClicksPerBeat() {
-    if (_clicksPerBeat > 1) {
+    if (_clicksPerBeat > MinClicksPerBeat) {
       setState(() {
         _clicksPerBeat--;
       });
@@ -51,7 +64,7 @@ class _SimpleMetronomeScreenState extends State<SimpleMetronomeScreen> {
   }
 
   void _increaseClicksPerBeat() {
-    if (_clicksPerBeat < 16) {
+    if (_clicksPerBeat < MaxClicksPerBeat) {
       setState(() {
         _clicksPerBeat++;
       });
@@ -61,8 +74,10 @@ class _SimpleMetronomeScreenState extends State<SimpleMetronomeScreen> {
   }
 
   void _restartTapTempoStopwatch() {
-    _tapTempoStopwatch.stop();
-    _tapTempoStopwatch.reset();
+    if (_tapTempoStopwatch.isRunning) {
+      _tapTempoStopwatch.stop();
+      _tapTempoStopwatch.reset();
+    }
   }
 
   void _changeTempoBy(int value) {
@@ -76,11 +91,11 @@ class _SimpleMetronomeScreenState extends State<SimpleMetronomeScreen> {
   void _calculateCurrentTempo(Duration elapsed) {
     setState(() {
       final newTempo = 60 ~/ (elapsed.inMilliseconds / 1000);
-      _currentTempo = newTempo <= 300
-          ? newTempo >= 10
+      _currentTempo = newTempo <= MaxTempo
+          ? newTempo >= MinTempo
               ? newTempo
-              : 10
-          : 300;
+              : MinTempo
+          : MaxTempo;
     });
 
     _restartTapTempoStopwatch();
@@ -142,7 +157,9 @@ class _SimpleMetronomeScreenState extends State<SimpleMetronomeScreen> {
                         onTap: () {
                           setState(() {
                             _tempoMultiplier =
-                                _tempoMultiplier >= 1 ? 0.5 : 1.0;
+                                _tempoMultiplier >= DefaultTempoMultiplier
+                                    ? MinTempoMultiplier
+                                    : DefaultTempoMultiplier;
                           });
 
                           final metronome =
@@ -157,9 +174,10 @@ class _SimpleMetronomeScreenState extends State<SimpleMetronomeScreen> {
                               style: TextStyle(
                                 color: Colors.white,
                               )),
-                          backgroundColor: _tempoMultiplier < 1.0
-                              ? Colors.blue
-                              : Colors.black,
+                          backgroundColor:
+                              _tempoMultiplier < DefaultTempoMultiplier
+                                  ? Colors.blue
+                                  : Colors.black,
                         ),
                       ),
                       Text(
@@ -170,7 +188,9 @@ class _SimpleMetronomeScreenState extends State<SimpleMetronomeScreen> {
                         onTap: () {
                           setState(() {
                             _tempoMultiplier =
-                                _tempoMultiplier <= 1 ? 2.0 : 1.0;
+                                _tempoMultiplier <= DefaultTempoMultiplier
+                                    ? MaxTempoMultiplier
+                                    : DefaultTempoMultiplier;
                           });
 
                           final metronome =
@@ -185,9 +205,10 @@ class _SimpleMetronomeScreenState extends State<SimpleMetronomeScreen> {
                               style: TextStyle(
                                 color: Colors.white,
                               )),
-                          backgroundColor: _tempoMultiplier > 1.0
-                              ? Colors.blue
-                              : Colors.black,
+                          backgroundColor:
+                              _tempoMultiplier > DefaultTempoMultiplier
+                                  ? Colors.blue
+                                  : Colors.black,
                         ),
                       ),
                     ],
@@ -208,19 +229,17 @@ class _SimpleMetronomeScreenState extends State<SimpleMetronomeScreen> {
                 ),
                 Slider(
                   value: _currentTempo.toDouble(),
-                  min: 10,
-                  max: 300,
+                  min: MinTempo.toDouble(),
+                  max: MaxTempo.toDouble(),
                   onChanged: (value) {
                     setState(() {
                       _currentTempo = value.toInt();
                     });
-                  },
-                  onChangeEnd: (value) {
-                    final metronome =
-                        Provider.of<Metronome>(context, listen: false);
-                    metronome.change(tempo: _currentTempo);
 
                     _restartTapTempoStopwatch();
+
+                    Provider.of<Metronome>(context, listen: false)
+                        .change(tempo: _currentTempo);
                   },
                 ),
               ],
@@ -335,20 +354,14 @@ class _SimpleMetronomeScreenState extends State<SimpleMetronomeScreen> {
                   child: Consumer<Metronome>(
                     builder: (context, metronome, child) => GestureDetector(
                       onTap: () {
-                        if (metronome.isPlaying) {
-                          metronome.stop();
-                        } else {
-                          // metronome.start();
-                          metronome.change(
-                            tempo: _currentTempo,
-                            beatsPerBar: _beatsPerBar,
-                            clicksPerBeat: _clicksPerBeat,
-                            play: false,
-                          );
-                          metronome.start();
+                        if (!metronome.isPlaying) {
+                          metronome.start(
+                              _currentTempo, _beatsPerBar, _clicksPerBeat,
+                              tempoMultiplier: _tempoMultiplier);
 
-                          _tapTempoStopwatch.stop();
-                          _tapTempoStopwatch.reset();
+                          _restartTapTempoStopwatch();
+                        } else {
+                          metronome.stop();
                         }
                       },
                       child: CircleAvatar(
@@ -377,7 +390,9 @@ class _SimpleMetronomeScreenState extends State<SimpleMetronomeScreen> {
                           clipBehavior: Clip.hardEdge,
                           child: GestureDetector(
                             onTapDown: (_) {
-                              if (!_isPlaying) {
+                              if (!Provider.of<Metronome>(context,
+                                      listen: false)
+                                  .isPlaying) {
                                 if (_tapTempoStopwatch.isRunning) {
                                   _calculateCurrentTempo(
                                       _tapTempoStopwatch.elapsed);

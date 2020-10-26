@@ -41,7 +41,7 @@ class _ClientControlScreenState extends State<ClientControlScreen> {
     // _btManager.setInputListenerCallback(_executeBtCommand);
 
     _metronome = Provider.of<Metronome>(context);
-    _metronome.setup(120, beatsPerBar: 4, clicksPerBeat: 1);
+    // _metronome.setup(120, beatsPerBar: 4, clicksPerBeat: 1);
 
     // _isInitialized = true;
   }
@@ -53,14 +53,14 @@ class _ClientControlScreenState extends State<ClientControlScreen> {
       final beats = int.parse(message.parameters[1]);
       final clicks = int.parse(message.parameters[2]);
 
-      _metronome.change(
-          tempo: tempo, beatsPerBar: beats, clicksPerBeat: clicks, play: false);
+      // _metronome.change(
+      //     tempo: tempo, beatsPerBar: beats, clicksPerBeat: clicks, play: false);
 
       final waitTime = DateTime.fromMillisecondsSinceEpoch(message.timestamp)
           .add(Duration(milliseconds: _remoteTimeDiff.abs() + 1000));
 
       await Future.doWhile(() => DateTime.now().isBefore(waitTime));
-      _metronome.start();
+      _metronome.start(tempo, beats, clicks);
     } else if (command == BluetoothCommand.Stop) {
       _metronome.stop();
     } else if (command == BluetoothCommand.LatencyTest) {

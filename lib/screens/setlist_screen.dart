@@ -88,11 +88,11 @@ class _SetlistScreenState extends State<SetlistScreen>
     //     beatsPerBar: currentSection.beatsPerBar,
     //     clicksPerBeat: currentSection.clicksPerBeat);
 
-    _metronome.change(
-        tempo: currentSection.tempo,
-        beatsPerBar: currentSection.beatsPerBar,
-        clicksPerBeat: currentSection.clicksPerBeat,
-        play: false);
+    // _metronome.change(
+    //     tempo: currentSection.tempo,
+    //     beatsPerBar: currentSection.beatsPerBar,
+    //     clicksPerBeat: currentSection.clicksPerBeat,
+    //     play: false);
   }
 
   dynamic _buildPopupMenuItems() {
@@ -279,9 +279,9 @@ class _PlayPanelState extends State<_PlayPanel> {
     final Map<IconData, Function> options = {
       Icons.skip_previous: widget.handlers['previous'],
       Icons.fast_rewind: widget.handlers['rewind'],
-      metronome.isPlaying ? Icons.stop : Icons.play_arrow: () {
-        metronome.isPlaying ? metronome.stop() : metronome.start();
-      },
+      // metronome.isPlaying ? Icons.stop : Icons.play_arrow: () {
+      //   metronome.isPlaying ? metronome.stop() : metronome.start();
+      // },
       Icons.fast_forward: widget.handlers['forward'],
       Icons.skip_next: widget.handlers['next'],
     };
