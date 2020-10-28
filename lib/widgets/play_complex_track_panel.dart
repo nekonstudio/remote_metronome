@@ -2,89 +2,70 @@ import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:metronom/models/track.dart';
 import 'package:metronom/providers/metronome.dart';
+import 'package:metronom/providers/setlist_player.dart';
 import 'package:metronom/providers/setlists_manager.dart';
 import 'package:metronom/widgets/visualization.dart';
 import 'package:provider/provider.dart';
 
 class PlayComplexTrackPanel extends StatefulWidget {
-  final Metronome metronome;
-  final Function switchTrack;
-
-  PlayComplexTrackPanel(this.metronome, this.switchTrack);
-
   @override
   _PlayComplexTrackPanelState createState() => _PlayComplexTrackPanelState();
 }
 
 class _PlayComplexTrackPanelState extends State<PlayComplexTrackPanel> {
-  // int _currentSectionBar = 1;
-
-  Track _track;
-  List<Section> _sections;
-  Section _currentSection;
-
   CarouselController _carouselController = CarouselController();
-  final int _scrollDuration = 300;
+  static const ScrollDuration = 300;
 
-  @override
-  void dispose() {
-    _track.reset();
-    super.dispose();
-  }
+  // void _handleBarCompleted() {
+  //   final isSectionFinished = _track.nextBar();
+  //   if (isSectionFinished) {
+  //     if (!_track.isTrackFinished) {
+  //       _currentSection = _track.currentSection;
 
-  void _handleBarCompleted() {
-    final isSectionFinished = _track.nextBar();
-    if (isSectionFinished) {
-      if (!_track.isTrackFinished) {
-        _currentSection = _track.currentSection;
+  //       widget.metronome.change(
+  //         tempo: _currentSection.tempo,
+  //         beatsPerBar: _currentSection.beatsPerBar,
+  //         clicksPerBeat: _currentSection.clicksPerBeat,
+  //       );
 
-        widget.metronome.change(
-          tempo: _currentSection.tempo,
-          beatsPerBar: _currentSection.beatsPerBar,
-          clicksPerBeat: _currentSection.clicksPerBeat,
-        );
-
-        _carouselController.nextPage(
-            duration: Duration(milliseconds: _scrollDuration),
-            curve: Curves.linear);
-      } else {
-        _track.reset();
-        widget.metronome.terminate();
-        widget.switchTrack();
-        _carouselController.animateToPage(0,
-            duration: Duration(milliseconds: _scrollDuration),
-            curve: Curves.linear);
-      }
-    }
-  }
+  //       _carouselController.nextPage(
+  //           duration: Duration(milliseconds: _scrollDuration),
+  //           curve: Curves.linear);
+  //     } else {
+  //       _track.reset();
+  //       widget.metronome.terminate();
+  //       widget.switchTrack();
+  //       _carouselController.animateToPage(0,
+  //           duration: Duration(milliseconds: _scrollDuration),
+  //           curve: Curves.linear);
+  //     }
+  //   }
+  // }
 
   @override
   Widget build(BuildContext context) {
-    _track = Provider.of<Track>(context);
-    _sections = _track.sections;
-    _currentSection = _track.currentSection;
+    final player = Provider.of<SetlistPlayer>(context);
+    final currentSection = player.currentSection;
     try {
-      _carouselController.animateToPage(_track.currentSectionIndex,
-          duration: Duration(milliseconds: _scrollDuration),
+      _carouselController.animateToPage(player.currentSectionIndex,
+          duration: Duration(milliseconds: ScrollDuration),
           curve: Curves.linear);
     } on NoSuchMethodError catch (e) {
       print('Karuzelowy wyjąteczek, ale bezpieczniutki');
     }
-    widget.metronome.setBarCompletedCallback(_handleBarCompleted);
 
     return Column(
       children: [
         Expanded(
           flex: 3,
-          child: Visualization(
-              _currentSection.beatsPerBar, widget.metronome.currentBarBeat),
+          child: Visualization(currentSection.beatsPerBar),
         ),
         Expanded(
           flex: 3,
           child: Container(
             alignment: Alignment.center,
             child: Text(
-              '${_currentSection.tempo}',
+              '${currentSection.tempo}',
               style: TextStyle(fontSize: 60),
             ),
           ),
@@ -92,12 +73,15 @@ class _PlayComplexTrackPanelState extends State<PlayComplexTrackPanel> {
         Expanded(
           flex: 2,
           child: CarouselSlider(
-              items: _sections.asMap().entries.map((sectionEntry) {
+              items: player.currentTrack.sections
+                  .asMap()
+                  .entries
+                  .map((sectionEntry) {
                 final isCurrent =
-                    sectionEntry.key == _track.currentSectionIndex;
+                    sectionEntry.key == player.currentSectionIndex;
                 final section = sectionEntry.value;
                 return AnimatedDefaultTextStyle(
-                  duration: Duration(milliseconds: _scrollDuration),
+                  duration: Duration(milliseconds: ScrollDuration),
                   style: TextStyle(
                     color: isCurrent ? Colors.white : Colors.white70,
                     fontWeight: isCurrent ? FontWeight.bold : FontWeight.normal,
@@ -108,7 +92,7 @@ class _PlayComplexTrackPanelState extends State<PlayComplexTrackPanel> {
                         isCurrent ? EdgeInsets.zero : EdgeInsets.only(top: 2),
                     child: Text(
                       isCurrent
-                          ? '${section.title} ${_track.currentSectionBar}/${section.barsCount}'
+                          ? '${section.title} ${player.currentSectionBar}/${section.barsCount}'
                           : '${section.title}',
                     ),
                   ),
@@ -126,54 +110,5 @@ class _PlayComplexTrackPanelState extends State<PlayComplexTrackPanel> {
         )
       ],
     );
-  }
-}
-
-class _LabelCircularBuffer {
-  final List<String> _values;
-  final int size;
-  int _start = 0;
-  int _end = 0;
-  int _count = 0;
-
-  _LabelCircularBuffer(this.size)
-      : _values = List.generate(size, (index) => '');
-
-  void insert(String value) {
-    _end++;
-    if (_end == _values.length) {
-      _end = 0;
-    }
-    _values[_end] = value;
-
-    // print('Insert: $_values');
-
-    _count++;
-    if (_count < _values.length) {
-      // print('Count: $_count');
-      return;
-    }
-
-    _start++;
-    if (_start == _values.length) {
-      _start = 0;
-    }
-  }
-
-  String operator [](int index) {
-    if (index >= size) {
-      throw 'Index $index is out of the boundaries ($index >= $size)';
-    }
-
-    int _index = _start + index;
-    if (_index >= size) {
-      _index = _start + index - size;
-    }
-
-    // print('get start: $_start');
-    // print('get index: $_index');
-    // print('get: ${_values[_index]}');
-
-    return _values[_index];
   }
 }

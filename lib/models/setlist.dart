@@ -29,7 +29,7 @@ class Setlist {
               clicksPerBeat: 1,
               tempo: 120),
         ]),
-    // Track('Utwór 2'),
+    Track.simple('test 2', 120, 4, 1),
   ];
 
   Setlist(

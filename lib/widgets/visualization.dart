@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:metronom/providers/metronome.dart';
+import 'package:provider/provider.dart';
 
 class Visualization extends StatelessWidget {
   final int beatsPerBar;
-  final int currentBarBeat;
 
-  Visualization(this.beatsPerBar, this.currentBarBeat);
+  Visualization(this.beatsPerBar);
 
-  Color _calculateColor(int index) {
+  Color _calculateColor(int index, int currentBarBeat) {
     double opacity = (index + 1 == currentBarBeat) ? 1.0 : 0.2;
     return Color.fromRGBO(255, index == 0 ? 0 : 255, 0, opacity);
   }
@@ -18,7 +19,8 @@ class Visualization extends StatelessWidget {
       children: List.generate(
           beatsPerBar,
           (index) => CircleAvatar(
-                backgroundColor: _calculateColor(index),
+                backgroundColor: _calculateColor(
+                    index, Provider.of<Metronome>(context).currentBarBeat),
               )),
     );
   }

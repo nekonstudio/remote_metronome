@@ -4,6 +4,8 @@ import 'package:provider/provider.dart';
 
 import '../mixins/list_item_long_press_popup_menu.dart';
 import '../models/setlist.dart';
+import '../providers/metronome.dart';
+import '../providers/setlist_player.dart';
 import '../providers/setlists_manager.dart';
 import 'setlist_screen.dart';
 
@@ -25,18 +27,26 @@ class SavedSetlistsScreen extends StatelessWidget
           separatorBuilder: (context, index) => Divider(),
           itemCount: setlists.length,
           itemBuilder: (context, index) {
-            final item = setlists[index];
+            final setlist = setlists[index];
             return InkWell(
               onTap: () {
-                Get.to(SetlistScreen(), arguments: item.id);
+                Get.to(
+                    ChangeNotifierProxyProvider<SetlistManager, SetlistPlayer>(
+                      create: (context) => SetlistPlayer(
+                          Provider.of<Metronome>(context, listen: false)),
+                      update: (context, manager, player) =>
+                          player..update(manager.setlists[index].tracks),
+                      child: SetlistScreen(),
+                    ),
+                    arguments: setlist.id);
               },
               onTapDown: (details) => storeTapPosition(details),
               onLongPress: () => showPopupMenu(context, index,
-                  _buildPopupMenuItems(context, setlistManager, item)),
+                  _buildPopupMenuItems(context, setlistManager, setlist)),
               child: ListTile(
                 leading: Icon(Icons.menu),
-                title: Text('${item.name}'),
-                subtitle: Text('Liczba utworów: ${item.tracksCount}'),
+                title: Text('${setlist.name}'),
+                subtitle: Text('Liczba utworów: ${setlist.tracksCount}'),
                 trailing: Text(''),
               ),
             );

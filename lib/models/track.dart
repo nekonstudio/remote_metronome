@@ -1,6 +1,4 @@
-import 'package:flutter/cupertino.dart';
-
-class Track with ChangeNotifier {
+class Track {
   String id = DateTime.now().toString();
   String name;
   int tempo;
@@ -21,69 +19,6 @@ class Track with ChangeNotifier {
       this.clicksPerBeat,
       this.isComplex,
       this.sections});
-
-  int _currentSectionIndex = 0;
-  bool _isFinished = false;
-
-  int get currentSectionIndex {
-    return _currentSectionIndex;
-  }
-
-  bool get isTrackFinished {
-    return _isFinished;
-  }
-
-  Section get currentSection {
-    // print('_currentSectionIndex: $_currentSectionIndex');
-    return sections[_currentSectionIndex];
-  }
-
-  int get currentSectionBar {
-    return currentSection.currentBar;
-  }
-
-  bool nextBar() {
-    final isFinished = currentSection.nextBar();
-    if (isFinished) {
-      selectNextSection();
-
-      return true;
-    }
-
-    notifyListeners();
-
-    return false;
-  }
-
-  void selectNextSection() {
-    if (isComplex) {
-      if (_currentSectionIndex >= sections.length - 1) {
-        _isFinished = true;
-        return;
-      }
-
-      currentSection.reset();
-      _currentSectionIndex++;
-
-      notifyListeners();
-    }
-  }
-
-  void selectPreviousSection() {
-    if (isComplex && _currentSectionIndex > 0) {
-      currentSection.reset();
-      _currentSectionIndex--;
-
-      notifyListeners();
-    }
-  }
-
-  void reset() {
-    _currentSectionIndex = 0;
-    _isFinished = false;
-
-    notifyListeners();
-  }
 }
 
 class Section {
@@ -100,26 +35,4 @@ class Section {
     this.beatsPerBar,
     this.clicksPerBeat,
   });
-
-  int _currentBar = 1;
-
-  bool nextBar() {
-    bool isFinished = false;
-    if (_currentBar >= barsCount) {
-      isFinished = true;
-      reset();
-    } else {
-      _currentBar++;
-    }
-
-    return isFinished;
-  }
-
-  int get currentBar {
-    return _currentBar;
-  }
-
-  void reset() {
-    _currentBar = 1;
-  }
 }

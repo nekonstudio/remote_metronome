@@ -1,15 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:metronom/models/track.dart';
-import 'package:metronom/providers/metronome.dart';
-import 'package:metronom/widgets/visualization.dart';
+
+import '../models/track.dart';
+import 'visualization.dart';
 
 class PlaySimpleTrackPanel extends StatelessWidget {
   final Track track;
-  final Metronome metronome;
 
-  PlaySimpleTrackPanel(this.track, this.metronome) {
-    metronome.setBarCompletedCallback(null);
-  }
+  PlaySimpleTrackPanel(this.track);
 
   @override
   Widget build(BuildContext context) {
@@ -17,8 +14,9 @@ class PlaySimpleTrackPanel extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Expanded(
-            flex: 3,
-            child: Visualization(track.beatsPerBar, metronome.currentBarBeat)),
+          flex: 3,
+          child: Visualization(track.beatsPerBar),
+        ),
         Expanded(
           flex: 3,
           child: Container(

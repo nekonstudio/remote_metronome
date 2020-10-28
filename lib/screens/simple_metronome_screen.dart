@@ -133,8 +133,7 @@ class _SimpleMetronomeScreenState extends State<SimpleMetronomeScreen> {
           children: [
             Padding(
               padding: const EdgeInsets.only(top: 20.0),
-              child: Visualization(
-                  _beatsPerBar, Provider.of<Metronome>(context).currentBarBeat),
+              child: Visualization(_beatsPerBar),
             ),
             Column(
               children: [

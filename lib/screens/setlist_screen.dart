@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:metronom/mixins/list_item_long_press_popup_menu.dart';
+import 'package:metronom/providers/setlist_player.dart';
 import 'package:metronom/widgets/play_complex_track_panel.dart';
 import 'package:metronom/widgets/play_simple_track_panel.dart';
 import 'package:provider/provider.dart';
@@ -25,75 +26,9 @@ class _SetlistScreenState extends State<SetlistScreen>
   SetlistManager _setlistManager;
   String _setlistId;
   List<Track> _tracks;
-  int _selectedTrackIndex = 0;
   Track _selectedTrack;
   ItemScrollController _scrollController = ItemScrollController();
   static const int SCROLL_DURATION = 300;
-  // var _tapPosition;
-
-  @override
-  void dispose() {
-    _metronome.terminate();
-    super.dispose();
-  }
-
-  void _selectPreviousTrack() {
-    if (_selectedTrackIndex > 0) {
-      setState(() {
-        _selectedTrackIndex--;
-      });
-
-      _metronome.stop();
-      _scrollController.scrollTo(
-          index: _selectedTrackIndex,
-          duration: Duration(milliseconds: SCROLL_DURATION));
-    }
-  }
-
-  void _selectNextTrack() {
-    if (_selectedTrackIndex < _tracks.length - 1) {
-      setState(() {
-        _selectedTrackIndex++;
-      });
-
-      _metronome.stop();
-      _scrollController.scrollTo(
-          index: _selectedTrackIndex,
-          duration: Duration(milliseconds: SCROLL_DURATION));
-    }
-  }
-
-  void _selectNextTrackSection() {
-    if (_selectedTrack.isComplex) {
-      if (_selectedTrack.currentSectionIndex <
-          _selectedTrack.sections.length - 1) {
-        _selectedTrack.selectNextSection();
-        _changeMetronomForCurrentSection();
-      }
-    }
-  }
-
-  void _selectPreviousTrackSection() {
-    if (_selectedTrack.isComplex) {
-      if (_selectedTrack.currentSectionIndex > 0) {
-        _selectedTrack.selectPreviousSection();
-        _changeMetronomForCurrentSection();
-      }
-    }
-  }
-
-  void _changeMetronomForCurrentSection() {
-    final currentSection = _selectedTrack.currentSection;
-    // _metronome.change(currentSection.tempo, false,
-    //     beatsPerBar: currentSection.beatsPerBar,
-    //     clicksPerBeat: currentSection.clicksPerBeat);
-
-    // _metronome.change(
-    //     tempo: currentSection.tempo,
-    //     beatsPerBar: currentSection.beatsPerBar,
-    //     clicksPerBeat: currentSection.clicksPerBeat,
-    //     play: false);
-  }
 
   dynamic _buildPopupMenuItems() {
     return [
@@ -121,31 +56,23 @@ class _SetlistScreenState extends State<SetlistScreen>
     ];
   }
 
+  void onTrackChanged(int currentIndex) {
+    _scrollController.scrollTo(
+        index: currentIndex, duration: Duration(milliseconds: SCROLL_DURATION));
+  }
+
   @override
   Widget build(BuildContext context) {
     _setlistId = ModalRoute.of(context).settings.arguments as String;
     _setlistManager = Provider.of<SetlistManager>(context);
     final setlist = _setlistManager.getSetlist(_setlistId);
     _tracks = setlist.tracks;
-    _selectedTrack = _tracks.length > 0 ? _tracks[_selectedTrackIndex] : null;
+    final player = Provider.of<SetlistPlayer>(context);
+    player.onTrackChangedCallback =
+        () => onTrackChanged(player.currentTrackIndex);
+
+    _selectedTrack = player.currentTrack;
     _metronome = Provider.of<Metronome>(context);
-
-    if (_selectedTrack != null) {
-      final tempo = _selectedTrack.isComplex
-          ? _selectedTrack.sections.first.tempo
-          : _selectedTrack.tempo;
-
-      final beatsPerBar = _selectedTrack.isComplex
-          ? _selectedTrack.sections.first.beatsPerBar
-          : _selectedTrack.beatsPerBar;
-
-      final clicksPerBeat = _selectedTrack.isComplex
-          ? _selectedTrack.sections.first.clicksPerBeat
-          : _selectedTrack.clicksPerBeat;
-
-      _metronome.setup(tempo,
-          beatsPerBar: beatsPerBar, clicksPerBeat: clicksPerBeat);
-    }
 
     return Scaffold(
       appBar: AppBar(
@@ -174,23 +101,14 @@ class _SetlistScreenState extends State<SetlistScreen>
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: [
                         Expanded(
-                            child: _selectedTrack.isComplex
-                                ? ChangeNotifierProvider.value(
-                                    value: _selectedTrack,
-                                    child: PlayComplexTrackPanel(
-                                        _metronome, _selectNextTrack),
-                                  )
-                                : PlaySimpleTrackPanel(
-                                    _selectedTrack, _metronome)),
+                          child: _selectedTrack.isComplex
+                              ? PlayComplexTrackPanel()
+                              : PlaySimpleTrackPanel(_selectedTrack),
+                        ),
                       ],
                     ),
                   ),
-                  _PlayPanel({
-                    'previous': _selectPreviousTrack,
-                    'rewind': _selectPreviousTrackSection,
-                    'forward': _selectNextTrackSection,
-                    'next': _selectNextTrack,
-                  }),
+                  _PlayPanel(player),
                   Expanded(
                     flex: 6,
                     child:
@@ -209,10 +127,7 @@ class _SetlistScreenState extends State<SetlistScreen>
                             children: [
                               InkWell(
                                 onTap: () {
-                                  setState(() {
-                                    _selectedTrackIndex = index;
-                                  });
-                                  _metronome.stop();
+                                  player.currentTrackIndex = index;
                                 },
                                 onTapDown: storeTapPosition,
                                 onLongPress: () => showPopupMenu(
@@ -224,12 +139,13 @@ class _SetlistScreenState extends State<SetlistScreen>
                                   title: Text(
                                     '${track.name}',
                                     style: TextStyle(
-                                      color: _selectedTrackIndex == index
+                                      color: player.currentTrackIndex == index
                                           ? Theme.of(context).accentColor
                                           : Colors.white,
-                                      fontWeight: _selectedTrackIndex == index
-                                          ? FontWeight.bold
-                                          : FontWeight.normal,
+                                      fontWeight:
+                                          player.currentTrackIndex == index
+                                              ? FontWeight.bold
+                                              : FontWeight.normal,
                                     ),
                                   ),
                                   subtitle: Text(track.isComplex
@@ -264,26 +180,21 @@ class _SetlistScreenState extends State<SetlistScreen>
   }
 }
 
-class _PlayPanel extends StatefulWidget {
-  final Map<String, Function> handlers;
-  _PlayPanel(this.handlers);
+class _PlayPanel extends StatelessWidget {
+  final SetlistPlayer player;
 
-  @override
-  _PlayPanelState createState() => _PlayPanelState();
-}
+  _PlayPanel(this.player);
 
-class _PlayPanelState extends State<_PlayPanel> {
   @override
   Widget build(BuildContext context) {
-    final metronome = Provider.of<Metronome>(context);
     final Map<IconData, Function> options = {
-      Icons.skip_previous: widget.handlers['previous'],
-      Icons.fast_rewind: widget.handlers['rewind'],
-      // metronome.isPlaying ? Icons.stop : Icons.play_arrow: () {
-      //   metronome.isPlaying ? metronome.stop() : metronome.start();
-      // },
-      Icons.fast_forward: widget.handlers['forward'],
-      Icons.skip_next: widget.handlers['next'],
+      Icons.skip_previous: player.selectPreviousTrack,
+      Icons.fast_rewind: player.selectPreviousSection,
+      player.isPlaying ? Icons.stop : Icons.play_arrow: () {
+        player.isPlaying ? player.stop() : player.play();
+      },
+      Icons.fast_forward: player.selectNextSection,
+      Icons.skip_next: player.selectNextTrack,
     };
 
     return Container(

@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
+import 'package:metronom/models/track.dart';
 
 class Metronome with ChangeNotifier {
   static const platform = const MethodChannel('com.example.metronom/metronom');
@@ -37,6 +38,10 @@ class Metronome with ChangeNotifier {
     _beatsPerBar = beatsPerBar;
     _clicksPerBeat = clicksPerBeat;
     _tempoMultiplier = tempoMultiplier;
+  }
+
+  void startTrack(Track track) {
+    start(track.tempo, track.beatsPerBar, track.clicksPerBeat);
   }
 
   void start(int tempo, int beatsPerBar, int clicksPerBeat,
@@ -107,16 +112,5 @@ class Metronome with ChangeNotifier {
             'clicksPerBeat': _clicksPerBeat,
             'tempoMultiplier': _tempoMultiplier,
           });
-  }
-
-  void terminate() {
-    if (_isPlaying) {
-      // _reset();
-      // _clickTimer.cancel();
-    }
-  }
-
-  void setBarCompletedCallback(Function handler) {
-    // _onBarCompleted = handler;
   }
 }
