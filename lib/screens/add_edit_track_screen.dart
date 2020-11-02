@@ -241,6 +241,7 @@ class _AddEditTrackScreenState extends State<AddEditTrackScreen> {
                                   ),
                                   _sections.length == 0
                                       ? Container(
+                                          color: Color.fromRGBO(36, 36, 36, 1),
                                           height: 60,
                                           child: Center(
                                             child: Text('Brak sekcji'),
@@ -383,8 +384,10 @@ class _SectionForm extends StatelessWidget {
                   existingSection == null ? 'Dodaj sekcję' : 'Edytuj sekcję'),
             ),
           ),
-          _metronomePanel.setup(existingSection.tempo,
-              existingSection.beatsPerBar, existingSection.clicksPerBeat),
+          existingSection != null
+              ? _metronomePanel.setup(existingSection.tempo,
+                  existingSection.beatsPerBar, existingSection.clicksPerBeat)
+              : _metronomePanel,
           Form(
             key: _formKey,
             child: Container(
@@ -424,7 +427,7 @@ class _SectionForm extends StatelessWidget {
                           keyboardType: TextInputType.numberWithOptions(
                               decimal: false, signed: false),
                           inputFormatters: [
-                            WhitelistingTextInputFormatter.digitsOnly
+                            FilteringTextInputFormatter.digitsOnly
                           ],
                           onSaved: (value) {
                             _newSection.barsCount = int.parse(value);

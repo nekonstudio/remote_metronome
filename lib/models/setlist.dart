@@ -18,10 +18,10 @@ class Setlist {
               tempo: 120),
           Section(
               title: 'section2',
-              barsCount: 2,
+              barsCount: 4,
               beatsPerBar: 4,
               clicksPerBeat: 1,
-              tempo: 120),
+              tempo: 240),
           Section(
               title: 'section3',
               barsCount: 2,

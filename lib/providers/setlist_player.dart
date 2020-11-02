@@ -50,20 +50,28 @@ class SetlistPlayer extends ChangeNotifier {
     if (currentTrack.isComplex && _isPlaying) {
       print(
           'lastBarBeat: $_lastBarBeat, currentBarBeat: ${metronome.currentBarBeat}');
+
+      if (_currentSectionBar >= currentSection.barsCount &&
+          metronome.currentBarBeat >= currentSection.beatsPerBar) {
+        final nextSectionIndex = _currentSectionIndex + 1;
+        if (nextSectionIndex < currentTrack.sections.length) {
+          final section = currentTrack.sections[nextSectionIndex];
+          metronome.change(
+            tempo: section.tempo,
+            beatsPerBar: section.beatsPerBar,
+            clicksPerBeat: section.clicksPerBeat,
+          );
+        }
+      }
+
       if (_lastBarBeat > metronome.currentBarBeat) {
         _currentSectionBar++;
         print('DAFUQ');
+
         if (_currentSectionBar > currentSection.barsCount) {
           _currentSectionIndex++;
 
-          if (_currentSectionIndex < currentTrack.sections.length) {
-            final section = currentSection;
-            metronome.change(
-              tempo: section.tempo,
-              beatsPerBar: section.beatsPerBar,
-              clicksPerBeat: section.clicksPerBeat,
-            );
-          } else {
+          if (_currentSectionIndex >= currentTrack.sections.length) {
             selectNextTrack();
             _currentSectionIndex = SectionIndexDefaultValue;
           }
@@ -117,6 +125,8 @@ class SetlistPlayer extends ChangeNotifier {
   void selectNextTrack() {
     if (_currentTrackIndex < _tracks.length - 1) {
       currentTrackIndex++;
+    } else {
+      currentTrackIndex = 0;
     }
   }
 

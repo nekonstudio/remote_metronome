@@ -61,7 +61,7 @@ class Metronome with ChangeNotifier {
     _subscription = _channel.receiveBroadcastStream().listen((value) {
       _currentBarBeat = value;
 
-      print('_currentBarBeat: $_currentBarBeat');
+      // print('_currentBarBeat: $_currentBarBeat');
 
       notifyListeners();
     });
