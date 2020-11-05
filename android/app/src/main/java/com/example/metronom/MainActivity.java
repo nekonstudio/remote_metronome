@@ -1,26 +1,23 @@
 package com.example.metronom;
 
-import android.content.Context;
+import android.content.res.AssetFileDescriptor;
 import android.media.AudioFormat;
 import android.media.AudioManager;
 import android.media.AudioTrack;
-import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
-import android.os.PersistableBundle;
-import android.os.PowerManager;
 import android.util.Log;
-import android.view.WindowManager;
+import android.util.SparseArray;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 
-import java.util.Random;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.io.ByteArrayOutputStream;
+import java.io.DataInputStream;
+import java.io.FileInputStream;
+import java.io.IOException;
 
+import io.flutter.FlutterInjector;
 import io.flutter.embedding.android.FlutterActivity;
 import io.flutter.embedding.engine.FlutterEngine;
+import io.flutter.embedding.engine.loader.FlutterLoader;
 import io.flutter.plugin.common.EventChannel;
 import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
@@ -32,28 +29,40 @@ public class MainActivity extends FlutterActivity {
     boolean m_stop = false;
     final int sampleRate = 44100;
     int size = sampleRate;
-    AudioTrack m_audioTrack = new AudioTrack(AudioManager.STREAM_MUSIC, sampleRate, AudioFormat.CHANNEL_OUT_MONO,
-                                           AudioFormat.ENCODING_PCM_FLOAT, sampleRate /* 1 second buffer */,
-                                           AudioTrack.MODE_STREAM);;
-    Thread m_noiseThread;
 
-    //        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+//        AudioFormat audioFormat = new AudioFormat.Builder()
+//                .setSampleRate(sampleRate)
+//                .setEncoding(AudioFormat.ENCODING_PCM_16BIT)
+//                .setChannelMask(AudioFormat.CHANNEL_OUT_MONO).build();
+//        AudioAttributes attributes = new AudioAttributes.Builder()
+//                .setUsage(AudioAttributes.USAGE_MEDIA)
+//                .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC).build();
+//        AudioTrack at = new AudioTrack.Builder()
+//                .setAudioFormat(audioFormat)
+//                .setAudioAttributes(attributes)
+//                .setBufferSizeInBytes(minBufferSize).build();
 
-    Handler handler = new Handler(new Handler.Callback() {
-        @Override
-        public boolean handleMessage(Message msg) {
-            if (eventStream != null) {
-                Log.d(TAG, "handleMessage: " + msg.obj);
-                eventStream.success(msg.obj);
-            }
-            return true;
-        }
-    });
+    AudioTrack m_audioTrack = new AudioTrack(
+            AudioManager.STREAM_MUSIC,
+            sampleRate,
+            AudioFormat.CHANNEL_OUT_MONO,
+            AudioFormat.ENCODING_PCM_16BIT,
+            AudioTrack.getMinBufferSize(sampleRate,
+                    AudioFormat.CHANNEL_OUT_MONO,
+                    AudioFormat.ENCODING_PCM_16BIT),
+            AudioTrack.MODE_STREAM);
 
+    Thread m_metronomeThread;
 
-    final static int HighFrequency = 2000;
-    final static int MediumFrequency = HighFrequency / 2;
-    final static int LowFrequency = MediumFrequency / 2;
+    final static int HighSound = 1;
+    final static int MediumSound = 2;
+    final static int LowSound = 3;
+
+    final SparseArray<byte[]> m_soundBuffers = new SparseArray<byte[]>() {{
+        put(HighSound, null);
+        put(MediumSound, null);
+        put(LowSound, null);
+    }};
 
     int beatsPerBar = 4;
     int clicksPerBeat = 1;
@@ -61,52 +70,40 @@ public class MainActivity extends FlutterActivity {
     Integer currentBeatsPerBar = 1;
     int currentClickPerBeat = 1;
 
-    private EventChannel channel;
     private EventChannel.EventSink eventStream;
 
-    Runnable m_noiseGenerator = new Runnable()
+    Runnable m_metronomePlayer = new Runnable()
     {
         public void run() {
             Thread.currentThread().setPriority(Thread.MAX_PRIORITY);
 
             while(!m_stop)
             {
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        if (eventStream != null) {
-                            final int copy = currentBeatsPerBar;
-                            eventStream.success(copy);
-                        }
+                runOnUiThread(() -> {
+                    if (eventStream != null) {
+                        final int copy = currentBeatsPerBar;
+                        eventStream.success(copy);
                     }
                 });
 
-                Log.d(TAG, "na poczatku: " + currentBeatsPerBar);
-                final float samples[] = new float[size];
-                int freq = currentBeatsPerBar == 1
-                        ? currentClickPerBeat == 1 ? HighFrequency : LowFrequency
-                        : currentClickPerBeat == 1 ? MediumFrequency : LowFrequency;
+                int soundId = currentBeatsPerBar == 1
+                        ? currentClickPerBeat == 1 ? HighSound : LowSound
+                        : currentClickPerBeat == 1 ? MediumSound : LowSound;
 
-                for (int i = 0; i < size; ++i) {
-                    if (i < sampleRate / 20) {
-                        samples[i] = (float) Math.sin(2 * Math.PI * i / (float)(sampleRate / freq)); // Sine wave
+                int testSize = size * 2;
+                byte[] samples = new byte[testSize];
+                byte[] buffer = m_soundBuffers.get(soundId);
+                for (int i = 0; i < testSize; ++i) {
+
+                    if (i < buffer.length) {
+                        samples[i] = buffer[i];
                     }
                     else {
                         samples[i] = 0;
                     }
                 }
 
-                m_audioTrack.write(samples, 0, samples.length, AudioTrack.WRITE_BLOCKING);
-
-//                Message msg = handler.obtainMessage();
-//                msg.obj = currentBeatsPerBar;
-//                handler.sendMessage(msg);
-//
-                Log.d(TAG, "w srodeczku: " + currentBeatsPerBar);
-
-
-
-
+                m_audioTrack.write(samples, 0, samples.length);
 
                 currentClickPerBeat++;
                 if (currentClickPerBeat > clicksPerBeat) {
@@ -117,42 +114,59 @@ public class MainActivity extends FlutterActivity {
                         currentBeatsPerBar = 1;
                     }
                 }
-
-                Log.d(TAG, "na koncu: " + currentBeatsPerBar);
-
-//                runOnUiThread(() -> {
-//                    Log.d(TAG, "teraz: " + (currentBeatsPerBar));
-//                    if (eventStream != null) {
-//                        eventStream.success(currentBeatsPerBar);
-//                    }
-//
-//                    currentClickPerBeat++;
-//                    if (currentClickPerBeat > clicksPerBeat) {
-//                        currentClickPerBeat = 1;
-//
-//                        currentBeatsPerBar++;
-//                        if (currentBeatsPerBar > beatsPerBar) {
-//                            currentBeatsPerBar = 1;
-//                        }
-//                    }
-//                });
-
-
             }
 
         }
     };
 
-    @Override
-    public void onCreate(@Nullable Bundle savedInstanceState, @Nullable PersistableBundle persistentState) {
-        super.onCreate(savedInstanceState, persistentState);
+    public void fillSoundBuffers(){
+        SparseArray<String> fileNames = new SparseArray<String>() {{
+            put(HighSound, "click_high.wav");
+            put(MediumSound, "click_medium.wav");
+            put(LowSound, "click_low.wav");
+        }};
 
+        FlutterLoader loader = FlutterInjector.instance().flutterLoader();
+
+        for (int i = 0; i < m_soundBuffers.size(); ++i) {
+            int soundId = m_soundBuffers.keyAt(i);
+            String fileName = fileNames.get(soundId);
+
+            try {
+                String key = loader.getLookupKeyForAsset("assets/sounds/" + fileName);
+                AssetFileDescriptor fileDescriptor = getAssets().openFd(key);
+                FileInputStream fin = fileDescriptor.createInputStream();
+                fin.skip(734); // skip 734 header bytes (dunno why not 44)
+                DataInputStream dis = new DataInputStream(fin);
+                ByteArrayOutputStream out = new ByteArrayOutputStream();
+
+                int bytesRead;
+                final int bufferSize = 1024;
+                byte[] s = new byte[bufferSize];
+                while((bytesRead = dis.read(s, 0, bufferSize)) > -1){
+                    out.write(s, 0, bytesRead);
+                }
+
+                m_soundBuffers.setValueAt(m_soundBuffers.indexOfKey(soundId), out.toByteArray());
+
+                dis.close();
+                fin.close();
+                out.close();
+
+            } catch (IOException e) {
+                // TODO
+                e.printStackTrace();
+            }
+        }
     }
 
     @Override
     public void configureFlutterEngine(@NonNull FlutterEngine flutterEngine) {
         super.configureFlutterEngine(flutterEngine);
-        channel = new EventChannel(flutterEngine.getDartExecutor().getBinaryMessenger(), "com.example.metronom/barBeatChannel");
+
+        fillSoundBuffers();
+
+        EventChannel channel = new EventChannel(flutterEngine.getDartExecutor().getBinaryMessenger(), "com.example.metronom/barBeatChannel");
         channel.setStreamHandler(new EventChannel.StreamHandler() {
             @Override
             public void onListen(Object arguments, EventChannel.EventSink events) {
@@ -170,36 +184,41 @@ public class MainActivity extends FlutterActivity {
         new MethodChannel(flutterEngine.getDartExecutor().getBinaryMessenger(), CHANNEL)
             .setMethodCallHandler(
                 (call, result) -> {
-                    if (call.method.equals("start")) {
-                        setup(call);
-                        start();
+                    switch (call.method) {
+                        case "start":
+                            setup(call);
+                            start();
 
-                        result.success(null);
+                            result.success(null);
 
-                    } else if (call.method.equals("stop")) {
-                        stop();
-                        result.success(null);
+                            break;
+                        case "stop":
+                            stop();
+                            result.success(null);
 
-                    } else if (call.method.equals("change")) {
-                        stop();
+                            break;
+                        case "change":
+                            stop();
 
-                        try {
-                            m_noiseThread.join();
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
+                            try {
+                                m_metronomeThread.join();
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
 
-                        setup(call);
-                        start();
+                            setup(call);
+                            start();
 
-                        result.success(null);
-                    } else if (call.method.equals("smoothChange")) {
-                        setup(call);
+                            result.success(null);
+                            break;
+                        case "smoothChange":
+                            setup(call);
 
-                        result.success(null);
-                    }
-                    else {
-                        result.notImplemented();
+                            result.success(null);
+                            break;
+                        default:
+                            result.notImplemented();
+                            break;
                     }
                 }
             );
@@ -229,10 +248,11 @@ public class MainActivity extends FlutterActivity {
 
     private void start() {
         m_stop = false;
+
         m_audioTrack.play();
 
-        m_noiseThread = new Thread(m_noiseGenerator);
-        m_noiseThread.start();
+        m_metronomeThread = new Thread(m_metronomePlayer);
+        m_metronomeThread.start();
     }
 
     private void stop()

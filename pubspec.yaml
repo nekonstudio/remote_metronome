@@ -60,9 +60,9 @@ flutter:
 
   # To add assets to your application, add an assets section, like this:
   assets:
-    - assets/sounds/click_high.ogg
-    - assets/sounds/click_medium.ogg
-    - assets/sounds/click_low.ogg
+    - assets/sounds/click_high.wav
+    - assets/sounds/click_medium.wav
+    - assets/sounds/click_low.wav
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.

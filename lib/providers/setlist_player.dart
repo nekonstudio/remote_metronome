@@ -150,6 +150,8 @@ class SetlistPlayer extends ChangeNotifier {
   void selectPreviousTrack() {
     if (_currentTrackIndex > 0) {
       currentTrackIndex--;
+    } else {
+      currentTrackIndex = _tracks.length - 1;
     }
   }
 
