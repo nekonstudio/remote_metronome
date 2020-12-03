@@ -1,10 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
 
 class EnableBluetooth extends StatelessWidget {
-  final Function enableHandler;
-
-  const EnableBluetooth(this.enableHandler);
-
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -18,7 +15,7 @@ class EnableBluetooth extends StatelessWidget {
             height: 10,
           ),
           RaisedButton(
-            onPressed: enableHandler,
+            onPressed: FlutterBluetoothSerial.instance.requestEnable,
             child: Text('Włącz'),
           ),
         ],

@@ -1,5 +1,6 @@
 package com.example.metronom;
 
+import android.content.Context;
 import android.content.res.AssetFileDescriptor;
 import android.media.AudioFormat;
 import android.media.AudioManager;
@@ -13,6 +14,9 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 
 import io.flutter.FlutterInjector;
 import io.flutter.embedding.android.FlutterActivity;
@@ -28,6 +32,7 @@ public class MainActivity extends FlutterActivity {
 
     boolean m_stop = false;
     final int sampleRate = 44100;
+//    final int sampleRate = 48000;
     int size = sampleRate;
 
 //        AudioFormat audioFormat = new AudioFormat.Builder()
@@ -77,6 +82,12 @@ public class MainActivity extends FlutterActivity {
         public void run() {
             Thread.currentThread().setPriority(Thread.MAX_PRIORITY);
 
+            Date currentTime = Calendar.getInstance().getTime();
+            SimpleDateFormat sdf = new SimpleDateFormat("hh:mm:ss.SSS");
+            Log.d(TAG, "currentTime: " + sdf.format(currentTime));
+
+
+
             while(!m_stop)
             {
                 runOnUiThread(() -> {
@@ -90,10 +101,12 @@ public class MainActivity extends FlutterActivity {
                         ? currentClickPerBeat == 1 ? HighSound : LowSound
                         : currentClickPerBeat == 1 ? MediumSound : LowSound;
 
-                int testSize = size * 2;
-                byte[] samples = new byte[testSize];
+                int bufferSize = size * 2;
+                byte[] samples = new byte[bufferSize];
                 byte[] buffer = m_soundBuffers.get(soundId);
-                for (int i = 0; i < testSize; ++i) {
+
+//                long startTime = SystemClock.elapsedRealtime();
+                for (int i = 0; i < bufferSize; ++i) {
 
                     if (i < buffer.length) {
                         samples[i] = buffer[i];
@@ -185,6 +198,11 @@ public class MainActivity extends FlutterActivity {
             .setMethodCallHandler(
                 (call, result) -> {
                     switch (call.method) {
+                        case "test":
+//                            setup(call);
+//                            Log.d(TAG, "configureFlutterEngine: ERLOOOO");
+                            result.success(null);
+                            break;
                         case "start":
                             setup(call);
                             start();
@@ -217,6 +235,7 @@ public class MainActivity extends FlutterActivity {
                             result.success(null);
                             break;
                         default:
+                            Log.d(TAG, "method name: " + call.method);
                             result.notImplemented();
                             break;
                     }
@@ -227,19 +246,19 @@ public class MainActivity extends FlutterActivity {
     private void setup(MethodCall call) throws NullPointerException {
         try {
             int tempo = call.argument("tempo");
-            Log.d(TAG, "tempo: " + tempo);
+//            Log.d(TAG, "tempo: " + tempo);
 
             beatsPerBar = call.argument("beatsPerBar");
-            Log.d(TAG, "beatsPerBar: " + beatsPerBar);
+//            Log.d(TAG, "beatsPerBar: " + beatsPerBar);
 
             clicksPerBeat = call.argument("clicksPerBeat");
-            Log.d(TAG, "clicksPerBeat: " + clicksPerBeat);
+//            Log.d(TAG, "clicksPerBeat: " + clicksPerBeat);
 
             double tempoMultiplier = call.argument("tempoMultiplier");
-            Log.d(TAG, "tempoMultiplier: " + tempoMultiplier);
+//            Log.d(TAG, "tempoMultiplier: " + tempoMultiplier);
 
             size = (int) (sampleRate  * (((1 / ( (double) tempo / 60)) / clicksPerBeat) / tempoMultiplier) );
-            Log.d(TAG, "size: " + size);
+//            Log.d(TAG, "size: " + size);
         }
         catch (NullPointerException e) {
             throw e;
@@ -248,6 +267,11 @@ public class MainActivity extends FlutterActivity {
 
     private void start() {
         m_stop = false;
+
+        AudioManager am = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+        String sampleRateStr = am.getProperty(AudioManager.PROPERTY_OUTPUT_SAMPLE_RATE);
+        int sp = Integer.parseInt(sampleRateStr);
+        Log.d(TAG, "sampleRate: " + sp);
 
         m_audioTrack.play();
 

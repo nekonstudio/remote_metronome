@@ -5,7 +5,7 @@ import 'package:get/get.dart';
 import 'package:metronom/models/track.dart';
 import 'package:metronom/providers/setlists_manager.dart';
 import 'package:metronom/widgets/metronome_panel.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:swipedetector/swipedetector.dart';
 import 'package:toggle_switch/toggle_switch.dart';
 
@@ -81,7 +81,7 @@ class _AddEditTrackScreenState extends State<AddEditTrackScreen> {
             _metronomeKey.currentState.clicksPerBeat,
           );
 
-    final setlistManager = Provider.of<SetlistManager>(context, listen: false);
+    final setlistManager = context.read(setlistManagerProvider);
 
     if (_isEditingMode) {
       setlistManager.editTrack(_setlistId, _track.id, track);

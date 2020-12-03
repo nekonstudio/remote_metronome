@@ -1,42 +1,31 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:get/get.dart';
-import 'package:metronom/mixins/list_item_long_press_popup_menu.dart';
-import 'package:metronom/providers/setlist_player.dart';
-import 'package:metronom/widgets/play_complex_track_panel.dart';
-import 'package:metronom/widgets/play_simple_track_panel.dart';
-import 'package:provider/provider.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
+import '../mixins/list_item_long_press_popup_menu.dart';
 import '../models/track.dart';
 import '../providers/metronome.dart';
+import '../providers/setlist_player.dart';
 import '../providers/setlists_manager.dart';
-import '../widgets/visualization.dart';
+import '../widgets/play_complex_track_panel.dart';
+import '../widgets/play_simple_track_panel.dart';
 import 'add_edit_track_screen.dart';
 
-class SetlistScreen extends StatefulWidget {
+class SetlistScreen extends ConsumerWidget with ListItemLongPressPopupMenu {
   static const routePath = '/setlist';
-
-  @override
-  _SetlistScreenState createState() => _SetlistScreenState();
-}
-
-class _SetlistScreenState extends State<SetlistScreen>
-    with ListItemLongPressPopupMenu {
-  Metronome _metronome;
-  SetlistManager _setlistManager;
-  String _setlistId;
-  List<Track> _tracks;
-  Track _selectedTrack;
-  ItemScrollController _scrollController = ItemScrollController();
   static const int SCROLL_DURATION = 300;
 
-  dynamic _buildPopupMenuItems() {
+  ItemScrollController _scrollController = ItemScrollController();
+
+  dynamic _buildPopupMenuItems(
+      BuildContext context, String setlistId, List<Track> tracks) {
     return [
       PopupMenuItem(
         child: Text('Edytuj'),
         value: (index) {
-          if (!_metronome.isPlaying) {
-            Get.to(AddEditTrackScreen(_setlistId, _tracks[index]));
+          if (!context.read(metronomeProvider).isPlaying) {
+            Get.to(AddEditTrackScreen(setlistId, tracks[index]));
           } else {
             Get.snackbar('Zatrzymaj odtwarzanie', 'aby edytować utwór.',
                 colorText: Colors.white);
@@ -46,8 +35,10 @@ class _SetlistScreenState extends State<SetlistScreen>
       PopupMenuItem(
           child: Text('Usuń'),
           value: (index) {
-            if (!_metronome.isPlaying) {
-              _setlistManager.deleteTrack(_setlistId, index);
+            if (!context.read(metronomeProvider).isPlaying) {
+              context
+                  .read(setlistManagerProvider)
+                  .deleteTrack(setlistId, index);
             } else {
               Get.snackbar('Zatrzymaj odtwarzanie', 'aby usunąć utwór.',
                   colorText: Colors.white);
@@ -62,32 +53,32 @@ class _SetlistScreenState extends State<SetlistScreen>
   }
 
   @override
-  Widget build(BuildContext context) {
-    _setlistId = ModalRoute.of(context).settings.arguments as String;
-    _setlistManager = Provider.of<SetlistManager>(context);
-    final setlist = _setlistManager.getSetlist(_setlistId);
-    _tracks = setlist.tracks;
-    final player = Provider.of<SetlistPlayer>(context);
+  Widget build(BuildContext context, ScopedReader watch) {
+    final setlistId = ModalRoute.of(context).settings.arguments as String;
+    final setlist = watch(setlistManagerProvider).getSetlist(setlistId);
+    final tracks = setlist.tracks;
+
+    final player = watch(setlistPlayerProvider);
+    player.update(tracks);
     player.onTrackChangedCallback =
         () => onTrackChanged(player.currentTrackIndex);
 
-    _selectedTrack = player.currentTrack;
-    _metronome = Provider.of<Metronome>(context);
+    final selectedTrack = player.currentTrack;
 
     return Scaffold(
       appBar: AppBar(
-        title: _tracks.length == 0
+        title: tracks.length == 0
             ? Text(setlist.name)
             : ListTile(
                 contentPadding: EdgeInsets.zero,
                 title: Text(
-                  _selectedTrack.name,
+                  selectedTrack.name,
                   style: TextStyle(fontWeight: FontWeight.bold),
                 ),
                 subtitle: Text(setlist.name),
               ),
       ),
-      body: _tracks.length == 0
+      body: tracks.length == 0
           ? Center(
               child: Text('Brak utworów w setliście'),
             )
@@ -101,9 +92,9 @@ class _SetlistScreenState extends State<SetlistScreen>
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: [
                         Expanded(
-                          child: _selectedTrack.isComplex
+                          child: selectedTrack.isComplex
                               ? PlayComplexTrackPanel()
-                              : PlaySimpleTrackPanel(_selectedTrack),
+                              : PlaySimpleTrackPanel(selectedTrack),
                         ),
                       ],
                     ),
@@ -122,7 +113,7 @@ class _SetlistScreenState extends State<SetlistScreen>
                         itemScrollController: _scrollController,
                         itemCount: setlist.tracksCount,
                         itemBuilder: (context, index) {
-                          final track = _tracks[index];
+                          final track = tracks[index];
                           return Column(
                             children: [
                               InkWell(
@@ -131,7 +122,11 @@ class _SetlistScreenState extends State<SetlistScreen>
                                 },
                                 onTapDown: storeTapPosition,
                                 onLongPress: () => showPopupMenu(
-                                    context, index, _buildPopupMenuItems()),
+                                  context,
+                                  index,
+                                  _buildPopupMenuItems(
+                                      context, setlistId, tracks),
+                                ),
                                 child: ListTile(
                                   leading: CircleAvatar(
                                       backgroundColor: Colors.transparent,
@@ -166,14 +161,19 @@ class _SetlistScreenState extends State<SetlistScreen>
                 ],
               ),
             ),
-      floatingActionButton: FloatingActionButton(
-        backgroundColor:
-            _metronome.isPlaying ? Colors.grey : Theme.of(context).accentColor,
-        child: Icon(Icons.add),
-        onPressed: () {
-          if (!_metronome.isPlaying) {
-            Get.to(AddEditTrackScreen(setlist.id, null));
-          }
+      floatingActionButton: Consumer(
+        builder: (context, watch, child) {
+          final isPlaying = watch(metronomeProvider).isPlaying;
+          return FloatingActionButton(
+            backgroundColor:
+                isPlaying ? Colors.grey : Theme.of(context).accentColor,
+            child: Icon(Icons.add),
+            onPressed: () {
+              if (!isPlaying) {
+                Get.to(AddEditTrackScreen(setlist.id, null));
+              }
+            },
+          );
         },
       ),
     );

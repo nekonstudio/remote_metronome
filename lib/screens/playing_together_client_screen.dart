@@ -49,7 +49,7 @@ class _PlayingTogetherClientScreenState
               child: CircularProgressIndicator(),
             )
           : !_btManager.state.isEnabled
-              ? EnableBluetooth(_btManager.enableBluetotoh)
+              ? EnableBluetooth()
               : Container(
                   width: double.infinity,
                   child: Column(

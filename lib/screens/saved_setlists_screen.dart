@@ -1,21 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../mixins/list_item_long_press_popup_menu.dart';
 import '../models/setlist.dart';
-import '../providers/metronome.dart';
-import '../providers/setlist_player.dart';
 import '../providers/setlists_manager.dart';
 import 'setlist_screen.dart';
 
-class SavedSetlistsScreen extends StatelessWidget
+class SavedSetlistsScreen extends ConsumerWidget
     with ListItemLongPressPopupMenu {
   static const String routePath = '/savedSetlists';
 
   @override
-  Widget build(BuildContext context) {
-    final setlistManager = Provider.of<SetlistManager>(context);
+  Widget build(BuildContext context, ScopedReader watch) {
+    final setlistManager = watch(setlistManagerProvider);
     final setlists = setlistManager.setlists;
 
     return Scaffold(
@@ -31,13 +29,15 @@ class SavedSetlistsScreen extends StatelessWidget
             return InkWell(
               onTap: () {
                 Get.to(
-                    ChangeNotifierProxyProvider<SetlistManager, SetlistPlayer>(
-                      create: (context) => SetlistPlayer(
-                          Provider.of<Metronome>(context, listen: false)),
-                      update: (context, manager, player) =>
-                          player..update(manager.setlists[index].tracks),
-                      child: SetlistScreen(),
-                    ),
+                    // ChangeNotifierProxyProvider<SetlistManager, SetlistPlayer>(
+                    //   create: (context) => SetlistPlayer(
+                    //       Provider.of<Metronome>(context, listen: false)),
+                    //   update: (context, manager, player) =>
+                    //       player..update(manager.setlists[index].tracks),
+                    //   child: SetlistScreen(),
+                    // ),
+
+                    SetlistScreen(),
                     arguments: setlist.id);
               },
               onTapDown: (details) => storeTapPosition(details),

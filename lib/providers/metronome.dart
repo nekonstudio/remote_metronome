@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:metronom/models/track.dart';
 
 class Metronome with ChangeNotifier {
@@ -44,13 +45,27 @@ class Metronome with ChangeNotifier {
     start(track.tempo, track.beatsPerBar, track.clicksPerBeat);
   }
 
+  void test() {
+    var timestamp = DateTime.now();
+    platform.invokeMethod('test').then((value) => print(
+        'test(): ${DateTime.now().difference(timestamp).inMilliseconds} ms'));
+  }
+
   void start(int tempo, int beatsPerBar, int clicksPerBeat,
       {double tempoMultiplier = 1.0}) {
+    test();
+    var timestamp = DateTime.now();
+    print('metronom.start(): ${timestamp}');
+    // Timeline.startSync('interesting function');
     platform.invokeMethod('start', {
       'tempo': tempo,
       'beatsPerBar': beatsPerBar,
       'clicksPerBeat': clicksPerBeat,
       'tempoMultiplier': tempoMultiplier
+    }).then((value) {
+      // Timeline.finishSync();
+      print(
+          'wykonano w: ${DateTime.now().difference(timestamp).inMilliseconds} ms');
     });
 
     _currentTempo = tempo;
@@ -114,3 +129,5 @@ class Metronome with ChangeNotifier {
           });
   }
 }
+
+final metronomeProvider = ChangeNotifierProvider((ref) => Metronome());

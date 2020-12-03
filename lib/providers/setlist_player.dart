@@ -1,12 +1,14 @@
 import 'package:flutter/cupertino.dart';
-
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/track.dart';
 import 'metronome.dart';
 
 class SetlistPlayer extends ChangeNotifier {
   final Metronome metronome;
 
-  SetlistPlayer(this.metronome) {}
+  SetlistPlayer(Reader reader) : metronome = reader(metronomeProvider) {
+    print('SetlistPlayer()');
+  }
 
   List<Track> _tracks;
 
@@ -104,6 +106,8 @@ class SetlistPlayer extends ChangeNotifier {
   void _onMetronomeChanged() {
     _isPlaying = metronome.isPlaying;
     _handleBarChange();
+
+    notifyListeners();
   }
 
   void update(List<Track> tracks) {
@@ -169,3 +173,6 @@ class SetlistPlayer extends ChangeNotifier {
     metronome.removeListener(_onMetronomeChanged);
   }
 }
+
+final setlistPlayerProvider =
+    ChangeNotifierProvider.autoDispose((ref) => SetlistPlayer(ref.read));

@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:get/get.dart';
-import 'package:provider/provider.dart';
 
-import 'providers/metronome.dart';
-import 'providers/setlists_manager.dart';
 import 'screens/simple_metronome_screen.dart';
 
 void main() {
@@ -13,15 +11,7 @@ void main() {
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return MultiProvider(
-      providers: [
-        ChangeNotifierProvider(
-          create: (_) => SetlistManager(),
-        ),
-        ChangeNotifierProvider(
-          create: (_) => Metronome(),
-        ),
-      ],
+    return ProviderScope(
       child: GetMaterialApp(
         title: 'Metronom',
         defaultTransition: Transition.rightToLeft,

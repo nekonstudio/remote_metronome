@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../models/setlist.dart';
 import '../models/track.dart';
@@ -65,3 +66,6 @@ class SetlistManager with ChangeNotifier {
   //   notifyListeners();
   // }
 }
+
+final setlistManagerProvider =
+    ChangeNotifierProvider((ref) => SetlistManager());

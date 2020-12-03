@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:metronom/bluetooth_manager.dart';
-import 'package:metronom/screens/playing_together_client_screen.dart';
-import 'package:metronom/screens/playing_together_host_screen.dart';
-import 'package:provider/provider.dart';
+
+import 'playing_together_client_screen.dart';
+import 'playing_together_host_screen.dart';
 
 class PlayingTogetherIntroScreen extends StatelessWidget {
   @override
@@ -32,10 +31,9 @@ class PlayingTogetherIntroScreen extends StatelessWidget {
                 RaisedButton(
                   child: Text('Utwórz'),
                   onPressed: () {
-                    Get.to(ChangeNotifierProvider(
-                      create: (context) => BluetoothManager(),
-                      child: PlayingTogetherHostScreen(),
-                    ));
+                    Get.to(
+                      PlayingTogetherHostScreen(),
+                    );
                   },
                 ),
               ],
@@ -63,10 +61,9 @@ class PlayingTogetherIntroScreen extends StatelessWidget {
                 RaisedButton(
                   child: Text('Dołącz'),
                   onPressed: () {
-                    Get.to(ChangeNotifierProvider(
-                      create: (context) => BluetoothManager(),
-                      child: PlayingTogetherClientScreen(),
-                    ));
+                    Get.to(
+                      PlayingTogetherClientScreen(),
+                    );
                   },
                 ),
               ],

@@ -13,7 +13,7 @@ class BluetoothMessage {
 
   static BluetoothMessage fromRawData(Uint8List data) {
     final str = utf8.decode(data);
-    print('Raw data: $str');
+    // print('Raw data: $str');
     final values = str.split(';');
 
     final command =

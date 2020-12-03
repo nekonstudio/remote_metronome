@@ -56,10 +56,25 @@ class _ClientControlScreenState extends State<ClientControlScreen> {
       // _metronome.change(
       //     tempo: tempo, beatsPerBar: beats, clicksPerBeat: clicks, play: false);
 
+      final latency = DateTime.now()
+          .difference(DateTime.fromMillisecondsSinceEpoch(message.timestamp)
+              .add(Duration(milliseconds: -_remoteTimeDiff)))
+          .inMilliseconds;
+
+      print('latency: $latency ms');
+
       final waitTime = DateTime.fromMillisecondsSinceEpoch(message.timestamp)
-          .add(Duration(milliseconds: _remoteTimeDiff.abs() + 1000));
+          .add(Duration(milliseconds: -_remoteTimeDiff + 500));
+
+      print('currentTime =\t${DateTime.now()}');
+      print('waitTime =\t\t$waitTime');
 
       await Future.doWhile(() => DateTime.now().isBefore(waitTime));
+
+      final hostNowTime =
+          DateTime.now().add(Duration(milliseconds: _remoteTimeDiff));
+      print('CLIENT START! (host) time: $hostNowTime');
+      print('CLIENT START! (client) time: ${DateTime.now()}');
       _metronome.start(tempo, beats, clicks);
     } else if (command == BluetoothCommand.Stop) {
       _metronome.stop();

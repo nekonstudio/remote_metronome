@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../providers/metronome.dart';
 import '../sound_manager.dart';
@@ -101,7 +101,7 @@ class _SimpleMetronomeScreenState extends State<SimpleMetronomeScreen> {
     _restartTapTempoStopwatch();
   }
 
-  Widget _buildChangeTempoButton(int value) {
+  Widget _buildChangeTempoButton(BuildContext context, int value) {
     return SizedBox(
       width: 40,
       height: 40,
@@ -109,9 +109,7 @@ class _SimpleMetronomeScreenState extends State<SimpleMetronomeScreen> {
         padding: const EdgeInsets.all(0),
         onPressed: () {
           _changeTempoBy(value);
-
-          final metronome = Provider.of<Metronome>(context, listen: false);
-          metronome.change(tempo: _currentTempo);
+          context.read(metronomeProvider).change(tempo: _currentTempo);
         },
         child: Text((value >= 0) ? '+$value' : '$value'),
         shape: Border.all(color: Colors.lightBlue),
@@ -140,11 +138,11 @@ class _SimpleMetronomeScreenState extends State<SimpleMetronomeScreen> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    _buildChangeTempoButton(-1),
+                    _buildChangeTempoButton(context, -1),
                     SizedBox(
                       width: 50,
                     ),
-                    _buildChangeTempoButton(1),
+                    _buildChangeTempoButton(context, 1),
                   ],
                 ),
                 Container(
@@ -161,9 +159,9 @@ class _SimpleMetronomeScreenState extends State<SimpleMetronomeScreen> {
                                     : DefaultTempoMultiplier;
                           });
 
-                          final metronome =
-                              Provider.of<Metronome>(context, listen: false);
-                          metronome.change(tempoMultiplier: _tempoMultiplier);
+                          context
+                              .read(metronomeProvider)
+                              .change(tempoMultiplier: _tempoMultiplier);
 
                           _restartTapTempoStopwatch();
                         },
@@ -192,9 +190,9 @@ class _SimpleMetronomeScreenState extends State<SimpleMetronomeScreen> {
                                     : DefaultTempoMultiplier;
                           });
 
-                          final metronome =
-                              Provider.of<Metronome>(context, listen: false);
-                          metronome.change(tempoMultiplier: _tempoMultiplier);
+                          context
+                              .read(metronomeProvider)
+                              .change(tempoMultiplier: _tempoMultiplier);
 
                           _restartTapTempoStopwatch();
                         },
@@ -216,11 +214,11 @@ class _SimpleMetronomeScreenState extends State<SimpleMetronomeScreen> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    _buildChangeTempoButton(-5),
+                    _buildChangeTempoButton(context, -5),
                     SizedBox(
                       width: 50,
                     ),
-                    _buildChangeTempoButton(5),
+                    _buildChangeTempoButton(context, 5),
                   ],
                 ),
                 SizedBox(
@@ -237,7 +235,8 @@ class _SimpleMetronomeScreenState extends State<SimpleMetronomeScreen> {
 
                     _restartTapTempoStopwatch();
 
-                    Provider.of<Metronome>(context, listen: false)
+                    context
+                        .read(metronomeProvider)
                         .change(tempo: _currentTempo);
                   },
                 ),
@@ -264,9 +263,9 @@ class _SimpleMetronomeScreenState extends State<SimpleMetronomeScreen> {
                             onTap: () {
                               _decreaseBeatsPerBar();
 
-                              final metronome = Provider.of<Metronome>(context,
-                                  listen: false);
-                              metronome.change(beatsPerBar: _beatsPerBar);
+                              context
+                                  .read(metronomeProvider)
+                                  .change(beatsPerBar: _beatsPerBar);
                             },
                             child: CircleAvatar(
                               radius: 13,
@@ -281,9 +280,9 @@ class _SimpleMetronomeScreenState extends State<SimpleMetronomeScreen> {
                             onTap: () {
                               _increaseBeatsPerBar();
 
-                              final metronome = Provider.of<Metronome>(context,
-                                  listen: false);
-                              metronome.change(beatsPerBar: _beatsPerBar);
+                              context
+                                  .read(metronomeProvider)
+                                  .change(beatsPerBar: _beatsPerBar);
                             },
                             child: CircleAvatar(
                               radius: 13,
@@ -313,9 +312,9 @@ class _SimpleMetronomeScreenState extends State<SimpleMetronomeScreen> {
                             onTap: () {
                               _decreaseClicksPerBeat();
 
-                              final metronome = Provider.of<Metronome>(context,
-                                  listen: false);
-                              metronome.change(clicksPerBeat: _clicksPerBeat);
+                              context
+                                  .read(metronomeProvider)
+                                  .change(beatsPerBar: _beatsPerBar);
                             },
                             child: CircleAvatar(
                               radius: 13,
@@ -330,9 +329,9 @@ class _SimpleMetronomeScreenState extends State<SimpleMetronomeScreen> {
                             onTap: () {
                               _increaseClicksPerBeat();
 
-                              final metronome = Provider.of<Metronome>(context,
-                                  listen: false);
-                              metronome.change(clicksPerBeat: _clicksPerBeat);
+                              context
+                                  .read(metronomeProvider)
+                                  .change(beatsPerBar: _beatsPerBar);
                             },
                             child: CircleAvatar(
                               radius: 13,
@@ -350,29 +349,35 @@ class _SimpleMetronomeScreenState extends State<SimpleMetronomeScreen> {
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
                 Expanded(
-                  child: Consumer<Metronome>(
-                    builder: (context, metronome, child) => GestureDetector(
-                      onTap: () {
-                        if (!metronome.isPlaying) {
-                          metronome.start(
-                              _currentTempo, _beatsPerBar, _clicksPerBeat,
-                              tempoMultiplier: _tempoMultiplier);
+                  child: Consumer(
+                    builder: (context, watch, child) {
+                      final metronome = watch(metronomeProvider);
+                      return GestureDetector(
+                        onTap: () {
+                          if (!metronome.isPlaying) {
+                            print('current time: ${DateTime.now()}');
+                            metronome.start(
+                                _currentTempo, _beatsPerBar, _clicksPerBeat,
+                                tempoMultiplier: _tempoMultiplier);
 
-                          _restartTapTempoStopwatch();
-                        } else {
-                          metronome.stop();
-                        }
-                      },
-                      child: CircleAvatar(
-                        backgroundColor: Colors.red,
-                        child: Icon(
-                          metronome.isPlaying ? Icons.pause : Icons.play_arrow,
-                          color: Colors.white,
-                          size: 35,
+                            _restartTapTempoStopwatch();
+                          } else {
+                            metronome.stop();
+                          }
+                        },
+                        child: CircleAvatar(
+                          backgroundColor: Colors.red,
+                          child: Icon(
+                            metronome.isPlaying
+                                ? Icons.pause
+                                : Icons.play_arrow,
+                            color: Colors.white,
+                            size: 35,
+                          ),
+                          radius: 30,
                         ),
-                        radius: 30,
-                      ),
-                    ),
+                      );
+                    },
                   ),
                 ),
                 Expanded(
@@ -389,9 +394,7 @@ class _SimpleMetronomeScreenState extends State<SimpleMetronomeScreen> {
                           clipBehavior: Clip.hardEdge,
                           child: GestureDetector(
                             onTapDown: (_) {
-                              if (!Provider.of<Metronome>(context,
-                                      listen: false)
-                                  .isPlaying) {
+                              if (context.read(metronomeProvider).isPlaying) {
                                 if (_tapTempoStopwatch.isRunning) {
                                   _calculateCurrentTempo(
                                       _tapTempoStopwatch.elapsed);

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:metronom/providers/metronome.dart';
-import 'package:provider/provider.dart';
 
-class Visualization extends StatelessWidget {
+class Visualization extends ConsumerWidget {
   final int beatsPerBar;
 
   Visualization(this.beatsPerBar);
@@ -13,15 +13,17 @@ class Visualization extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, ScopedReader watch) {
+    final currentBarBeat = watch(metronomeProvider).currentBarBeat;
     return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceAround,
-      children: List.generate(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: List.generate(
           beatsPerBar,
           (index) => CircleAvatar(
-                backgroundColor: _calculateColor(
-                    index, Provider.of<Metronome>(context).currentBarBeat),
-              )),
-    );
+              backgroundColor: _calculateColor(
+            index,
+            currentBarBeat,
+          )),
+        ));
   }
 }

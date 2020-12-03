@@ -3,6 +3,7 @@ import 'dart:convert';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:metronom/bluetooth_message.dart';
 import 'package:metronom/bluetooth_message_executor.dart';
 
@@ -17,40 +18,40 @@ class BluetoothManager with ChangeNotifier {
   void Function(BluetoothState) _stateChangedCallback;
 
   BluetoothManager() {
-    FlutterBluetoothSerial.instance.state.then((state) {
-      _bluetoothState = state;
-      notifyListeners();
-      print('Bluetooth state: $state');
+    // FlutterBluetoothSerial.instance.state.then((state) {
+    //   _bluetoothState = state;
+    //   // notifyListeners();
+    //   print('Bluetooth state: $state');
 
-      if (state == BluetoothState.STATE_ON) {
-        // _findConnectedDevices();
-        _incomingConnectionsListener = FlutterBluetoothSerial.instance
-            .onIncomingConnection()
-            .listen((connection) {
-          print("JAKIS NOWY CONNECTION MAMY WE FLUTTERU");
+    //   if (state == BluetoothState.STATE_ON) {
+    //     // _findConnectedDevices();
+    //     _incomingConnectionsListener = FlutterBluetoothSerial.instance
+    //         .onIncomingConnection()
+    //         .listen((connection) {
+    //       print("JAKIS NOWY CONNECTION MAMY WE FLUTTERU");
 
-          BluetoothDevice device =
-              BluetoothDevice(name: 'test', address: 'addressTest');
-          _connections[device] = connection;
+    //       BluetoothDevice device =
+    //           BluetoothDevice(name: 'test', address: 'addressTest');
+    //       _connections[device] = connection;
 
-          notifyListeners();
+    //       // notifyListeners();
 
-          print('Connections size: ${_connections.length}');
-          // connection.output.add(utf8.encode("Siemanko!"));
-        });
-      }
-    }, onError: (error) {
-      print('STATE ERROR!!!!');
-    });
+    //       print('Connections size: ${_connections.length}');
+    //       // connection.output.add(utf8.encode("Siemanko!"));
+    //     });
+    //   }
+    // }, onError: (error) {
+    //   print('STATE ERROR!!!!');
+    // });
 
-    _btStateListener =
-        FlutterBluetoothSerial.instance.onStateChanged().listen((state) {
-      _bluetoothState = state;
-      notifyListeners();
+    // _btStateListener =
+    //     FlutterBluetoothSerial.instance.onStateChanged().listen((state) {
+    //   _bluetoothState = state;
+    //   // notifyListeners();
 
-      _stateChangedCallback?.call(state);
-      print('Bluetooth state changed to $state');
-    });
+    //   _stateChangedCallback?.call(state);
+    //   print('Bluetooth state changed to $state');
+    // });
 
     print('BluetoothManager() dla pewności');
   }
@@ -59,11 +60,20 @@ class BluetoothManager with ChangeNotifier {
     _streamSubscription?.cancel();
     _btStateListener?.cancel();
     _incomingConnectionsListener?.cancel();
+    print('bluetooth dispose');
+  }
+
+  Future<BluetoothState> get fState {
+    return FlutterBluetoothSerial.instance.state;
+  }
+
+  Stream<BluetoothState> get sState {
+    return FlutterBluetoothSerial.instance.onStateChanged();
   }
 
   set _scanning(bool value) {
     _isScanning = value;
-    notifyListeners();
+    // notifyListeners();
   }
 
   bool get isScanning {
@@ -113,12 +123,12 @@ class BluetoothManager with ChangeNotifier {
       //     .add(Duration(milliseconds: 5000))
       //     .millisecondsSinceEpoch;
 
-      print('wysyłam wiadomość. data: ${DateTime.now().toIso8601String()}');
+      // print('wysyłam wiadomość. data: ${DateTime.now().toIso8601String()}');
       connection.output.add(message.rawData);
       final storedTime = DateTime.now();
       connection.output.allSent.then((value) {
         final latency = DateTime.now().difference(storedTime).inMilliseconds;
-        print('Wysłano w $latency ms');
+        // print('Wysłano w $latency ms');
       });
     });
 
@@ -129,7 +139,7 @@ class BluetoothManager with ChangeNotifier {
     _connections.forEach((device, connection) {
       print('włączanko nasłuchiwanka');
       connection.input.listen((data) async {
-        print('przyszła wiadomość. data: ${DateTime.now().toIso8601String()}');
+        // print('przyszła wiadomość. data: ${DateTime.now().toIso8601String()}');
 
         final message = BluetoothMessage.fromRawData(data);
         // await BluetoothMessageExecutor.awaitExecute(message.timestamp);
@@ -159,6 +169,36 @@ class BluetoothManager with ChangeNotifier {
     _stateChangedCallback = callback;
   }
 
+  void refresh() {
+    notifyListeners();
+  }
+
+  Stream<List<BluetoothDevice>> scanDevices({
+    List<BluetoothDeviceType> deviceTypeFilter,
+  }) async* {
+    List<BluetoothDevice> devices = [];
+
+    await for (var result in FlutterBluetoothSerial.instance.startDiscovery()) {
+      print('new device bitch');
+      final addDevice = (BluetoothDevice device) {
+        if (devices.indexOf(device) < 0) {
+          devices.add(device);
+          return devices;
+        }
+      };
+
+      if (deviceTypeFilter != null) {
+        if (deviceTypeFilter.indexOf(result.device.type) >= 0) {
+          yield addDevice(result.device);
+        }
+      } else {
+        yield addDevice(result.device);
+      }
+    }
+
+    print('stream completed');
+  }
+
   Future<List<BluetoothDevice>> scanAvailableDevices(
       {List<BluetoothDeviceType> deviceTypeFilter,
       void Function(List<BluetoothDevice>) onDeviceListChanged}) async {
@@ -167,14 +207,21 @@ class BluetoothManager with ChangeNotifier {
     _scanning = true;
     _streamSubscription =
         FlutterBluetoothSerial.instance.startDiscovery().listen((result) {
-      if (deviceTypeFilter != null) {
-        if (deviceTypeFilter.indexOf(result.device.type) >= 0) {
-          devices.add(result.device);
+      print(result.device.name);
+
+      final addDevice = (BluetoothDevice device) {
+        if (devices.indexOf(device) < 0) {
+          devices.add(device);
           onDeviceListChanged?.call(devices);
         }
+      };
+
+      if (deviceTypeFilter != null) {
+        if (deviceTypeFilter.indexOf(result.device.type) >= 0) {
+          addDevice(result.device);
+        }
       } else {
-        devices.add(result.device);
-        onDeviceListChanged?.call(devices);
+        addDevice(result.device);
       }
     }, onError: (error) => throw error);
 
@@ -203,3 +250,6 @@ class BluetoothManager with ChangeNotifier {
     print(_connections);
   }
 }
+
+final bluetoothManagerProvider =
+    ChangeNotifierProvider.autoDispose((ref) => BluetoothManager());

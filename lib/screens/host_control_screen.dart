@@ -116,7 +116,7 @@ class _HostControlScreenState extends State<HostControlScreen> {
 
         print('Latency: ($latency ms)');
 
-        if (latency > 14) {
+        if (latency > 15) {
           // perform clock sync as long as you get satisfying latency for reliable result
           print('To big latency, trying again');
           _clockSync();
@@ -173,13 +173,15 @@ class _HostControlScreenState extends State<HostControlScreen> {
                   1.toString(),
                 ]);
 
-                Future.delayed(Duration(seconds: 1), () {
+                Future.delayed(Duration(milliseconds: 500), () {
+                  print('HOST START! time:\t' + DateTime.now().toString());
                   _metronome.start(120, 4, 1);
                 });
               }
 
               msg.timestamp = DateTime.now().millisecondsSinceEpoch;
               _btManager.broadcastMessage(msg);
+
               // action();
             },
             child: Text(_metronome.isPlaying ? 'Zatrzymaj' : 'Odtwórz'),
