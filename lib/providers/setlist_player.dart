@@ -1,7 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '../models/track.dart';
-import 'metronome.dart';
+import 'metronome/metronome.dart';
 
 class SetlistPlayer extends ChangeNotifier {
   final Metronome metronome;

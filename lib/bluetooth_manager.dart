@@ -4,8 +4,6 @@ import 'dart:convert';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:metronom/bluetooth_message.dart';
-import 'package:metronom/bluetooth_message_executor.dart';
 
 class BluetoothManager with ChangeNotifier {
   BluetoothState _bluetoothState;
@@ -117,37 +115,37 @@ class BluetoothManager with ChangeNotifier {
     return _connections.length;
   }
 
-  Future<void> broadcastMessage(BluetoothMessage message) async {
-    _connections.forEach((device, connection) {
-      // message.timestamp = DateTime.now()
-      //     .add(Duration(milliseconds: 5000))
-      //     .millisecondsSinceEpoch;
+  // Future<void> broadcastMessage(BluetoothMessage message) async {
+  //   _connections.forEach((device, connection) {
+  //     // message.timestamp = DateTime.now()
+  //     //     .add(Duration(milliseconds: 5000))
+  //     //     .millisecondsSinceEpoch;
 
-      // print('wysyłam wiadomość. data: ${DateTime.now().toIso8601String()}');
-      connection.output.add(message.rawData);
-      final storedTime = DateTime.now();
-      connection.output.allSent.then((value) {
-        final latency = DateTime.now().difference(storedTime).inMilliseconds;
-        // print('Wysłano w $latency ms');
-      });
-    });
+  //     // print('wysyłam wiadomość. data: ${DateTime.now().toIso8601String()}');
+  //     connection.output.add(message.rawData);
+  //     final storedTime = DateTime.now();
+  //     connection.output.allSent.then((value) {
+  //       final latency = DateTime.now().difference(storedTime).inMilliseconds;
+  //       // print('Wysłano w $latency ms');
+  //     });
+  //   });
 
-    // await BluetoothMessageExecutor.awaitExecute(message.timestamp);
-  }
+  //   // await BluetoothMessageExecutor.awaitExecute(message.timestamp);
+  // }
 
-  void setInputListenerCallback(void Function(BluetoothMessage) callback) {
-    _connections.forEach((device, connection) {
-      print('włączanko nasłuchiwanka');
-      connection.input.listen((data) async {
-        // print('przyszła wiadomość. data: ${DateTime.now().toIso8601String()}');
+  // void setInputListenerCallback(void Function(BluetoothMessage) callback) {
+  //   _connections.forEach((device, connection) {
+  //     print('włączanko nasłuchiwanka');
+  //     connection.input.listen((data) async {
+  //       // print('przyszła wiadomość. data: ${DateTime.now().toIso8601String()}');
 
-        final message = BluetoothMessage.fromRawData(data);
-        // await BluetoothMessageExecutor.awaitExecute(message.timestamp);
+  //       final message = BluetoothMessage.fromRawData(data);
+  //       // await BluetoothMessageExecutor.awaitExecute(message.timestamp);
 
-        callback(message);
-      });
-    });
-  }
+  //       callback(message);
+  //     });
+  //   });
+  // }
 
   void disconnect(BluetoothDevice device) {
     _connections[device].close();

@@ -3,7 +3,11 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:metronom/models/track.dart';
+
+import '../../models/track.dart';
+import '../nearby/nearby_devices.dart';
+import '../remoteCommand/role.dart';
+import 'remote_synchronized_metronome.dart';
 
 class Metronome with ChangeNotifier {
   static const platform = const MethodChannel('com.example.metronom/metronom');
@@ -28,6 +32,13 @@ class Metronome with ChangeNotifier {
 
   bool get isPlaying {
     return _isPlaying;
+  }
+
+  @override
+  void dispose() {
+    print('METRONOME DISPOSE!!!!!');
+
+    super.dispose();
   }
 
   // TODO: remove
@@ -67,6 +78,8 @@ class Metronome with ChangeNotifier {
       print(
           'wykonano w: ${DateTime.now().difference(timestamp).inMilliseconds} ms');
     });
+
+    print('Metronome start!');
 
     _currentTempo = tempo;
     _beatsPerBar = beatsPerBar;
@@ -130,4 +143,15 @@ class Metronome with ChangeNotifier {
   }
 }
 
-final metronomeProvider = ChangeNotifierProvider((ref) => Metronome());
+// final metronomeProvider = ChangeNotifierProvider<Metronome>((ref) {
+//   return Metronome();
+// });
+
+final metronomeProvider = ChangeNotifierProvider<Metronome>((ref) {
+  return ref.watch(nearbyDevicesProvider).hasConnections &&
+          ref.watch(roleProvider.state) == Role.Host
+      ? RemoteSynchronizedMetronome(ref.read)
+      : Metronome();
+  // : ref.read(metronomeProvider);
+//  return Metronome();
+});

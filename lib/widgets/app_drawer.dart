@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:get/get.dart';
-import 'package:metronom/screens/playing_together_host_screen.dart';
-import 'package:metronom/screens/playing_together_intro_screen.dart';
 
+import '../providers/nearby/nearby_devices.dart';
+import '../screens/playing_together_intro_screen.dart';
 import '../screens/saved_setlists_screen.dart';
 
 class AppDrawer extends StatelessWidget {
@@ -36,14 +37,42 @@ class AppDrawer extends StatelessWidget {
             title: Text('Setlisty'),
             leading: Icon(Icons.format_list_numbered),
           ),
-          ListTile(
-            onTap: () {
-              // Get.to(BluetoothScreen());
-              Get.to(PlayingTogetherIntroScreen());
+          Consumer(
+            builder: (context, watch, child) {
+              final hasConnections =
+                  watch(nearbyDevicesProvider).hasConnections;
+              final color =
+                  hasConnections ? Get.theme.accentColor : Colors.white;
+
+              return ListTile(
+                onTap: () {
+                  Get.to(PlayingTogetherIntroScreen());
+                },
+                title: Text(
+                  'Wspólne odtwarzanie',
+                  style: TextStyle(color: color),
+                ),
+                leading: Icon(
+                  Icons.wifi,
+                  color: color,
+                ),
+              );
             },
-            title: Text('Wspólne odtwarzanie'),
-            leading: Icon(Icons.bluetooth_audio),
           ),
+          // ListTile(
+          //   onTap: () {
+          //     Get.to(NearbyHost());
+          //   },
+          //   title: Text('Nearby host'),
+          //   leading: Icon(Icons.connect_without_contact),
+          // ),
+          // ListTile(
+          //   onTap: () {
+          //     Get.to(NearbyClient());
+          //   },
+          //   title: Text('Nearby client'),
+          //   leading: Icon(Icons.connect_without_contact),
+          // ),
         ],
       ),
     );

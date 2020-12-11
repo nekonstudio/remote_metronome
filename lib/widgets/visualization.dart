@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:metronom/providers/metronome.dart';
+
+import '../providers/metronome/metronome.dart';
 
 class Visualization extends ConsumerWidget {
   final int beatsPerBar;

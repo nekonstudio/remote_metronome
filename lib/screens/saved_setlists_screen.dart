@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:get/get.dart';
 
 import '../mixins/list_item_long_press_popup_menu.dart';
 import '../models/setlist.dart';
 import '../providers/setlists_manager.dart';
+import '../widgets/remote_mode_screen.dart';
 import 'setlist_screen.dart';
 
 class SavedSetlistsScreen extends ConsumerWidget
@@ -16,10 +17,8 @@ class SavedSetlistsScreen extends ConsumerWidget
     final setlistManager = watch(setlistManagerProvider);
     final setlists = setlistManager.setlists;
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Setlisty'),
-      ),
+    return RemoteModeScreen(
+      title: Text('Setlisty'),
       body: Container(
         child: ListView.separated(
           separatorBuilder: (context, index) => Divider(),
@@ -28,17 +27,7 @@ class SavedSetlistsScreen extends ConsumerWidget
             final setlist = setlists[index];
             return InkWell(
               onTap: () {
-                Get.to(
-                    // ChangeNotifierProxyProvider<SetlistManager, SetlistPlayer>(
-                    //   create: (context) => SetlistPlayer(
-                    //       Provider.of<Metronome>(context, listen: false)),
-                    //   update: (context, manager, player) =>
-                    //       player..update(manager.setlists[index].tracks),
-                    //   child: SetlistScreen(),
-                    // ),
-
-                    SetlistScreen(),
-                    arguments: setlist.id);
+                Get.to(SetlistScreen(), arguments: setlist.id);
               },
               onTapDown: (details) => storeTapPosition(details),
               onLongPress: () => showPopupMenu(context, index,

@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../providers/metronome.dart';
+import '../providers/metronome/metronome.dart';
 import '../sound_manager.dart';
 import '../widgets/app_drawer.dart';
+import '../widgets/remote_mode_screen.dart';
 import '../widgets/visualization.dart';
 
 class SimpleMetronomeScreen extends StatefulWidget {
@@ -119,10 +120,8 @@ class _SimpleMetronomeScreenState extends State<SimpleMetronomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Metronom'),
-      ),
+    return RemoteModeScreen(
+      title: Text('Metronom'),
       drawer: AppDrawer(),
       body: Padding(
         padding: const EdgeInsets.symmetric(vertical: 30, horizontal: 0),

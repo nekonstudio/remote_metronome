@@ -5,11 +5,12 @@ import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
 import '../mixins/list_item_long_press_popup_menu.dart';
 import '../models/track.dart';
-import '../providers/metronome.dart';
+import '../providers/metronome/metronome.dart';
 import '../providers/setlist_player.dart';
 import '../providers/setlists_manager.dart';
 import '../widgets/play_complex_track_panel.dart';
 import '../widgets/play_simple_track_panel.dart';
+import '../widgets/remote_mode_screen.dart';
 import 'add_edit_track_screen.dart';
 
 class SetlistScreen extends ConsumerWidget with ListItemLongPressPopupMenu {
@@ -64,6 +65,117 @@ class SetlistScreen extends ConsumerWidget with ListItemLongPressPopupMenu {
         () => onTrackChanged(player.currentTrackIndex);
 
     final selectedTrack = player.currentTrack;
+
+    return RemoteModeScreen(
+      title: tracks.length == 0
+          ? Text(setlist.name)
+          : ListTile(
+              contentPadding: EdgeInsets.zero,
+              title: Text(
+                selectedTrack.name,
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              subtitle: Text(setlist.name),
+            ),
+      body: tracks.length == 0
+          ? Center(
+              child: Text('Brak utworów w setliście'),
+            )
+          : Container(
+              padding: const EdgeInsets.symmetric(vertical: 20),
+              child: Column(
+                children: [
+                  Expanded(
+                    flex: 4,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                        Expanded(
+                          child: selectedTrack.isComplex
+                              ? PlayComplexTrackPanel()
+                              : PlaySimpleTrackPanel(selectedTrack),
+                        ),
+                      ],
+                    ),
+                  ),
+                  _PlayPanel(player),
+                  Expanded(
+                    flex: 6,
+                    child:
+                        NotificationListener<OverscrollIndicatorNotification>(
+                      onNotification:
+                          (OverscrollIndicatorNotification overscroll) {
+                        overscroll.disallowGlow();
+                        return true;
+                      },
+                      child: ScrollablePositionedList.builder(
+                        itemScrollController: _scrollController,
+                        itemCount: setlist.tracksCount,
+                        itemBuilder: (context, index) {
+                          final track = tracks[index];
+                          return Column(
+                            children: [
+                              InkWell(
+                                onTap: () {
+                                  player.currentTrackIndex = index;
+                                },
+                                onTapDown: storeTapPosition,
+                                onLongPress: () => showPopupMenu(
+                                  context,
+                                  index,
+                                  _buildPopupMenuItems(
+                                      context, setlistId, tracks),
+                                ),
+                                child: ListTile(
+                                  leading: CircleAvatar(
+                                      backgroundColor: Colors.transparent,
+                                      child: Text('${index + 1}.')),
+                                  title: Text(
+                                    '${track.name}',
+                                    style: TextStyle(
+                                      color: player.currentTrackIndex == index
+                                          ? Theme.of(context).accentColor
+                                          : Colors.white,
+                                      fontWeight:
+                                          player.currentTrackIndex == index
+                                              ? FontWeight.bold
+                                              : FontWeight.normal,
+                                    ),
+                                  ),
+                                  subtitle: Text(track.isComplex
+                                      ? 'Złożony'
+                                      : '${track.tempo} BPM'),
+                                ),
+                              ),
+                              if (index < setlist.tracksCount - 1)
+                                Divider(
+                                  height: 0,
+                                ),
+                            ],
+                          );
+                        },
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+      floatingActionButton: Consumer(
+        builder: (context, watch, child) {
+          final isPlaying = watch(metronomeProvider).isPlaying;
+          return FloatingActionButton(
+            backgroundColor:
+                isPlaying ? Colors.grey : Theme.of(context).accentColor,
+            child: Icon(Icons.add),
+            onPressed: () {
+              if (!isPlaying) {
+                Get.to(AddEditTrackScreen(setlist.id, null));
+              }
+            },
+          );
+        },
+      ),
+    );
 
     return Scaffold(
       appBar: AppBar(

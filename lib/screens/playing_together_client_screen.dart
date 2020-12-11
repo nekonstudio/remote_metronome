@@ -1,79 +1,68 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:get/get.dart';
-import 'package:metronom/bluetooth_manager.dart';
-import 'package:metronom/screens/client_control_screen.dart';
-import 'package:metronom/widgets/enable_bluetooth.dart';
-import 'package:provider/provider.dart';
 
-class PlayingTogetherClientScreen extends StatefulWidget {
-  @override
-  _PlayingTogetherClientScreenState createState() =>
-      _PlayingTogetherClientScreenState();
-}
+import '../providers/nearby/nearby_devices.dart';
 
-class _PlayingTogetherClientScreenState
-    extends State<PlayingTogetherClientScreen> {
-  var _isInitialized = false;
-
-  BluetoothManager _btManager;
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-
-    if (!_isInitialized) {
-      _isInitialized = true;
-
-      _btManager = Provider.of<BluetoothManager>(context);
-      // _btManager.waitForState().then((value) => null);
-
-    }
-  }
-
+class PlayingTogetherClientScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    print(_btManager.connectedDevicesCount);
-    if (_btManager.connectedDevicesCount > 0) {
-      print('mamy to! ${_btManager.connectedDevicesCount}');
-      Future.delayed(Duration(milliseconds: 200), () {
-        Get.off(ClientControlScreen(_btManager));
-      });
-      // Get.off(ClientControlScreen());
-    }
+    context.read(nearbyDevicesProvider).discover();
     return Scaffold(
       appBar: AppBar(
         title: Text('Wspólne odtwarzanie'),
       ),
-      body: _btManager.state == null
-          ? Center(
-              child: CircularProgressIndicator(),
-            )
-          : !_btManager.state.isEnabled
-              ? EnableBluetooth()
-              : Container(
-                  width: double.infinity,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      CircularProgressIndicator(),
-                      SizedBox(
-                        height: 20,
-                      ),
+      body: WillPopScope(
+        onWillPop: () async {
+          context.read(nearbyDevicesProvider).finish();
+          return true;
+        },
+        child: Container(
+          width: double.infinity,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              CircularProgressIndicator(),
+              SizedBox(
+                height: 20,
+              ),
+              Consumer(
+                builder: (context, watch, child) {
+                  final nearbyDevices = watch(nearbyDevicesProvider);
+                  final isConnected = nearbyDevices.hasConnections;
+                  final text = isConnected
+                      ? 'Połączono z ${nearbyDevices.connectedDevicesList.first}!'
+                      : 'Trwa wyszukiwanie dostępnych urządzeń';
+                  return
+                      // isConnected
+                      //     ? Get.to(ClientControlScreen())
+                      //     :
                       Text(
-                        'Oczekiwanie',
-                        style: Get.textTheme.headline5,
-                      ),
-                      SizedBox(
-                        height: 5,
-                      ),
-                      Text(
-                        'Twórca sesji musi połączyć się z Twoim urządzeniem',
-                        style: Get.textTheme.caption,
-                      ),
-                    ],
-                  ),
-                ),
+                    text,
+                    style: Get.textTheme.caption,
+                  );
+                },
+              ),
+              SizedBox(
+                height: 5,
+              ),
+              Consumer(
+                builder: (context, watch, child) {
+                  final nearbyDevices = watch(nearbyDevicesProvider);
+                  final isConnected = nearbyDevices.hasConnections;
+                  final text =
+                      isConnected ? 'Oczekiwanie na zatwierdzenie sesji.' : '';
+                  return Text(
+                    text,
+                    style: Get.textTheme.caption,
+                  );
+                },
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

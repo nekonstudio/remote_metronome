@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:get/get.dart';
-import 'package:metronom/models/track.dart';
-import 'package:metronom/providers/setlists_manager.dart';
-import 'package:metronom/widgets/metronome_panel.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:swipedetector/swipedetector.dart';
 import 'package:toggle_switch/toggle_switch.dart';
+
+import '../models/track.dart';
+import '../providers/setlists_manager.dart';
+import '../widgets/metronome_panel.dart';
+import '../widgets/remote_mode_screen.dart';
 
 class AddEditTrackScreen extends StatefulWidget {
   static const routePath = '/newTrack';
@@ -137,10 +139,8 @@ class _AddEditTrackScreenState extends State<AddEditTrackScreen> {
           });
         }
       },
-      child: Scaffold(
-        appBar: AppBar(
-          title: Text(_isEditingMode ? 'Edycja utworu' : 'Nowy utwór'),
-        ),
+      child: RemoteModeScreen(
+        title: Text(_isEditingMode ? 'Edycja utworu' : 'Nowy utwór'),
         body: SingleChildScrollView(
           child: Form(
             key: AddEditTrackScreen._formKey,
