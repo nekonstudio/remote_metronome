@@ -3,8 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:get/get.dart';
 
 import '../providers/nearby/nearby_devices.dart';
-import '../providers/remoteCommand/remote_command.dart';
-import '../providers/remoteCommand/role.dart';
+import '../providers/remote_synchronization.dart';
 import '../widgets/connected_nearby_devices_list.dart';
 import 'simple_metronome_screen.dart';
 
@@ -45,12 +44,7 @@ class PlayingTogetherHostScreen extends StatelessWidget {
             onPressed: hasConnections
                 ? () async {
                     context.read(nearbyDevicesProvider).stopAdvertising();
-                    context.read(roleProvider).role = Role.Host;
-
-                    // await
-                    context.read(nearbyDevicesProvider).broadcastCommand(
-                        RemoteCommand.clockSyncRequest(DateTime.now()));
-                    // context.read(hostRemoteSyncExecutorProvider).clockSync();
+                    context.read(synchronizationProvider).synchronize();
 
                     Get.offAll(SimpleMetronomeScreen());
                   }

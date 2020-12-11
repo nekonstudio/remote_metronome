@@ -5,8 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../models/track.dart';
-import '../nearby/nearby_devices.dart';
-import '../remoteCommand/role.dart';
+import '../remote_synchronization.dart';
 import 'remote_synchronized_metronome.dart';
 
 class Metronome with ChangeNotifier {
@@ -143,15 +142,9 @@ class Metronome with ChangeNotifier {
   }
 }
 
-// final metronomeProvider = ChangeNotifierProvider<Metronome>((ref) {
-//   return Metronome();
-// });
-
 final metronomeProvider = ChangeNotifierProvider<Metronome>((ref) {
-  return ref.watch(nearbyDevicesProvider).hasConnections &&
-          ref.watch(roleProvider.state) == Role.Host
-      ? RemoteSynchronizedMetronome(ref.read)
+  return ref.watch(synchronizationProvider.state) ==
+          DeviceSynchronizationMode.Host
+      ? RemoteSynchronizedMetronome(ref.read(synchronizationProvider))
       : Metronome();
-  // : ref.read(metronomeProvider);
-//  return Metronome();
 });

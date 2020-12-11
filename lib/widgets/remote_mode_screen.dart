@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:get/get.dart';
 
 import '../providers/nearby/nearby_devices.dart';
-import '../providers/remoteCommand/role.dart';
+import '../providers/remote_synchronization.dart';
 import 'remote_connected_devices_panel.dart';
 
 class RemoteModeScreen extends StatelessWidget {
@@ -103,7 +103,7 @@ class RemoteModeScreen extends StatelessWidget {
               ),
             );
 
-            context.read(roleProvider).role = Role.None;
+            context.read(synchronizationProvider).end();
           }
         },
         child: Stack(

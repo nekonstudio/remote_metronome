@@ -3,16 +3,8 @@ import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:nearby_connections/nearby_connections.dart';
 
-import '../remoteCommand/client_remote_command_handler.dart';
-import '../remoteCommand/host_remote_command_handler.dart';
 import '../remoteCommand/remote_command.dart';
 import '../remoteCommand/remote_command_handler.dart';
-import '../remoteCommand/role.dart';
-
-final remoteCommandHandlerProvider = Provider<RemoteCommandHandler>((ref) =>
-    ref.watch(roleProvider.state) == Role.Host
-        ? HostRemoteCommandHandler(ref.read)
-        : ClientRemoteCommandHandler(ref.read));
 
 class NearbyDeviceInfo {
   final String endpointId;
@@ -23,9 +15,10 @@ class NearbyDeviceInfo {
 
 class NearbyDevices with ChangeNotifier {
   final List<NearbyDeviceInfo> _connectedDevices = [];
-  final Reader providerReader;
+  final RemoteCommandHandler _receivedDataHandler;
 
-  NearbyDevices(this.providerReader);
+  NearbyDevices(Reader providerReader)
+      : _receivedDataHandler = RemoteCommandHandler(providerReader);
 
   var _isAdvertising = false;
   var _isDiscovering = false;
@@ -117,18 +110,9 @@ class NearbyDevices with ChangeNotifier {
       onPayLoadRecieved: (endpointId, payload) {
         print('message recived');
 
-        providerReader(remoteCommandHandlerProvider).handle(
+        _receivedDataHandler.handle(
           RemoteCommand.fromRawData(payload.bytes),
         );
-
-        // if (providerReader(roleProvider.state) == Role.Host) {
-        //   providerReader(hostRemoteSyncExecutorProvider)
-        //       .execute(RemoteCommand.fromRawData(payload.bytes), null);
-        // } else {
-        //   providerReader(clientRemoteSyncExecutorProvider).execute(
-        //     RemoteCommand.fromRawData(payload.bytes),
-        //   );
-        // }
       },
       onPayloadTransferUpdate: (endpointId, payloadTransferUpdate) {
         // print(payloadTransferUpdate.status);
