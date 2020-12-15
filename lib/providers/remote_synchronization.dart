@@ -1,27 +1,28 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:metronom/providers/nearby/nearby_devices.dart';
 import 'package:metronom/providers/remoteCommand/remote_command.dart';
 
 enum DeviceSynchronizationMode { Host, Client, None }
 
-class RemoteSynchronization extends StateNotifier<DeviceSynchronizationMode> {
+class RemoteSynchronization with ChangeNotifier {
   final Future<void> Function(RemoteCommand) sendRemoteCommand;
 
-  RemoteSynchronization(this.sendRemoteCommand)
-      : super(DeviceSynchronizationMode.None);
+  RemoteSynchronization(this.sendRemoteCommand);
 
+  var _mode = DeviceSynchronizationMode.None;
   int _remoteTimeDifference;
 
-  bool get isSynchronized => state != DeviceSynchronizationMode.None;
+  DeviceSynchronizationMode get deviceMode => _mode;
+  bool get isSynchronized => _mode != DeviceSynchronizationMode.None;
 
   Future<void> synchronize() async {
     sendRemoteCommand(RemoteCommand.clockSyncRequest(DateTime.now()));
-
-    // await Future.doWhile(() => !isSynchronized);
   }
 
   void end() {
-    state = DeviceSynchronizationMode.None;
+    _mode = DeviceSynchronizationMode.None;
+    notifyListeners();
   }
 
   void onClockSyncRequest(String hostStartTime) {
@@ -61,13 +62,15 @@ class RemoteSynchronization extends StateNotifier<DeviceSynchronizationMode> {
         RemoteCommand.clockSyncSuccess(-_remoteTimeDifference),
       );
 
-      state = DeviceSynchronizationMode.Host;
+      _mode = DeviceSynchronizationMode.Host;
+      notifyListeners();
     }
   }
 
   void onClockSyncSuccess(int remoteTimeDifference) {
     _remoteTimeDifference = remoteTimeDifference;
-    state = DeviceSynchronizationMode.Client;
+    _mode = DeviceSynchronizationMode.Client;
+    notifyListeners();
     print(
         'Client clock sync success! Remote time difference: $remoteTimeDifference');
   }
@@ -112,7 +115,7 @@ class RemoteSynchronization extends StateNotifier<DeviceSynchronizationMode> {
   }
 }
 
-final synchronizationProvider = StateNotifierProvider(
+final synchronizationProvider = ChangeNotifierProvider(
   (ref) => RemoteSynchronization(
     ref.read(nearbyDevicesProvider).broadcastCommand,
   ),

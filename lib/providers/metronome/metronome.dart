@@ -143,7 +143,7 @@ class Metronome with ChangeNotifier {
 }
 
 final metronomeProvider = ChangeNotifierProvider<Metronome>((ref) {
-  return ref.watch(synchronizationProvider.state) ==
+  return ref.watch(synchronizationProvider).deviceMode ==
           DeviceSynchronizationMode.Host
       ? RemoteSynchronizedMetronome(ref.read(synchronizationProvider))
       : Metronome();

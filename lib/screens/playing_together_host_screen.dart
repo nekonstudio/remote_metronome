@@ -44,7 +44,28 @@ class PlayingTogetherHostScreen extends StatelessWidget {
             onPressed: hasConnections
                 ? () async {
                     context.read(nearbyDevicesProvider).stopAdvertising();
+
                     context.read(synchronizationProvider).synchronize();
+                    await showDialog(
+                        context: context,
+                        // barrierDismissible: false,
+                        builder: (context) =>
+                            ProviderListener<RemoteSynchronization>(
+                              provider: synchronizationProvider,
+                              onChange: (context, synchronization) {
+                                print(synchronization.isSynchronized);
+                                if (synchronization.isSynchronized) {
+                                  Get.back();
+                                }
+                              },
+                              child: AlertDialog(
+                                title: Text('Proszę czekać...'),
+                                content: ListTile(
+                                  leading: CircularProgressIndicator(),
+                                  title: Text('Trwa synchronizacja'),
+                                ),
+                              ),
+                            ));
 
                     Get.offAll(SimpleMetronomeScreen());
                   }
