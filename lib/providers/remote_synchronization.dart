@@ -5,10 +5,18 @@ import 'package:metronom/providers/remoteCommand/remote_command.dart';
 
 enum DeviceSynchronizationMode { Host, Client, None }
 
+class RemoteActionNotifier extends StateNotifier<bool> {
+  RemoteActionNotifier(bool state) : super(state);
+
+  void setActionState(bool value) => state = value;
+}
+
 class RemoteSynchronization with ChangeNotifier {
   final Future<void> Function(RemoteCommand) sendRemoteCommand;
 
   RemoteSynchronization(this.sendRemoteCommand);
+
+  final remoteActionNotifier = RemoteActionNotifier(false);
 
   var _mode = DeviceSynchronizationMode.None;
   int _remoteTimeDifference;
@@ -80,12 +88,22 @@ class RemoteSynchronization with ChangeNotifier {
     print('hostStartTime: ${DateTime.now()}');
     sendRemoteCommand(remoteCommand);
 
-    instant
-        ? action()
-        : Future.delayed(Duration(milliseconds: 500), () {
-            print('HOST START! time:\t' + DateTime.now().toString());
-            action();
-          });
+    if (instant) {
+      action();
+    } else {
+      remoteActionNotifier.setActionState(true);
+      Future.delayed(
+        Duration(milliseconds: 500),
+        () {
+          print('HOST START! time:\t' + DateTime.now().toString());
+          action();
+          Future.delayed(
+            Duration(milliseconds: 120),
+            () => remoteActionNotifier.setActionState(false),
+          );
+        },
+      );
+    }
   }
 
   void hostSynchonizedAction(DateTime hostStartTime, Function action) async {
@@ -119,4 +137,9 @@ final synchronizationProvider = ChangeNotifierProvider(
   (ref) => RemoteSynchronization(
     ref.read(nearbyDevicesProvider).broadcastCommand,
   ),
+);
+
+StateNotifierProvider<RemoteActionNotifier> remoteActionNotifierProvider =
+    StateNotifierProvider<RemoteActionNotifier>(
+  (ref) => ref.read(synchronizationProvider).remoteActionNotifier,
 );

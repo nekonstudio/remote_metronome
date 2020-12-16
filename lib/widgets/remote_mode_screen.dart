@@ -26,17 +26,12 @@ class RemoteModeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        // title: ListTile(
-        //   title: title,
-        //   subtitle: subtitle ?? Text('Wspólne odtwarzanie'),
-        // ),
         title: title,
         actions: [
           Consumer(
             builder: (context, watch, child) {
               final nearbyDevices = watch(nearbyDevicesProvider);
               final hasConnections = nearbyDevices.hasConnections;
-              // final hasConnections = true;
               final connectionsCount =
                   nearbyDevices.connectedDevicesList.length;
 
@@ -46,7 +41,6 @@ class RemoteModeScreen extends StatelessWidget {
                       number: connectionsCount,
                       color: Get.theme.accentColor,
                       onPressed: () {
-                        // showBottomSheet(context: null, builder: null)
                         showModalBottomSheet(
                             // isScrollControlled: true,
                             context: context,
@@ -55,23 +49,6 @@ class RemoteModeScreen extends StatelessWidget {
                       },
                     )
                   : Container();
-
-              // return IconButton(
-              //   icon: Icon(hasConnections ? Icons.wifi : null),
-              //   onPressed: hasConnections
-              //       ? () {
-              // showModalBottomSheet(
-              //   context: context,
-              //   builder: (context) {
-              //     return Center(
-              //       child: Text('Hello'),
-              //     );
-              //   },
-              // );
-              //         }
-              //       : null,
-              //   color: Get.theme.accentColor,
-              // );
             },
           ),
         ],
@@ -109,14 +86,28 @@ class RemoteModeScreen extends StatelessWidget {
         child: Stack(
           children: [
             body,
-            // LinearProgressIndicator(
-            //   value: 1.0,
-            // ),
+            _RemoteLaunchIndicator(),
           ],
         ),
       ),
       floatingActionButton: floatingActionButton,
     );
+  }
+}
+
+class _RemoteLaunchIndicator extends ConsumerWidget {
+  @override
+  Widget build(BuildContext context, ScopedReader watch) {
+    final useIndicator = watch(remoteActionNotifierProvider.state);
+    return useIndicator
+        ? TweenAnimationBuilder(
+            tween: Tween<double>(begin: 0.0, end: 1.0),
+            duration: Duration(milliseconds: 500),
+            builder: (context, value, child) => LinearProgressIndicator(
+              value: value,
+            ),
+          )
+        : Container();
   }
 }
 
