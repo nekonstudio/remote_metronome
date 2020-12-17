@@ -1,5 +1,5 @@
-import '../remoteCommand/remote_command.dart';
-import '../remote_synchronization.dart';
+import '../remote/remote_command.dart';
+import '../remote/remote_synchronization.dart';
 import 'metronome.dart';
 
 class RemoteSynchronizedMetronome extends Metronome {
@@ -37,5 +37,16 @@ class RemoteSynchronizedMetronome extends Metronome {
       () => super.stop(),
       instant: true,
     );
+  }
+
+  @override
+  void change(
+      {int tempo,
+      int beatsPerBar,
+      int clicksPerBeat,
+      double tempoMultiplier,
+      bool smooth = true}) {
+    // changing metronome properties during playing in
+    // remote synchronization mode is off, so this function must be empty
   }
 }

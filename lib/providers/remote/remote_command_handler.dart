@@ -1,6 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:metronom/providers/metronome/metronome.dart';
-import 'package:metronom/providers/remote_synchronization.dart';
+import '../metronome/metronome.dart';
+import 'remote_synchronization.dart';
+
+import 'remote_metronome_screen_controller.dart';
 
 import 'remote_command.dart';
 
@@ -49,6 +51,24 @@ class RemoteCommandHandler {
 
       case RemoteCommandType.StopMetronome:
         providerReader(metronomeProvider).stop();
+        break;
+
+      case RemoteCommandType.SetMetronomeData:
+        final tempo = int.parse(command.parameters[0]);
+        final beats = int.parse(command.parameters[1]);
+        providerReader(remoteMetronomeScreenControllerProvider)
+            .initialize(tempo, beats);
+        break;
+
+      case RemoteCommandType.ChangeTempo:
+        final tempo = int.parse(command.parameters[0]);
+        providerReader(remoteMetronomeScreenControllerProvider).tempo = tempo;
+        break;
+
+      case RemoteCommandType.ChangeBeatsPerBar:
+        final beatsPerBar = int.parse(command.parameters[0]);
+        providerReader(remoteMetronomeScreenControllerProvider).beatsPerBar =
+            beatsPerBar;
         break;
 
       default:

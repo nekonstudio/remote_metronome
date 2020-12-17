@@ -3,8 +3,8 @@ import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:nearby_connections/nearby_connections.dart';
 
-import '../remoteCommand/remote_command.dart';
-import '../remoteCommand/remote_command_handler.dart';
+import '../remote/remote_command.dart';
+import '../remote/remote_command_handler.dart';
 
 class NearbyDeviceInfo {
   final String endpointId;
@@ -46,6 +46,8 @@ class NearbyDevices with ChangeNotifier {
     stopDiscovery();
     Nearby().stopAllEndpoints();
     _connectedDevices.clear();
+
+    notifyListeners();
   }
 
   Future<bool> advertise() async {
@@ -140,10 +142,6 @@ class NearbyDevices with ChangeNotifier {
 
   void _onDisconnected(String endpointId) async {
     await Nearby().disconnectFromEndpoint(endpointId);
-
-    _lastDisconnectedDeviceName = _connectedDevices
-        .firstWhere((element) => element.endpointId == endpointId)
-        .name;
 
     final lastDeviceIndex = _connectedDevices
         .indexWhere((element) => element.endpointId == endpointId);

@@ -5,7 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../models/track.dart';
-import '../remote_synchronization.dart';
+import '../remote/remote_synchronization.dart';
 import 'remote_synchronized_metronome.dart';
 
 class Metronome with ChangeNotifier {

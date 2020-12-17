@@ -3,14 +3,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:get/get.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
-import '../mixins/list_item_long_press_popup_menu.dart';
-import '../models/track.dart';
-import '../providers/metronome/metronome.dart';
-import '../providers/setlist_player.dart';
-import '../providers/setlists_manager.dart';
-import '../widgets/play_complex_track_panel.dart';
-import '../widgets/play_simple_track_panel.dart';
-import '../widgets/remote_mode_screen.dart';
+import '../../mixins/list_item_long_press_popup_menu.dart';
+import '../../models/track.dart';
+import '../../providers/metronome/metronome.dart';
+import '../../providers/setlist_player.dart';
+import '../../providers/setlists_manager.dart';
+import '../../widgets/play_complex_track_panel.dart';
+import '../../widgets/play_simple_track_panel.dart';
+import '../../widgets/remote_mode_screen.dart';
 import 'add_edit_track_screen.dart';
 
 class SetlistScreen extends ConsumerWidget with ListItemLongPressPopupMenu {

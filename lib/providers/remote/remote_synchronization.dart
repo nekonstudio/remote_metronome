@@ -1,7 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:metronom/providers/nearby/nearby_devices.dart';
-import 'package:metronom/providers/remoteCommand/remote_command.dart';
+
+import '../nearby/nearby_devices.dart';
+import 'remote_command.dart';
 
 enum DeviceSynchronizationMode { Host, Client, None }
 

@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:get/get.dart';
 
-import '../mixins/list_item_long_press_popup_menu.dart';
-import '../models/setlist.dart';
-import '../providers/setlists_manager.dart';
-import '../widgets/remote_mode_screen.dart';
+import '../../mixins/list_item_long_press_popup_menu.dart';
+import '../../models/setlist.dart';
+import '../../providers/setlists_manager.dart';
+import '../../widgets/remote_mode_screen.dart';
 import 'setlist_screen.dart';
 
 class SavedSetlistsScreen extends ConsumerWidget

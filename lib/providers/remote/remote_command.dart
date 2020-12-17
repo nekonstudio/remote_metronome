@@ -7,6 +7,9 @@ enum RemoteCommandType {
   ClockSyncSuccess,
   StartMetronome,
   StopMetronome,
+  SetMetronomeData,
+  ChangeBeatsPerBar,
+  ChangeTempo,
   LatencyTest,
 }
 
@@ -51,6 +54,22 @@ class RemoteCommand {
         );
 
   RemoteCommand.stopMetronome() : this(RemoteCommandType.StopMetronome);
+
+  RemoteCommand.setMetronomeData(int tempo, int beatsPerBar)
+      : this(
+          RemoteCommandType.SetMetronomeData,
+          parameters: [
+            tempo.toString(),
+            beatsPerBar.toString(),
+          ],
+        );
+
+  RemoteCommand.changeBeatsPerBar(int value)
+      : this(RemoteCommandType.ChangeBeatsPerBar,
+            parameters: [value.toString()]);
+
+  RemoteCommand.changeTempo(int value)
+      : this(RemoteCommandType.ChangeTempo, parameters: [value.toString()]);
 
   static RemoteCommand fromRawData(Uint8List data) {
     final str = utf8.decode(data);

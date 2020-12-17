@@ -6,10 +6,10 @@ import 'package:get/get.dart';
 import 'package:swipedetector/swipedetector.dart';
 import 'package:toggle_switch/toggle_switch.dart';
 
-import '../models/track.dart';
-import '../providers/setlists_manager.dart';
-import '../widgets/metronome_panel.dart';
-import '../widgets/remote_mode_screen.dart';
+import '../../models/track.dart';
+import '../../providers/setlists_manager.dart';
+import '../../widgets/metronome_panel.dart';
+import '../../widgets/remote_mode_screen.dart';
 
 class AddEditTrackScreen extends StatefulWidget {
   static const routePath = '/newTrack';

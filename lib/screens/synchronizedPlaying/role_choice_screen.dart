@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import 'playing_together_client_screen.dart';
-import 'playing_together_host_screen.dart';
+import 'client_connecting_screen.dart';
+import 'host_connecting_screen.dart';
 
-class PlayingTogetherIntroScreen extends StatelessWidget {
+class RoleChoiceScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -32,7 +32,7 @@ class PlayingTogetherIntroScreen extends StatelessWidget {
                   child: Text('Utwórz'),
                   onPressed: () {
                     Get.to(
-                      PlayingTogetherHostScreen(),
+                      HostConnectingScreen(),
                     );
                   },
                 ),
@@ -62,7 +62,7 @@ class PlayingTogetherIntroScreen extends StatelessWidget {
                   child: Text('Dołącz'),
                   onPressed: () {
                     Get.to(
-                      PlayingTogetherClientScreen(),
+                      ClientConnectingScreen(),
                     );
                   },
                 ),

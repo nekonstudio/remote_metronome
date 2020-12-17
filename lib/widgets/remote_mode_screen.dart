@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:get/get.dart';
 
 import '../providers/nearby/nearby_devices.dart';
-import '../providers/remote_synchronization.dart';
+import '../providers/remote/remote_synchronization.dart';
 import 'remote_connected_devices_panel.dart';
 
 class RemoteModeScreen extends StatelessWidget {
@@ -42,7 +42,6 @@ class RemoteModeScreen extends StatelessWidget {
                       color: Get.theme.accentColor,
                       onPressed: () {
                         showModalBottomSheet(
-                            // isScrollControlled: true,
                             context: context,
                             builder: (context) =>
                                 RemoteConnectedDevicesPanel());
@@ -57,6 +56,8 @@ class RemoteModeScreen extends StatelessWidget {
       body: ProviderListener<NearbyDevices>(
         provider: nearbyDevicesProvider,
         onChange: (context, nearbyDevices) {
+          if (!ModalRoute.of(context).isCurrent) return;
+
           if (nearbyDevices.hasConnections) {
             final disconnectedDeviceName =
                 nearbyDevices.lastDisconnectedDeviceName;
@@ -73,7 +74,7 @@ class RemoteModeScreen extends StatelessWidget {
               context: context,
               builder: (context) => AlertDialog(
                 title: Text('Zakończono tryb wspólnego odtwarzania'),
-                content: Text('Wszystkie podłączone urządzenia rozłączyły się'),
+                content: Text('Rozłączono ze wszystkimi urządzniami'),
                 actions: [
                   FlatButton(onPressed: Get.back, child: Text('OK')),
                 ],

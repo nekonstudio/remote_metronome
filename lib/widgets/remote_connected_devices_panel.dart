@@ -1,22 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:metronom/providers/nearby/nearby_devices.dart';
+import 'package:metronom/providers/remote/remote_synchronization.dart';
 
 import 'connected_nearby_devices_list.dart';
 
 class RemoteConnectedDevicesPanel extends StatelessWidget {
-  final bool isModalVersion;
-
-  const RemoteConnectedDevicesPanel({
-    Key key,
-    this.isModalVersion,
-  }) : super(key: key);
-
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
-        // if (isModalVersion) ListTile(),
-        // Container(),
         ListTile(
           leading: Icon(
             Icons.connect_without_contact,
@@ -45,7 +39,11 @@ class RemoteConnectedDevicesPanel extends StatelessWidget {
               ),
               ElevatedButton(
                 child: Text('Zakończ'),
-                onPressed: () {},
+                onPressed: () {
+                  context.read(nearbyDevicesProvider).finish();
+                  context.read(synchronizationProvider).end();
+                  Get.back();
+                },
               ),
             ],
           ),

@@ -3,8 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:get/get.dart';
 
 import '../providers/nearby/nearby_devices.dart';
-import '../screens/playing_together_intro_screen.dart';
-import '../screens/saved_setlists_screen.dart';
+import '../screens/synchronizedPlaying/role_choice_screen.dart';
+import '../screens/setlists/saved_setlists_screen.dart';
+import 'remote_connected_devices_panel.dart';
 
 class AppDrawer extends StatelessWidget {
   @override
@@ -46,7 +47,15 @@ class AppDrawer extends StatelessWidget {
 
               return ListTile(
                 onTap: () {
-                  Get.to(PlayingTogetherIntroScreen());
+                  if (hasConnections) {
+                    Get.back();
+                    showModalBottomSheet(
+                      context: context,
+                      builder: (context) => RemoteConnectedDevicesPanel(),
+                    );
+                  } else {
+                    Get.to(RoleChoiceScreen());
+                  }
                 },
                 title: Text(
                   'Wspólne odtwarzanie',
@@ -59,20 +68,6 @@ class AppDrawer extends StatelessWidget {
               );
             },
           ),
-          // ListTile(
-          //   onTap: () {
-          //     Get.to(NearbyHost());
-          //   },
-          //   title: Text('Nearby host'),
-          //   leading: Icon(Icons.connect_without_contact),
-          // ),
-          // ListTile(
-          //   onTap: () {
-          //     Get.to(NearbyClient());
-          //   },
-          //   title: Text('Nearby client'),
-          //   leading: Icon(Icons.connect_without_contact),
-          // ),
         ],
       ),
     );
