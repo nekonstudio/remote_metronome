@@ -15,7 +15,7 @@ class Visualization extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, ScopedReader watch) {
-    final currentBarBeat = watch(metronomeProvider).currentBarBeat;
+    final currentBarBeat = watch(currentBeatBarProvider);
     return Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: List.generate(

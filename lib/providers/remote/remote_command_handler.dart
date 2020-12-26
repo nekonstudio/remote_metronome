@@ -1,10 +1,10 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '../metronome/metronome.dart';
-import 'remote_synchronization.dart';
-
-import 'remote_metronome_screen_controller.dart';
-
+import '../metronome/metronome_settings.dart';
 import 'remote_command.dart';
+import 'remote_metronome_screen_controller.dart';
+import 'remote_synchronization.dart';
 
 class RemoteCommandHandler {
   final Reader providerReader;
@@ -38,14 +38,18 @@ class RemoteCommandHandler {
         final tempo = int.parse(command.parameters[0]);
         final beats = int.parse(command.parameters[1]);
         final clicks = int.parse(command.parameters[2]);
-        final tempoMultiplier = double.parse(command.parameters[3]);
         final hostStartTime =
             DateTime.fromMillisecondsSinceEpoch(command.timestamp);
 
         synchronization.hostSynchonizedAction(
           hostStartTime,
-          () => providerReader(metronomeProvider)
-              .start(tempo, beats, clicks, tempoMultiplier: tempoMultiplier),
+          () => providerReader(metronomeProvider).start(
+            MetronomeSettings(
+              tempo,
+              beats,
+              clicks,
+            ),
+          ),
         );
         break;
 

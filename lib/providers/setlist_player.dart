@@ -3,9 +3,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../models/track.dart';
 import 'metronome/metronome.dart';
+import 'metronome/metronome_settings.dart';
+import 'metronome/notifier_metronome.dart';
 
 class SetlistPlayer extends ChangeNotifier {
-  final Metronome metronome;
+  final NotifierMetronome metronome;
 
   SetlistPlayer(Reader reader) : metronome = reader(metronomeProvider) {
     print('SetlistPlayer()');
@@ -60,9 +62,11 @@ class SetlistPlayer extends ChangeNotifier {
         if (nextSectionIndex < currentTrack.sections.length) {
           final section = currentTrack.sections[nextSectionIndex];
           metronome.change(
-            tempo: section.tempo,
-            beatsPerBar: section.beatsPerBar,
-            clicksPerBeat: section.clicksPerBeat,
+            MetronomeSettings(
+              section.tempo,
+              section.beatsPerBar,
+              section.clicksPerBeat,
+            ),
           );
         }
       }
@@ -95,9 +99,11 @@ class SetlistPlayer extends ChangeNotifier {
     if (_isPlaying) {
       final section = currentSection;
       metronome.change(
-        tempo: section.tempo,
-        beatsPerBar: section.beatsPerBar,
-        clicksPerBeat: section.clicksPerBeat,
+        MetronomeSettings(
+          section.tempo,
+          section.beatsPerBar,
+          section.clicksPerBeat,
+        ),
       );
     } else {
       notifyListeners();
@@ -116,14 +122,19 @@ class SetlistPlayer extends ChangeNotifier {
   }
 
   void play() {
-    if (currentTrack.isComplex) {
-      final section = currentSection;
-      metronome.start(
-          section.tempo, section.beatsPerBar, section.clicksPerBeat);
-    } else {
-      metronome.startTrack(currentTrack);
-    }
+    final settings = currentTrack.isComplex
+        ? MetronomeSettings(
+            currentSection.tempo,
+            currentSection.beatsPerBar,
+            currentSection.clicksPerBeat,
+          )
+        : MetronomeSettings(
+            currentTrack.tempo,
+            currentTrack.beatsPerBar,
+            currentTrack.clicksPerBeat,
+          );
 
+    metronome.start(settings);
     metronome.addListener(_onMetronomeChanged);
   }
 
