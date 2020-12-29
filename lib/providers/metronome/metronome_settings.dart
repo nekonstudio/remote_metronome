@@ -1,6 +1,10 @@
 import 'dart:convert';
 
-class MetronomeSettings {
+import '../../utils/validable/property_validable.dart';
+import '../../utils/validable/range_validable_property.dart';
+import '../../utils/validable/validable.dart';
+
+class MetronomeSettings extends PropertyValidable {
   final int tempo;
   final int beatsPerBar;
   final int clicksPerBeat;
@@ -10,6 +14,16 @@ class MetronomeSettings {
     this.beatsPerBar,
     this.clicksPerBeat,
   );
+
+  @override
+  List<Validable> get validableProperties => [
+        RangeValidableProperty(
+            propertyValue: tempo, minValue: 10, maxValue: 300),
+        RangeValidableProperty(
+            propertyValue: beatsPerBar, minValue: 1, maxValue: 16),
+        RangeValidableProperty(
+            propertyValue: clicksPerBeat, minValue: 1, maxValue: 16),
+      ];
 
   MetronomeSettings copyWith({
     int tempo,

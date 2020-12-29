@@ -28,8 +28,8 @@ class NotifierMetronome with ChangeNotifier implements MetronomeInterface {
   }
 
   @override
-  void change(MetronomeSettings settings) {
-    metronomeImpl.change(settings);
+  void change(MetronomeSettings newSettings) {
+    metronomeImpl.change(newSettings);
 
     _notifyListenersIfIsPlayingValueChanged();
   }

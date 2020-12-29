@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../controllers/metronome_settings_controller.dart';
 import '../providers/metronome/metronome.dart';
 import '../providers/metronome/metronome_settings.dart';
 import '../providers/nearby/nearby_devices.dart';
 import '../providers/remote/remote_command.dart';
 import '../providers/remote/remote_synchronization.dart';
-import '../sound_manager.dart';
 import '../widgets/app_drawer.dart';
 import '../widgets/remote_mode_screen.dart';
 import '../widgets/visualization.dart';
@@ -21,59 +21,27 @@ class _SimpleMetronomeScreenState extends State<SimpleMetronomeScreen> {
   static const MinTempo = 10;
   static const MaxTempo = 300;
 
-  static const MinBeatsPerBar = 1;
-  static const MaxBeatsPerBar = 16;
-
-  static const MinClicksPerBeat = 1;
-  static const MaxClicksPerBeat = 16;
-
   static const MinTempoMultiplier = 0.5;
   static const DefaultTempoMultiplier = 1.0;
   static const MaxTempoMultiplier = 2.0;
 
-  bool _isPlaying = false;
-  int _currentTempo = 120;
-  int _beatsPerBar = 4;
-  int _clicksPerBeat = 1;
   double _tempoMultiplier = DefaultTempoMultiplier;
   Stopwatch _tapTempoStopwatch = Stopwatch();
+
+  final _controller = MetronomeSettingsController(MetronomeSettings(120, 4, 1));
 
   @override
   void initState() {
     super.initState();
 
     if (context.read(synchronizationProvider).isSynchronized) {
+      final settings = _controller.value;
+      final tempo = settings.tempo;
+      final beatsPerBar = settings.beatsPerBar;
       context.read(nearbyDevicesProvider).broadcastCommand(
-            RemoteCommand.setMetronomeData(_currentTempo, _beatsPerBar),
+            RemoteCommand.setMetronomeData(tempo, beatsPerBar),
           );
     }
-  }
-
-  int _decreaseBeatsPerBar() {
-    if (_beatsPerBar > MinBeatsPerBar) {
-      setState(() {
-        _beatsPerBar--;
-      });
-
-      _restartTapTempoStopwatch();
-
-      return _beatsPerBar;
-    }
-
-    return null;
-  }
-
-  int _increaseBeatsPerBar() {
-    if (_beatsPerBar < MaxBeatsPerBar) {
-      setState(() {
-        _beatsPerBar++;
-      });
-      _restartTapTempoStopwatch();
-
-      return _beatsPerBar;
-    }
-
-    return null;
   }
 
   void changeRemoteMetronomeProperty(
@@ -93,64 +61,8 @@ class _SimpleMetronomeScreenState extends State<SimpleMetronomeScreen> {
       }
     } else {
       changeFunction();
-      context.read(metronomeProvider).change(
-            MetronomeSettings(
-              _currentTempo,
-              _beatsPerBar,
-              _clicksPerBeat,
-            ),
-          );
+      context.read(metronomeProvider).change(_controller.value);
     }
-  }
-
-  void _decreaseClicksPerBeat() {
-    if (_clicksPerBeat > MinClicksPerBeat) {
-      setState(() {
-        _clicksPerBeat--;
-      });
-
-      _restartTapTempoStopwatch();
-    }
-  }
-
-  void _increaseClicksPerBeat() {
-    if (_clicksPerBeat < MaxClicksPerBeat) {
-      setState(() {
-        _clicksPerBeat++;
-      });
-
-      _restartTapTempoStopwatch();
-    }
-  }
-
-  void _restartTapTempoStopwatch() {
-    if (_tapTempoStopwatch.isRunning) {
-      _tapTempoStopwatch.stop();
-      _tapTempoStopwatch.reset();
-    }
-  }
-
-  int _changeTempoBy(int value) {
-    setState(() {
-      _currentTempo += value;
-    });
-
-    _restartTapTempoStopwatch();
-
-    return _currentTempo;
-  }
-
-  void _calculateCurrentTempo(Duration elapsed) {
-    setState(() {
-      final newTempo = 60 ~/ (elapsed.inMilliseconds / 1000);
-      _currentTempo = newTempo <= MaxTempo
-          ? newTempo >= MinTempo
-              ? newTempo
-              : MinTempo
-          : MaxTempo;
-    });
-
-    _restartTapTempoStopwatch();
   }
 
   Widget _buildChangeTempoButton(BuildContext context, int value) {
@@ -161,13 +73,28 @@ class _SimpleMetronomeScreenState extends State<SimpleMetronomeScreen> {
         padding: const EdgeInsets.all(0),
         onPressed: () {
           changeRemoteMetronomeProperty(
-            () => _changeTempoBy(value),
+            () {
+              _controller.changeTempoBy(value);
+              return _controller.value.tempo;
+            },
             RemoteCommandType.ChangeTempo,
           );
         },
         child: Text((value >= 0) ? '+$value' : '$value'),
         shape: Border.all(color: Colors.lightBlue),
       ),
+    );
+  }
+
+  Widget _buildWithController(
+      Widget Function(
+              BuildContext context, MetronomeSettings settings, Widget child)
+          builder,
+      {Widget child}) {
+    return ValueListenableBuilder(
+      valueListenable: _controller,
+      builder: builder,
+      child: child,
     );
   }
 
@@ -183,7 +110,10 @@ class _SimpleMetronomeScreenState extends State<SimpleMetronomeScreen> {
           children: [
             Padding(
               padding: const EdgeInsets.only(top: 20.0),
-              child: Visualization(_beatsPerBar),
+              child: _buildWithController(
+                (context, metronomeSettings, child) =>
+                    Visualization(metronomeSettings.beatsPerBar),
+              ),
             ),
             Column(
               children: [
@@ -219,9 +149,11 @@ class _SimpleMetronomeScreenState extends State<SimpleMetronomeScreen> {
                                         ? MinTempoMultiplier
                                         : DefaultTempoMultiplier;
                               });
-                              _restartTapTempoStopwatch();
+                              // _restartTapTempoStopwatch();
 
-                              return (_currentTempo * _tempoMultiplier).toInt();
+                              return (_controller.value.tempo *
+                                      _tempoMultiplier)
+                                  .toInt();
                             },
                             RemoteCommandType.ChangeTempo,
                           );
@@ -238,9 +170,11 @@ class _SimpleMetronomeScreenState extends State<SimpleMetronomeScreen> {
                                   : Colors.black,
                         ),
                       ),
-                      Text(
-                        '$_currentTempo',
-                        style: TextStyle(fontSize: 60),
+                      _buildWithController(
+                        (context, metronomeSettings, child) => Text(
+                          '${metronomeSettings.tempo}',
+                          style: TextStyle(fontSize: 60),
+                        ),
                       ),
                       GestureDetector(
                         onTap: () {
@@ -259,9 +193,11 @@ class _SimpleMetronomeScreenState extends State<SimpleMetronomeScreen> {
                                         ? MaxTempoMultiplier
                                         : DefaultTempoMultiplier;
                               });
-                              _restartTapTempoStopwatch();
+                              // _restartTapTempoStopwatch();
 
-                              return (_currentTempo * _tempoMultiplier).toInt();
+                              return (_controller.value.tempo *
+                                      _tempoMultiplier)
+                                  .toInt();
                             },
                             RemoteCommandType.ChangeTempo,
                           );
@@ -294,23 +230,19 @@ class _SimpleMetronomeScreenState extends State<SimpleMetronomeScreen> {
                 SizedBox(
                   height: 20,
                 ),
-                Slider(
-                  value: _currentTempo.toDouble(),
-                  min: MinTempo.toDouble(),
-                  max: MaxTempo.toDouble(),
-                  onChanged: (value) {
-                    changeRemoteMetronomeProperty(() {
-                      setState(() {
-                        _currentTempo = value.toInt();
-                      });
-                      _restartTapTempoStopwatch();
-                      return _currentTempo;
-                    }, RemoteCommandType.ChangeTempo);
-
-                    // context
-                    //     .read(metronomeProvider)
-                    //     .change(tempo: _currentTempo);
-                  },
+                _buildWithController(
+                  (context, metronomeSettings, child) => Slider(
+                    value: metronomeSettings.tempo.toDouble(),
+                    min: MinTempo.toDouble(),
+                    max: MaxTempo.toDouble(),
+                    onChanged: (value) {
+                      changeRemoteMetronomeProperty(() {
+                        _controller.changeTempo(value.toInt());
+                        // _restartTapTempoStopwatch();
+                        return _controller.value.tempo;
+                      }, RemoteCommandType.ChangeTempo);
+                    },
+                  ),
                 ),
               ],
             ),
@@ -334,7 +266,10 @@ class _SimpleMetronomeScreenState extends State<SimpleMetronomeScreen> {
                           GestureDetector(
                             onTap: () {
                               changeRemoteMetronomeProperty(
-                                _decreaseBeatsPerBar,
+                                () {
+                                  _controller.decreaseBeatsPerBarBy1();
+                                  return _controller.value.beatsPerBar;
+                                },
                                 RemoteCommandType.ChangeBeatsPerBar,
                               );
                             },
@@ -343,14 +278,19 @@ class _SimpleMetronomeScreenState extends State<SimpleMetronomeScreen> {
                               child: Text('-'),
                             ),
                           ),
-                          Text(
-                            '$_beatsPerBar',
-                            style: TextStyle(fontSize: 26),
+                          _buildWithController(
+                            (context, settings, child) => Text(
+                              '${settings.beatsPerBar}',
+                              style: TextStyle(fontSize: 26),
+                            ),
                           ),
                           GestureDetector(
                             onTap: () {
                               changeRemoteMetronomeProperty(
-                                _increaseBeatsPerBar,
+                                () {
+                                  _controller.increaseBeatsPerBarBy1();
+                                  return _controller.value.beatsPerBar;
+                                },
                                 RemoteCommandType.ChangeBeatsPerBar,
                               );
                             },
@@ -380,36 +320,30 @@ class _SimpleMetronomeScreenState extends State<SimpleMetronomeScreen> {
                         children: [
                           GestureDetector(
                             onTap: () {
-                              _decreaseClicksPerBeat();
+                              _controller.decreaseClicksPerBeatBy1();
 
-                              context.read(metronomeProvider).change(
-                                    MetronomeSettings(
-                                      _currentTempo,
-                                      _beatsPerBar,
-                                      _clicksPerBeat,
-                                    ),
-                                  );
+                              context
+                                  .read(metronomeProvider)
+                                  .change(_controller.value);
                             },
                             child: CircleAvatar(
                               radius: 13,
                               child: Text('-'),
                             ),
                           ),
-                          Text(
-                            '$_clicksPerBeat',
-                            style: TextStyle(fontSize: 26),
+                          _buildWithController(
+                            (context, settings, child) => Text(
+                              '${settings.clicksPerBeat}',
+                              style: TextStyle(fontSize: 26),
+                            ),
                           ),
                           GestureDetector(
                             onTap: () {
-                              _increaseClicksPerBeat();
+                              _controller.increaseClicksPerBeatBy1();
 
-                              context.read(metronomeProvider).change(
-                                    MetronomeSettings(
-                                      _currentTempo,
-                                      _beatsPerBar,
-                                      _clicksPerBeat,
-                                    ),
-                                  );
+                              context
+                                  .read(metronomeProvider)
+                                  .change(_controller.value);
                             },
                             child: CircleAvatar(
                               radius: 13,
@@ -436,12 +370,9 @@ class _SimpleMetronomeScreenState extends State<SimpleMetronomeScreen> {
                           if (!metronome.isPlaying) {
                             print('current time: ${DateTime.now()}');
 
-                            metronome.start(
-                              MetronomeSettings(
-                                  _currentTempo, _beatsPerBar, _clicksPerBeat),
-                            );
+                            metronome.start(_controller.value);
 
-                            _restartTapTempoStopwatch();
+                            // _restartTapTempoStopwatch();
                           } else {
                             metronome.stop();
                           }
@@ -473,29 +404,33 @@ class _SimpleMetronomeScreenState extends State<SimpleMetronomeScreen> {
                           clipBehavior: Clip.hardEdge,
                           child: GestureDetector(
                             onTapDown: (_) {
-                              if (context.read(metronomeProvider).isPlaying) {
-                                if (_tapTempoStopwatch.isRunning) {
-                                  _calculateCurrentTempo(
-                                      _tapTempoStopwatch.elapsed);
-                                  _tapTempoStopwatch.reset();
-                                }
+                              // if (context.read(metronomeProvider).isPlaying) {
+                              //   if (_tapTempoStopwatch.isRunning) {
+                              //     _calculateCurrentTempo(
+                              //         _tapTempoStopwatch.elapsed);
+                              //     _tapTempoStopwatch.reset();
+                              //   }
 
-                                setState(() {
-                                  _tapTempoStopwatch.start();
-                                });
+                              //   setState(() {
+                              //     _tapTempoStopwatch.start();
+                              //   });
 
-                                final soundManager = SoundManager();
-                                soundManager
-                                    .playSound(soundManager.mediumClickSoundId);
-                              }
+                              //   final soundManager = SoundManager();
+                              //   soundManager
+                              //       .playSound(soundManager.mediumClickSoundId);
+                              // }
                             },
                             child: CircleAvatar(
                               backgroundColor: Colors.transparent,
                               radius: 28,
-                              child: Icon(
-                                Icons.touch_app,
-                                color: _isPlaying ? Colors.grey : Colors.white,
-                                size: 35,
+                              child: Consumer(
+                                builder: (context, watch, child) => Icon(
+                                  Icons.touch_app,
+                                  color: watch(metronomeProvider).isPlaying
+                                      ? Colors.grey
+                                      : Colors.white,
+                                  size: 35,
+                                ),
                               ),
                             ),
                           ),
