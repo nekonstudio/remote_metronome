@@ -4,6 +4,7 @@ class Setlist {
   final String id = DateTime.now().toString();
   String name;
   final List<Track> _tracks = [
+    Track.simple('test 1', 100, 4, 1),
     Track(
         name: 'test',
         isComplex: true,
@@ -30,6 +31,11 @@ class Setlist {
               tempo: 120),
         ]),
     Track.simple('test 2', 120, 4, 1),
+    Track.simple('test 3', 159, 4, 1),
+    Track.simple('test 4', 112, 3, 1),
+    Track.simple('test 5', 112, 5, 1),
+    Track.simple('test 6', 112, 6, 1),
+    Track.simple('test 4', 112, 7, 1),
   ];
 
   Setlist(

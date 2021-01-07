@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../controllers/metronome_settings_controller.dart';
-import '../providers/metronome/metronome.dart';
+import '../providers/metronome/metronome_base.dart';
 import '../providers/metronome/metronome_settings.dart';
 import '../providers/nearby/nearby_devices.dart';
 import '../providers/remote/remote_command.dart';

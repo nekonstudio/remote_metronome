@@ -288,6 +288,8 @@ public class MainActivity extends FlutterActivity {
 
         currentBeatsPerBar = 1;
         currentClickPerBeat = 1;
+
+        eventStream.success(0);
         Log.d(TAG, "stop: " + currentBeatsPerBar);
     }
 }

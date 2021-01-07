@@ -27,7 +27,7 @@ class SavedSetlistsScreen extends ConsumerWidget
             final setlist = setlists[index];
             return InkWell(
               onTap: () {
-                Get.to(SetlistScreen(), arguments: setlist.id);
+                Get.to(SetlistScreen(setlist));
               },
               onTapDown: (details) => storeTapPosition(details),
               onLongPress: () => showPopupMenu(context, index,

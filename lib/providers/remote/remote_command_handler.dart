@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../metronome/metronome.dart';
+import '../metronome/metronome_base.dart';
 import '../metronome/metronome_settings.dart';
 import 'remote_command.dart';
 import 'remote_metronome_screen_controller.dart';

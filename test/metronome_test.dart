@@ -2,14 +2,14 @@ import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:metronom/providers/metronome/metronome_base.dart';
 import 'package:metronom/providers/metronome/metronome.dart';
-import 'package:metronom/providers/metronome/metronome_impl.dart';
 import 'package:metronom/providers/metronome/metronome_settings.dart';
 import 'package:metronom/providers/metronome/notifier_metronome.dart';
 import 'package:mockito/mockito.dart';
 
 // class MockMetronomeImpl extends Mock implements Metronome {}
-class MockMetronomeImpl extends Metronome {
+class MockMetronomeImpl extends MetronomeBase {
   @override
   void onStart(MetronomeSettings settings) {
     // TODO: implement onStart
@@ -77,7 +77,7 @@ void main() {
     });
 
     test('settings are correctly saved after start', () {
-      final Metronome metronome = MockMetronomeImpl();
+      final MetronomeBase metronome = MockMetronomeImpl();
 
       final settings = MetronomeSettings(120, 4, 1);
       metronome.start(settings);
@@ -94,7 +94,7 @@ void main() {
     });
 
     test('isPlaying flag is set to true if change is called after start', () {
-      final Metronome metronome = MockMetronomeImpl();
+      final MetronomeBase metronome = MockMetronomeImpl();
 
       final settings = MetronomeSettings(120, 4, 1);
       metronome.start(settings);
@@ -104,7 +104,7 @@ void main() {
     });
 
     test('isPlaying flag is set to false after stop is called', () {
-      final Metronome metronome = MockMetronomeImpl();
+      final MetronomeBase metronome = MockMetronomeImpl();
 
       metronome.stop();
 
@@ -112,7 +112,7 @@ void main() {
     });
 
     test('isPlaying flag is set to false when stop is called after start', () {
-      final Metronome metronome = MockMetronomeImpl();
+      final MetronomeBase metronome = MockMetronomeImpl();
 
       metronome.start(MetronomeSettings(120, 4, 1));
       metronome.stop();

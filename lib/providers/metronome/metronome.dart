@@ -1,95 +1,67 @@
 import 'dart:async';
 
-import 'package:flutter/cupertino.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter/services.dart';
 
-import '../remote/remote_synchronization.dart';
-import 'metronome_impl.dart';
-import 'metronome_interface.dart';
+import 'metronome_base.dart';
 import 'metronome_settings.dart';
-import 'notifier_metronome.dart';
-import 'remote_synchronized_metronome_impl.dart';
 
-abstract class Metronome implements MetronomeInterface {
-  MetronomeSettings _settings;
-  int _currentBarBeat;
-  bool _isPlaying = false;
-  StreamSubscription<dynamic> _currentBarBeatSubscription;
+class Metronome extends MetronomeBase {
+  static Metronome _instance;
 
-  MetronomeSettings get settings => _settings;
-  bool get isPlaying => _isPlaying;
-  int get currentBarBeat => _currentBarBeat;
-
-  @override
-  void start(MetronomeSettings settings) {
-    _performIfIsPlayingEquals(false, () => _setupAndStart(settings));
-  }
-
-  @override
-  void change(MetronomeSettings newSettings) {
-    _performIfIsPlayingEquals(true, () => _change(newSettings));
-  }
-
-  @override
-  void stop() {
-    _performIfIsPlayingEquals(true, _resetAndStop);
-  }
-
-  void _performIfIsPlayingEquals(bool value, Function action) {
-    if (value == _isPlaying) {
-      action();
+  factory Metronome() {
+    if (_instance == null) {
+      _instance = Metronome._();
     }
+    return _instance;
   }
 
-  @protected
-  void onStart(MetronomeSettings settings);
-  @protected
-  void onChange(MetronomeSettings settings);
-  @protected
-  void onStop();
-  @protected
-  Stream<dynamic> getCurrentBarBeatStream();
+  Metronome._();
 
-  void _setupAndStart(MetronomeSettings settings) {
-    _settings = settings;
-    _isPlaying = true;
+  static const _metronomePlatformChannel =
+      const MethodChannel('com.example.metronom/metronom');
 
-    _currentBarBeatSubscription = getCurrentBarBeatStream()
-        .listen((barBeat) => _currentBarBeat = barBeat);
+  final Stream<dynamic> currentBarBeatStream =
+      const EventChannel('com.example.metronom/barBeatChannel')
+          .receiveBroadcastStream();
 
-    onStart(_settings);
+  @override
+  void onStart(MetronomeSettings settings) {
+    _invokePlatformMethod(
+      'start',
+      {
+        'tempo': settings.tempo,
+        'beatsPerBar': settings.beatsPerBar,
+        'clicksPerBeat': settings.clicksPerBeat,
+        'tempoMultiplier': 1.0 // TODO: remove from platform implementation
+      },
+    );
   }
 
-  void _change(MetronomeSettings newSettings) {
-    _settings = newSettings;
-
-    onChange(_settings);
+  @override
+  void onChange(MetronomeSettings settings) {
+    _invokePlatformMethod(
+      'smoothChange',
+      {
+        'tempo': settings.tempo,
+        'beatsPerBar': settings.beatsPerBar,
+        'clicksPerBeat': settings.clicksPerBeat,
+        'tempoMultiplier': 1.0 // TODO: remove from platform implementation
+      },
+    );
   }
 
-  void _resetAndStop() {
-    _settings = null;
-    _isPlaying = false;
-    _currentBarBeat = 0;
+  @override
+  void onStop() {
+    _invokePlatformMethod('stop');
+  }
 
-    _currentBarBeatSubscription.cancel();
+  void _invokePlatformMethod(String methodName,
+      [Map<String, dynamic> parameters]) {
+    _metronomePlatformChannel.invokeMethod(methodName, parameters);
+  }
 
-    onStop();
+  @override
+  Stream<dynamic> getCurrentBarBeatStream() {
+    return currentBarBeatStream;
   }
 }
-
-final metronomeProvider = ChangeNotifierProvider<NotifierMetronome>(
-  (ref) {
-    final deviceMode = ref.watch(synchronizationProvider).deviceMode;
-    final metronomeImpl = deviceMode == DeviceSynchronizationMode.Host
-        ? RemoteSynchronizedMetronomeImpl(ref.read(synchronizationProvider))
-        : MetronomeImpl();
-
-    return NotifierMetronome(metronomeImpl);
-  },
-);
-
-final isMetronomePlayingProvider =
-    Provider((ref) => ref.watch(metronomeProvider).isPlaying ? true : false);
-
-final currentBeatBarProvider =
-    Provider((ref) => ref.watch(metronomeProvider).currentBarBeat);
