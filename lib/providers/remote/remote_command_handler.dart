@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../metronome/metronome_base.dart';
@@ -16,40 +18,36 @@ class RemoteCommandHandler {
 
     final synchronization = providerReader(synchronizationProvider);
 
+    print('jsonParams: ${command.jsonParameters}');
+
     switch (command.type) {
       case RemoteCommandType.ClockSyncRequest:
-        synchronization.onClockSyncRequest(command.parameters.first);
+        final hostStartTime = json.decode(command.jsonParameters) as int;
+        synchronization.onClockSyncRequest(hostStartTime);
         break;
 
       case RemoteCommandType.ClockSyncResponse:
-        final startTime = DateTime.fromMillisecondsSinceEpoch(
-            int.parse(command.parameters[0]));
-        final clientResponseTime = DateTime.fromMillisecondsSinceEpoch(
-            int.parse(command.parameters[1]));
+        final parameters = json.decode(command.jsonParameters) as List<dynamic>;
+        final startTime = DateTime.fromMillisecondsSinceEpoch(parameters[0]);
+        final clientResponseTime =
+            DateTime.fromMillisecondsSinceEpoch(parameters[1]);
         synchronization.onClockSyncResponse(startTime, clientResponseTime);
         break;
 
       case RemoteCommandType.ClockSyncSuccess:
-        final remoteTimeDifference = int.parse(command.parameters[0]);
+        final remoteTimeDifference = json.decode(command.jsonParameters) as int;
         synchronization.onClockSyncSuccess(remoteTimeDifference);
         break;
 
       case RemoteCommandType.StartMetronome:
-        final tempo = int.parse(command.parameters[0]);
-        final beats = int.parse(command.parameters[1]);
-        final clicks = int.parse(command.parameters[2]);
+        final metronomeSettings =
+            MetronomeSettings.fromJson(command.jsonParameters);
         final hostStartTime =
             DateTime.fromMillisecondsSinceEpoch(command.timestamp);
 
         synchronization.hostSynchonizedAction(
           hostStartTime,
-          () => providerReader(metronomeProvider).start(
-            MetronomeSettings(
-              tempo,
-              beats,
-              clicks,
-            ),
-          ),
+          () => providerReader(metronomeProvider).start(metronomeSettings),
         );
         break;
 
@@ -57,22 +55,12 @@ class RemoteCommandHandler {
         providerReader(metronomeProvider).stop();
         break;
 
-      case RemoteCommandType.SetMetronomeData:
-        final tempo = int.parse(command.parameters[0]);
-        final beats = int.parse(command.parameters[1]);
+      case RemoteCommandType.SetMetronomeSettings:
+        final metronomeSettings =
+            MetronomeSettings.fromJson(command.jsonParameters);
+
         providerReader(remoteMetronomeScreenControllerProvider)
-            .initialize(tempo, beats);
-        break;
-
-      case RemoteCommandType.ChangeTempo:
-        final tempo = int.parse(command.parameters[0]);
-        providerReader(remoteMetronomeScreenControllerProvider).tempo = tempo;
-        break;
-
-      case RemoteCommandType.ChangeBeatsPerBar:
-        final beatsPerBar = int.parse(command.parameters[0]);
-        providerReader(remoteMetronomeScreenControllerProvider).beatsPerBar =
-            beatsPerBar;
+            .setMetronomeSettings(metronomeSettings);
         break;
 
       default:

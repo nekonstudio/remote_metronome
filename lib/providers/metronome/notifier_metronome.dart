@@ -7,58 +7,49 @@ import 'metronome_interface.dart';
 import 'metronome_settings.dart';
 
 class NotifierMetronome with ChangeNotifier implements MetronomeInterface {
-  final Metronome metronome = Metronome();
+  final MetronomeInterface metronome;
+  StreamSubscription<dynamic> _currentBarBeatStreamSubscription;
 
-  NotifierMetronome() {
-    _previousIsPlayingValue = metronome.isPlaying;
-
+  NotifierMetronome(this.metronome) {
     _subscribeToBarBeatChange();
   }
 
-  bool _previousIsPlayingValue;
-  StreamSubscription<dynamic> _currentBarBeatStreamSubscription;
+  @override
+  void dispose() {
+    _currentBarBeatStreamSubscription.cancel();
 
+    print('NotifierMetronome dispose');
+
+    super.dispose();
+  }
+
+  @override
   bool get isPlaying => metronome.isPlaying;
+
+  @override
   int get currentBarBeat => metronome.currentBarBeat;
 
   @override
   void start(MetronomeSettings settings) {
     metronome.start(settings);
-
-    _notifyListenersIfIsPlayingValueChanged();
   }
 
   @override
   void change(MetronomeSettings newSettings) {
     metronome.change(newSettings);
-
-    _notifyListenersIfIsPlayingValueChanged();
   }
 
   @override
   void stop() {
     metronome.stop();
-
-    _notifyListenersIfIsPlayingValueChanged();
-  }
-
-  void _notifyListenersIfIsPlayingValueChanged() {
-    if (_previousIsPlayingValue != metronome.isPlaying) {
-      _previousIsPlayingValue = metronome.isPlaying;
-      notifyListeners();
-    }
   }
 
   void _subscribeToBarBeatChange() {
-    final stream = metronome.getCurrentBarBeatStream();
+    final stream = Metronome().getCurrentBarBeatStream();
     _currentBarBeatStreamSubscription = stream.listen(_onBarBeatChange);
   }
 
   void _onBarBeatChange(_) {
     notifyListeners();
-  }
-
-  void _cancelBarBeatSubscription() {
-    _currentBarBeatStreamSubscription.cancel();
   }
 }

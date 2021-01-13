@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:get/get.dart';
+import 'package:metronom/providers/metronome/metronome_settings.dart';
 import 'package:swipedetector/swipedetector.dart';
 import 'package:toggle_switch/toggle_switch.dart';
 
@@ -78,9 +79,11 @@ class _AddEditTrackScreenState extends State<AddEditTrackScreen> {
         ? Track.complex(value, _sections)
         : Track.simple(
             value,
-            _metronomeKey.currentState.currentTempo,
-            _metronomeKey.currentState.beatsPerBar,
-            _metronomeKey.currentState.clicksPerBeat,
+            MetronomeSettings(
+              _metronomeKey.currentState.currentTempo,
+              _metronomeKey.currentState.beatsPerBar,
+              _metronomeKey.currentState.clicksPerBeat,
+            ),
           );
 
     final setlistManager = context.read(setlistManagerProvider);
@@ -195,10 +198,7 @@ class _AddEditTrackScreenState extends State<AddEditTrackScreen> {
                                 _isEditingMode
                                     ? _isComplexTrack
                                         ? _metronomePanel
-                                        : _metronomePanel.setup(
-                                            _track.tempo,
-                                            _track.beatsPerBar,
-                                            _track.clicksPerBeat)
+                                        : _metronomePanel.setup(_track.settings)
                                     : _metronomePanel,
                               ],
                             ),
@@ -277,7 +277,7 @@ class _AddEditTrackScreenState extends State<AddEditTrackScreen> {
                                                     title: Text(
                                                         _sections[index].title),
                                                     subtitle: Text(
-                                                        '${_sections[index].tempo} BPM'),
+                                                        '${_sections[index].settings.tempo} BPM'),
                                                     trailing: CircleAvatar(
                                                       backgroundColor:
                                                           Colors.transparent,
@@ -348,7 +348,7 @@ class _SectionForm extends StatelessWidget {
   static final _formKey = GlobalKey<FormState>();
   static final _metronomeKey = GlobalKey<MetronomePanelState>();
   MetronomePanel _metronomePanel = MetronomePanel(key: _metronomeKey);
-  Section _newSection = Section();
+  Section _newSection = Section(title: null, settings: null, barsCount: null);
 
   void _saveForm(BuildContext context) {
     if (!_formKey.currentState.validate()) {
@@ -357,9 +357,11 @@ class _SectionForm extends StatelessWidget {
 
     _formKey.currentState.save();
 
-    _newSection.tempo = _metronomeKey.currentState.currentTempo;
-    _newSection.beatsPerBar = _metronomeKey.currentState.beatsPerBar;
-    _newSection.clicksPerBeat = _metronomeKey.currentState.clicksPerBeat;
+    _newSection.settings = MetronomeSettings(
+      _metronomeKey.currentState.currentTempo,
+      _metronomeKey.currentState.beatsPerBar,
+      _metronomeKey.currentState.clicksPerBeat,
+    );
 
     if (existingSection == null) {
       sectionHandler(_newSection);
@@ -385,8 +387,7 @@ class _SectionForm extends StatelessWidget {
             ),
           ),
           existingSection != null
-              ? _metronomePanel.setup(existingSection.tempo,
-                  existingSection.beatsPerBar, existingSection.clicksPerBeat)
+              ? _metronomePanel.setup(existingSection.settings)
               : _metronomePanel,
           Form(
             key: _formKey,

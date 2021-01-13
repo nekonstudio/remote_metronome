@@ -26,7 +26,8 @@ class RemoteSynchronization with ChangeNotifier {
   bool get isSynchronized => _mode != DeviceSynchronizationMode.None;
 
   Future<void> synchronize() async {
-    sendRemoteCommand(RemoteCommand.clockSyncRequest(DateTime.now()));
+    sendRemoteCommand(
+        RemoteCommand.clockSyncRequest(DateTime.now().millisecondsSinceEpoch));
   }
 
   void end() {
@@ -34,12 +35,12 @@ class RemoteSynchronization with ChangeNotifier {
     notifyListeners();
   }
 
-  void onClockSyncRequest(String hostStartTime) {
+  void onClockSyncRequest(int hostStartTime) {
     print(
-        'Host start time: ${DateTime.fromMillisecondsSinceEpoch(int.parse(hostStartTime))}');
+        'Host start time: ${DateTime.fromMillisecondsSinceEpoch(hostStartTime)}');
     print('Client start time: ${DateTime.now()}');
-    sendRemoteCommand(
-        RemoteCommand.clockSyncResponse(hostStartTime, DateTime.now()));
+    sendRemoteCommand(RemoteCommand.clockSyncResponse(
+        hostStartTime, DateTime.now().millisecondsSinceEpoch));
   }
 
   void onClockSyncResponse(DateTime startTime, DateTime clientResponseTime) {
@@ -52,7 +53,7 @@ class RemoteSynchronization with ChangeNotifier {
       print('To big latency, trying again');
 
       sendRemoteCommand(
-        RemoteCommand.clockSyncRequest(DateTime.now()),
+        RemoteCommand.clockSyncRequest(DateTime.now().millisecondsSinceEpoch),
       );
     } else {
       print('Start time: $startTime');

@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:get/get.dart';
 import 'package:metronom/models/setlist.dart';
+import 'package:metronom/providers/remote/remote_synchronization.dart';
 import 'package:metronom/providers/setlist_player/notifier_setlist_player.dart';
+import 'package:metronom/providers/setlist_player/remote_synchronized_notifier_setlist_player.dart';
 import 'package:metronom/providers/setlist_player/setlist_player.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
@@ -16,12 +18,13 @@ import '../../widgets/play_simple_track_panel.dart';
 import '../../widgets/remote_mode_screen.dart';
 import 'add_edit_track_screen.dart';
 
-final _setlistPlayerProvider = ChangeNotifierProvider.autoDispose
-    // .family<NotifierSetlistPlayer, Map<String, dynamic>>(
-    // (ref, params) => NotifierSetlistPlayer(params['setlist'],
-    //     onTrackChanged: params['onTrackChanged']),
-    .family<NotifierSetlistPlayer, Setlist>(
-  (ref, setlist) => NotifierSetlistPlayer(setlist),
+final _setlistPlayerProvider =
+    ChangeNotifierProvider.autoDispose.family<NotifierSetlistPlayer, Setlist>(
+  (ref, setlist) => ref.watch(synchronizationProvider).deviceMode ==
+          DeviceSynchronizationMode.Host
+      ? RemoteSynchronizedNotifierSetlistPlayer(
+          ref.read(synchronizationProvider), setlist)
+      : NotifierSetlistPlayer(setlist),
 );
 
 class SetlistScreen extends ConsumerWidget with ListItemLongPressPopupMenu {
@@ -70,6 +73,8 @@ class SetlistScreen extends ConsumerWidget with ListItemLongPressPopupMenu {
 
   @override
   Widget build(BuildContext context, ScopedReader watch) {
+    watch(setlistManagerProvider);
+
     final tracks = setlist.tracks;
 
     final player = watch(_setlistPlayerProvider(setlist));
@@ -155,7 +160,7 @@ class SetlistScreen extends ConsumerWidget with ListItemLongPressPopupMenu {
                                   ),
                                   subtitle: Text(track.isComplex
                                       ? 'Złożony'
-                                      : '${track.tempo} BPM'),
+                                      : '${track.settings.tempo} BPM'),
                                 ),
                               ),
                               if (index < setlist.tracksCount - 1)

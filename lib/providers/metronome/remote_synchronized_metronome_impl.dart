@@ -1,36 +1,45 @@
-// import '../remote/remote_command.dart';
-// import '../remote/remote_synchronization.dart';
-// import 'metronome.dart';
-// import 'metronome_settings.dart';
+import 'package:metronom/providers/metronome/metronome_interface.dart';
 
-// class RemoteSynchronizedMetronomeImpl extends Metronome {
-//   final RemoteSynchronization synchronization;
+import '../remote/remote_command.dart';
+import '../remote/remote_synchronization.dart';
+import 'metronome.dart';
+import 'metronome_settings.dart';
 
-//   RemoteSynchronizedMetronomeImpl(this.synchronization);
+class RemoteSynchronizedMetronome implements MetronomeInterface {
+  final RemoteSynchronization synchronization;
+  final Metronome metronome;
 
-//   @override
-//   void onStart(MetronomeSettings settings) {
-//     print('Remote Synchronized Metronome start!');
+  RemoteSynchronizedMetronome(this.synchronization, this.metronome);
 
-//     synchronization.clientSynchonizedAction(
-//       RemoteCommand.startMetronome(
-//         settings.tempo,
-//         settings.beatsPerBar,
-//         settings.clicksPerBeat,
-//         1.0, // TODO: remove
-//       ),
-//       () => super.onStart(settings),
-//     );
-//   }
+  @override
+  void start(MetronomeSettings settings) {
+    print('Remote Synchronized Metronome start!');
 
-//   @override
-//   void onStop() {
-//     print('remote stop');
+    synchronization.clientSynchonizedAction(
+      RemoteCommand.startMetronome(settings),
+      () => metronome.start(settings),
+    );
+  }
 
-//     synchronization.clientSynchonizedAction(
-//       RemoteCommand.stopMetronome(),
-//       () => super.onStop(),
-//       instant: true,
-//     );
-//   }
-// }
+  @override
+  void stop() {
+    print('remote stop');
+
+    synchronization.clientSynchonizedAction(
+      RemoteCommand.stopMetronome(),
+      () => metronome.stop(),
+      instant: true,
+    );
+  }
+
+  @override
+  void change(MetronomeSettings newSettings) {
+    // do nothing on remote metronome change
+  }
+
+  @override
+  int get currentBarBeat => metronome.currentBarBeat;
+
+  @override
+  bool get isPlaying => metronome.isPlaying;
+}

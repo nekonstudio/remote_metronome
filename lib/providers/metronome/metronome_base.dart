@@ -17,7 +17,11 @@ abstract class MetronomeBase implements MetronomeInterface {
   StreamSubscription<dynamic> _currentBarBeatSubscription;
 
   MetronomeSettings get settings => _settings;
+
+  @override
   bool get isPlaying => _isPlaying;
+
+  @override
   int get currentBarBeat => _currentBarBeat;
 
   @override
@@ -79,15 +83,14 @@ abstract class MetronomeBase implements MetronomeInterface {
 
 final metronomeProvider = ChangeNotifierProvider<NotifierMetronome>(
   (ref) {
-    // final deviceMode = ref.watch(synchronizationProvider).deviceMode;
-    // final metronomeImpl = deviceMode == DeviceSynchronizationMode.Host
-    //     ? RemoteSynchronizedMetronomeImpl(ref.read(synchronizationProvider))
-    //     : Metronome();
+    final deviceMode = ref.watch(synchronizationProvider).deviceMode;
+    final metronomeImpl = Metronome();
+    final metronome = deviceMode == DeviceSynchronizationMode.Host
+        ? RemoteSynchronizedMetronome(
+            ref.read(synchronizationProvider), metronomeImpl)
+        : metronomeImpl;
 
-    // final metronomeImpl = Metronome();
-
-    // return NotifierMetronome(metronomeImpl);
-    return NotifierMetronome();
+    return NotifierMetronome(metronome);
   },
 );
 

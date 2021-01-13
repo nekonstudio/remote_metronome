@@ -15,14 +15,14 @@ class PlaySimpleTrackPanel extends StatelessWidget {
       children: [
         Expanded(
           flex: 3,
-          child: Visualization(track.beatsPerBar),
+          child: Visualization(track.settings.beatsPerBar),
         ),
         Expanded(
           flex: 3,
           child: Container(
             alignment: Alignment.center,
             child: Text(
-              '${track.tempo}',
+              '${track.settings.tempo}',
               textAlign: TextAlign.center,
               style: TextStyle(fontSize: 60),
             ),

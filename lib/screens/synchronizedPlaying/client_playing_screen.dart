@@ -76,17 +76,23 @@ class _RemoteMetronomePanel extends ConsumerWidget {
       return Center(child: CircularProgressIndicator());
     }
 
-    return Column(
-      mainAxisSize: MainAxisSize.max,
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Visualization(controller.beatsPerBar),
-        Text(
-          controller.tempo.toString(),
-          style: TextStyle(fontSize: 60),
-          textAlign: TextAlign.center,
-        ),
-      ],
+    return Padding(
+      padding: const EdgeInsets.only(top: 50),
+      child: Column(
+        // mainAxisSize: MainAxisSize.max,
+        // mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Visualization(controller.metronomeSettings.beatsPerBar),
+          SizedBox(
+            height: 50,
+          ),
+          Text(
+            controller.metronomeSettings.tempo.toString(),
+            style: TextStyle(fontSize: 60),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
     );
   }
 }

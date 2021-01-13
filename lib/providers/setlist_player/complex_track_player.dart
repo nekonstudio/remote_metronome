@@ -31,10 +31,7 @@ class ComplexTrackPlayer extends TrackPlayer {
       _handleCurrentBarBeatChange(currentBarBeat as int);
     });
 
-    Metronome().start(
-      MetronomeSettings(_currentSection.tempo, _currentSection.beatsPerBar,
-          _currentSection.clicksPerBeat),
-    );
+    Metronome().start(_currentSection.settings);
   }
 
   @override
@@ -66,22 +63,20 @@ class ComplexTrackPlayer extends TrackPlayer {
   void _handleCurrentBarBeatChange(int currentBarBeat) {
     if (currentBarBeat == 0) return;
 
-    _changeTempoOnLastBarBeat(currentBarBeat);
+    _changeToNextSectionOnLastBarBeat(currentBarBeat);
     _updateSectionControlData(currentBarBeat);
     _stopIfEndOfSections();
   }
 
-  void _changeTempoOnLastBarBeat(int currentBarBeat) {
+  void _changeToNextSectionOnLastBarBeat(int currentBarBeat) {
     final isNotLastSection = _currentSectionIndex < track.sections.length - 1;
     final isLastSectionBar = _currentSectionBar == _currentSection.barsCount;
-    final isLastBarBeat = currentBarBeat == _currentSection.beatsPerBar;
+    final isLastBarBeat =
+        currentBarBeat == _currentSection.settings.beatsPerBar;
 
     if (isNotLastSection && isLastSectionBar && isLastBarBeat) {
       final nextSection = track.sections[_currentSectionIndex + 1];
-      Metronome().change(
-        MetronomeSettings(nextSection.tempo, nextSection.beatsPerBar,
-            nextSection.clicksPerBeat),
-      );
+      Metronome().change(nextSection.settings);
     }
   }
 
@@ -108,9 +103,7 @@ class ComplexTrackPlayer extends TrackPlayer {
   void _onSectionChange() {
     _currentSectionBar = 1;
 
-    final metronomeSettings = MetronomeSettings(_currentSection.tempo,
-        _currentSection.beatsPerBar, _currentSection.clicksPerBeat);
-    Metronome().change(metronomeSettings);
+    Metronome().change(_currentSection.settings);
   }
 
   void _resetSectionDataToDefaults() {

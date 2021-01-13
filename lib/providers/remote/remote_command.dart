@@ -1,75 +1,63 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
+import 'package:metronom/providers/metronome/metronome_settings.dart';
+
 enum RemoteCommandType {
   ClockSyncRequest,
   ClockSyncResponse,
   ClockSyncSuccess,
   StartMetronome,
   StopMetronome,
-  SetMetronomeData,
-  ChangeBeatsPerBar,
-  ChangeTempo,
+  SetMetronomeSettings,
   LatencyTest,
 }
 
 class RemoteCommand {
   final RemoteCommandType type;
-  final List<String> parameters;
+  final String jsonParameters;
   int timestamp;
 
-  RemoteCommand(this.type, {this.parameters, this.timestamp}) {
+  RemoteCommand(this.type, {this.jsonParameters, this.timestamp}) {
     timestamp ??= DateTime.now().millisecondsSinceEpoch;
     print(
         'RemoteCommand(): timestamp: ${DateTime.fromMillisecondsSinceEpoch(timestamp)}');
   }
 
-  RemoteCommand.clockSyncRequest(DateTime startTime)
-      : this(RemoteCommandType.ClockSyncRequest,
-            parameters: [startTime.millisecondsSinceEpoch.toString()]);
+  RemoteCommand.clockSyncRequest(int startTime)
+      : this(
+          RemoteCommandType.ClockSyncRequest,
+          jsonParameters: json.encode(startTime),
+        );
 
-  RemoteCommand.clockSyncResponse(String startTime, DateTime clientTime)
+  RemoteCommand.clockSyncResponse(int startTime, int clientTime)
       : this(
           RemoteCommandType.ClockSyncResponse,
-          parameters: [
+          jsonParameters: json.encode([
             startTime,
-            clientTime.millisecondsSinceEpoch.toString(),
-          ],
+            clientTime,
+          ]),
         );
 
   RemoteCommand.clockSyncSuccess(int timeDiff)
-      : this(RemoteCommandType.ClockSyncSuccess,
-            parameters: [timeDiff.toString()]);
+      : this(
+          RemoteCommandType.ClockSyncSuccess,
+          jsonParameters: json.encode(timeDiff),
+        );
 
-  RemoteCommand.startMetronome(
-      int tempo, int beatsPerBar, int clicksPerBeat, double tempoMultiplier)
+  RemoteCommand.startMetronome(MetronomeSettings settings)
       : this(
           RemoteCommandType.StartMetronome,
-          parameters: [
-            tempo.toString(),
-            beatsPerBar.toString(),
-            clicksPerBeat.toString(),
-            tempoMultiplier.toString(),
-          ],
+          jsonParameters: settings.toJson(),
         );
 
   RemoteCommand.stopMetronome() : this(RemoteCommandType.StopMetronome);
 
-  RemoteCommand.setMetronomeData(int tempo, int beatsPerBar)
+  RemoteCommand.setMetronomeSettings(MetronomeSettings settings)
       : this(
-          RemoteCommandType.SetMetronomeData,
-          parameters: [
-            tempo.toString(),
-            beatsPerBar.toString(),
-          ],
+          RemoteCommandType.SetMetronomeSettings,
+          jsonParameters: settings.toJson(),
         );
-
-  RemoteCommand.changeBeatsPerBar(int value)
-      : this(RemoteCommandType.ChangeBeatsPerBar,
-            parameters: [value.toString()]);
-
-  RemoteCommand.changeTempo(int value)
-      : this(RemoteCommandType.ChangeTempo, parameters: [value.toString()]);
 
   static RemoteCommand fromRawData(Uint8List data) {
     final str = utf8.decode(data);
@@ -78,50 +66,27 @@ class RemoteCommand {
 
     final command =
         _enumFromString<RemoteCommandType>(values[0], RemoteCommandType.values);
-    var params = values[1].split(',');
-    if (params.first.isEmpty) {
-      params = [];
-    }
+
+    final jsonParams = values[1];
+
+    print('jsonParams robienie: $jsonParams');
+
     final timestamp = int.parse(values[2]);
 
-    final isValid = (command != null && params != null && timestamp != null);
+    final isValid =
+        (command != null && jsonParams != null && timestamp != null);
 
     return isValid
-        ? RemoteCommand(command, parameters: params, timestamp: timestamp)
+        ? RemoteCommand(command,
+            jsonParameters: jsonParams, timestamp: timestamp)
         : null;
-  }
-
-  dynamic get parsedParameters {
-    switch (type) {
-      case RemoteCommandType.ClockSyncRequest:
-        return DateTime.fromMillisecondsSinceEpoch(int.parse(parameters.first));
-      case RemoteCommandType.ClockSyncResponse:
-        // [0: Host sync start time, 1: Client response time]
-        return List.generate(
-          parameters.length,
-          (index) => DateTime.fromMillisecondsSinceEpoch(
-            int.parse(parameters[index]),
-          ),
-        );
-      default:
-        return null;
-    }
   }
 
   Uint8List get bytes {
     final buffer = StringBuffer();
     buffer.write(_enumToString(type));
     buffer.write(';');
-
-    if (parameters != null) {
-      for (var i = 0; i < parameters.length; ++i) {
-        buffer.write(parameters[i]);
-        if (i < parameters.length - 1) {
-          buffer.write(',');
-        }
-      }
-    }
-
+    buffer.write(jsonParameters ?? '');
     buffer.write(';');
     buffer.write(timestamp ?? 0);
 

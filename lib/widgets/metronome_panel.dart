@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:metronom/providers/metronome/metronome_settings.dart';
 
 class MetronomePanel extends StatefulWidget {
   MetronomePanel({Key key}) : super(key: key);
@@ -7,10 +8,10 @@ class MetronomePanel extends StatefulWidget {
   int _beatsPerBar = 4;
   int _clicksPerBeat = 1;
 
-  MetronomePanel setup(int tempo, int beatsPerBar, int clicksPerBeat) {
-    _tempo = tempo;
-    _beatsPerBar = beatsPerBar;
-    _clicksPerBeat = clicksPerBeat;
+  MetronomeSettings _settings = MetronomeSettings(120, 4, 1);
+
+  MetronomePanel setup(MetronomeSettings settings) {
+    _settings = settings;
     return this;
   }
 

@@ -55,16 +55,6 @@ class SetlistManager with ChangeNotifier {
     getSetlist(setlistId).deleteTrack(index);
     notifyListeners();
   }
-
-  // void selectNextTrackSection(String setlistId, String trackId) {
-  //   getSetlist(setlistId).getTrack(trackId).selectNextSection();
-  //   notifyListeners();
-  // }
-
-  // void selectPreviousTrackSection(String setlistId, String trackId) {
-  //   getSetlist(setlistId).getTrack(trackId).selectPreviousSection();
-  //   notifyListeners();
-  // }
 }
 
 final setlistManagerProvider =

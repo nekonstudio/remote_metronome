@@ -37,14 +37,14 @@ class _PlayComplexTrackPanelState extends State<PlayComplexTrackPanel> {
       children: [
         Expanded(
           flex: 3,
-          child: Visualization(currentSection.beatsPerBar),
+          child: Visualization(currentSection.settings.beatsPerBar),
         ),
         Expanded(
           flex: 3,
           child: Container(
             alignment: Alignment.center,
             child: Text(
-              '${currentSection.tempo}',
+              '${currentSection.settings.tempo}',
               style: TextStyle(fontSize: 60),
             ),
           ),

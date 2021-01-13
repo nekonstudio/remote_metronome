@@ -11,9 +11,7 @@ class SimpleTrackPlayer extends TrackPlayer {
 
   @override
   void play() {
-    Metronome().start(
-      MetronomeSettings(track.tempo, track.beatsPerBar, track.clicksPerBeat),
-    );
+    Metronome().start(track.settings);
   }
 
   @override

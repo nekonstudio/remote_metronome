@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -36,10 +38,8 @@ class _SimpleMetronomeScreenState extends State<SimpleMetronomeScreen> {
 
     if (context.read(synchronizationProvider).isSynchronized) {
       final settings = _controller.value;
-      final tempo = settings.tempo;
-      final beatsPerBar = settings.beatsPerBar;
       context.read(nearbyDevicesProvider).broadcastCommand(
-            RemoteCommand.setMetronomeData(tempo, beatsPerBar),
+            RemoteCommand.setMetronomeSettings(settings),
           );
     }
   }
@@ -48,11 +48,11 @@ class _SimpleMetronomeScreenState extends State<SimpleMetronomeScreen> {
       Function changeFunction, RemoteCommandType commandType) {
     if (context.read(synchronizationProvider).isSynchronized) {
       if (!context.read(metronomeProvider).isPlaying) {
-        final value = changeFunction();
+        final MetronomeSettings value = changeFunction();
         print('value: $value');
         if (value != null) {
           context.read(nearbyDevicesProvider).broadcastCommand(
-                RemoteCommand(commandType, parameters: [value.toString()]),
+                RemoteCommand(commandType, jsonParameters: value.toJson()),
               );
         }
       } else {
@@ -75,9 +75,9 @@ class _SimpleMetronomeScreenState extends State<SimpleMetronomeScreen> {
           changeRemoteMetronomeProperty(
             () {
               _controller.changeTempoBy(value);
-              return _controller.value.tempo;
+              return _controller.value;
             },
-            RemoteCommandType.ChangeTempo,
+            RemoteCommandType.SetMetronomeSettings,
           );
         },
         child: Text((value >= 0) ? '+$value' : '$value'),
@@ -151,11 +151,9 @@ class _SimpleMetronomeScreenState extends State<SimpleMetronomeScreen> {
                               });
                               // _restartTapTempoStopwatch();
 
-                              return (_controller.value.tempo *
-                                      _tempoMultiplier)
-                                  .toInt();
+                              return _controller.value;
                             },
-                            RemoteCommandType.ChangeTempo,
+                            RemoteCommandType.SetMetronomeSettings,
                           );
                         },
                         child: CircleAvatar(
@@ -195,11 +193,9 @@ class _SimpleMetronomeScreenState extends State<SimpleMetronomeScreen> {
                               });
                               // _restartTapTempoStopwatch();
 
-                              return (_controller.value.tempo *
-                                      _tempoMultiplier)
-                                  .toInt();
+                              return _controller.value.tempo;
                             },
-                            RemoteCommandType.ChangeTempo,
+                            RemoteCommandType.SetMetronomeSettings,
                           );
                         },
                         child: CircleAvatar(
@@ -239,8 +235,8 @@ class _SimpleMetronomeScreenState extends State<SimpleMetronomeScreen> {
                       changeRemoteMetronomeProperty(() {
                         _controller.changeTempo(value.toInt());
                         // _restartTapTempoStopwatch();
-                        return _controller.value.tempo;
-                      }, RemoteCommandType.ChangeTempo);
+                        return _controller.value;
+                      }, RemoteCommandType.SetMetronomeSettings);
                     },
                   ),
                 ),
@@ -268,9 +264,9 @@ class _SimpleMetronomeScreenState extends State<SimpleMetronomeScreen> {
                               changeRemoteMetronomeProperty(
                                 () {
                                   _controller.decreaseBeatsPerBarBy1();
-                                  return _controller.value.beatsPerBar;
+                                  return _controller.value;
                                 },
-                                RemoteCommandType.ChangeBeatsPerBar,
+                                RemoteCommandType.SetMetronomeSettings,
                               );
                             },
                             child: CircleAvatar(
@@ -289,9 +285,9 @@ class _SimpleMetronomeScreenState extends State<SimpleMetronomeScreen> {
                               changeRemoteMetronomeProperty(
                                 () {
                                   _controller.increaseBeatsPerBarBy1();
-                                  return _controller.value.beatsPerBar;
+                                  return _controller.value;
                                 },
-                                RemoteCommandType.ChangeBeatsPerBar,
+                                RemoteCommandType.SetMetronomeSettings,
                               );
                             },
                             child: CircleAvatar(
