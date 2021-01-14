@@ -120,6 +120,7 @@ class _RemoteMetronomePanel extends ConsumerWidget {
           ),
           if (state == _ScreenState.Setlist)
             Text(context.read(remoteScreenStateProvider).setlist.name),
+          if (state == _ScreenState.Setlist) Text(track.name),
         ],
       ),
     );

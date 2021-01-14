@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:metronom/models/setlist.dart';
+import 'package:metronom/screens/setlists/setlist_screen.dart';
 import 'package:metronom/screens/synchronizedPlaying/client_playing_screen.dart';
 
 import '../metronome/metronome_base.dart';
@@ -72,6 +73,15 @@ class RemoteCommandHandler {
         print(setlist);
 
         providerReader(remoteScreenStateProvider).setSetlistState(setlist);
+        break;
+
+      case RemoteCommandType.SelectTrack:
+        final trackIndex = json.decode(command.jsonParameters) as int;
+        final setlist = providerReader(remoteScreenStateProvider).setlist;
+        if (setlist != null) {
+          final setlistPlayer = providerReader(setlistPlayerProvider(setlist));
+          setlistPlayer.selectTrack(trackIndex);
+        }
         break;
 
       default:

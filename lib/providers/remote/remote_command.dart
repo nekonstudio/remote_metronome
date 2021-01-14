@@ -12,6 +12,7 @@ enum RemoteCommandType {
   StopMetronome,
   SetMetronomeSettings,
   SetSetlist,
+  SelectTrack,
   LatencyTest,
 }
 
@@ -65,6 +66,12 @@ class RemoteCommand {
       : this(
           RemoteCommandType.SetSetlist,
           jsonParameters: setlist.toJson(),
+        );
+
+  RemoteCommand.selectTrack(int index)
+      : this(
+          RemoteCommandType.SelectTrack,
+          jsonParameters: json.encode(index),
         );
 
   static RemoteCommand fromRawData(Uint8List data) {
