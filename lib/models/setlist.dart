@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:metronom/providers/metronome/metronome_settings.dart';
 
 import 'track.dart';
@@ -64,4 +66,43 @@ class Setlist {
   void deleteTrack(int index) {
     _tracks.removeAt(index);
   }
+
+  void clear() {
+    _tracks.clear();
+  }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'name': name,
+      'tracks': _tracks?.map((x) => x?.toMap())?.toList(),
+    };
+  }
+
+  factory Setlist.fromMap(Map<String, dynamic> map) {
+    if (map == null) return null;
+
+    final setlist = Setlist(
+      map['name'],
+    );
+
+    // TODO: remove
+    setlist.clear();
+
+    final tracks =
+        List<Track>.from(map['tracks']?.map((x) => Track.fromMap(x)));
+
+    for (final track in tracks) {
+      setlist.addTrack(track);
+    }
+
+    return setlist;
+  }
+
+  String toJson() => json.encode(toMap());
+
+  factory Setlist.fromJson(String source) =>
+      Setlist.fromMap(json.decode(source));
+
+  @override
+  String toString() => 'Setlist(name: $name, tracks: $_tracks)';
 }

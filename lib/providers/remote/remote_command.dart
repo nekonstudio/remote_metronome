@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
+import 'package:metronom/models/setlist.dart';
 import 'package:metronom/providers/metronome/metronome_settings.dart';
 
 enum RemoteCommandType {
@@ -10,6 +11,7 @@ enum RemoteCommandType {
   StartMetronome,
   StopMetronome,
   SetMetronomeSettings,
+  SetSetlist,
   LatencyTest,
 }
 
@@ -57,6 +59,12 @@ class RemoteCommand {
       : this(
           RemoteCommandType.SetMetronomeSettings,
           jsonParameters: settings.toJson(),
+        );
+
+  RemoteCommand.setSetlist(Setlist setlist)
+      : this(
+          RemoteCommandType.SetSetlist,
+          jsonParameters: setlist.toJson(),
         );
 
   static RemoteCommand fromRawData(Uint8List data) {

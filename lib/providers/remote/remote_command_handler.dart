@@ -1,6 +1,8 @@
 import 'dart:convert';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:metronom/models/setlist.dart';
+import 'package:metronom/screens/synchronizedPlaying/client_playing_screen.dart';
 
 import '../metronome/metronome_base.dart';
 import '../metronome/metronome_settings.dart';
@@ -18,7 +20,7 @@ class RemoteCommandHandler {
 
     final synchronization = providerReader(synchronizationProvider);
 
-    print('jsonParams: ${command.jsonParameters}');
+    // print('jsonParams: ${command.jsonParameters}');
 
     switch (command.type) {
       case RemoteCommandType.ClockSyncRequest:
@@ -61,6 +63,15 @@ class RemoteCommandHandler {
 
         providerReader(remoteMetronomeScreenControllerProvider)
             .setMetronomeSettings(metronomeSettings);
+        providerReader(remoteScreenStateProvider).setSimpleMetronomeState();
+        break;
+
+      case RemoteCommandType.SetSetlist:
+        final setlist = Setlist.fromJson(command.jsonParameters);
+
+        print(setlist);
+
+        providerReader(remoteScreenStateProvider).setSetlistState(setlist);
         break;
 
       default:

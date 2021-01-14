@@ -13,7 +13,7 @@ class SetlistPlayer {
   SetlistPlayer(this.setlist) {
     _currentTrackIndex = 0;
 
-    _trackPlayer = TrackPlayer.createPlayerForTrack(_currentTrack);
+    _trackPlayer = TrackPlayer.createPlayerForTrack(currentTrack);
   }
 
   set onTrackChanged(void Function(int) callback) => _onTrackChanged = callback;
@@ -22,7 +22,8 @@ class SetlistPlayer {
   int get currentSectionIndex => _trackPlayer.currentSectionIndex;
   int get currentSectionBar => _trackPlayer.currentSectionBar;
 
-  Track get _currentTrack => setlist.tracks[_currentTrackIndex];
+  Track get currentTrack => setlist.tracks[_currentTrackIndex];
+  Section get currentSection => currentTrack.sections[currentSectionIndex];
 
   bool get isPlaying => _trackPlayer.isPlaying;
 
@@ -63,7 +64,7 @@ class SetlistPlayer {
     trackChangeFunction();
     _onTrackChanged?.call(_currentTrackIndex);
 
-    _trackPlayer = TrackPlayer.createPlayerForTrack(_currentTrack);
+    _trackPlayer = TrackPlayer.createPlayerForTrack(currentTrack);
   }
 
   void _setNextTrackIndex() {
