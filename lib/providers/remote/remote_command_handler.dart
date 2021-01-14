@@ -75,6 +75,28 @@ class RemoteCommandHandler {
         providerReader(remoteScreenStateProvider).setSetlistState(setlist);
         break;
 
+      case RemoteCommandType.PlayTrack:
+        final setlist = providerReader(remoteScreenStateProvider).setlist;
+        if (setlist != null) {
+          final hostStartTime =
+              DateTime.fromMillisecondsSinceEpoch(command.timestamp);
+          final setlistPlayer = providerReader(setlistPlayerProvider(setlist));
+
+          synchronization.hostSynchonizedAction(
+            hostStartTime,
+            setlistPlayer.play,
+          );
+        }
+        break;
+
+      case RemoteCommandType.StopTrack:
+        final setlist = providerReader(remoteScreenStateProvider).setlist;
+        if (setlist != null) {
+          final setlistPlayer = providerReader(setlistPlayerProvider(setlist));
+          setlistPlayer.stop();
+        }
+        break;
+
       case RemoteCommandType.SelectTrack:
         final trackIndex = json.decode(command.jsonParameters) as int;
         final setlist = providerReader(remoteScreenStateProvider).setlist;

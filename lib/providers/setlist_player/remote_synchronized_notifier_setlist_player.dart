@@ -11,16 +11,17 @@ class RemoteSynchronizedNotifierSetlistPlayer extends NotifierSetlistPlayer {
 
   @override
   void play() {
-    // TODO: implement play
-
-    // synchronization.clientSynchonizedAction(remoteCommand, action);
-
-    super.play();
+    synchronization.clientSynchonizedAction(
+      RemoteCommand.playTrack(),
+      super.play,
+    );
   }
 
   @override
   void stop() {
-    // TODO: implement stop
+    synchronization.sendRemoteCommand(
+      RemoteCommand.stopTrack(),
+    );
     super.stop();
   }
 
