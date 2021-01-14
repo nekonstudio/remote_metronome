@@ -106,6 +106,22 @@ class RemoteCommandHandler {
         }
         break;
 
+      case RemoteCommandType.SelectNextSection:
+        final setlist = providerReader(remoteScreenStateProvider).setlist;
+        if (setlist != null) {
+          final setlistPlayer = providerReader(setlistPlayerProvider(setlist));
+          setlistPlayer.selectNextSection();
+        }
+        break;
+
+      case RemoteCommandType.SelectPreviousSection:
+        final setlist = providerReader(remoteScreenStateProvider).setlist;
+        if (setlist != null) {
+          final setlistPlayer = providerReader(setlistPlayerProvider(setlist));
+          setlistPlayer.selectPreviousSection();
+        }
+        break;
+
       default:
         print('Unhandled remote command: ${command.type}');
         break;

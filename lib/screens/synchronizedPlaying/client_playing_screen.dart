@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:metronom/models/setlist.dart';
 import 'package:metronom/providers/setlist_player/setlist_player.dart';
 import 'package:metronom/screens/setlists/setlist_screen.dart';
+import 'package:metronom/widgets/animated_track_sections.dart';
 
 import '../../providers/nearby/nearby_devices.dart';
 import '../../providers/remote/remote_metronome_screen_controller.dart';
@@ -121,6 +122,11 @@ class _RemoteMetronomePanel extends ConsumerWidget {
           if (state == _ScreenState.Setlist)
             Text(context.read(remoteScreenStateProvider).setlist.name),
           if (state == _ScreenState.Setlist) Text(track.name),
+          if (state == _ScreenState.Setlist && track.isComplex)
+            AnimatedTrackSections(
+              player,
+              track.sections,
+            ),
         ],
       ),
     );

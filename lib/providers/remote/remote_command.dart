@@ -15,6 +15,8 @@ enum RemoteCommandType {
   PlayTrack,
   StopTrack,
   SelectTrack,
+  SelectNextSection,
+  SelectPreviousSection,
   LatencyTest,
 }
 
@@ -79,6 +81,11 @@ class RemoteCommand {
           RemoteCommandType.SelectTrack,
           jsonParameters: json.encode(index),
         );
+
+  RemoteCommand.selectNextSection() : this(RemoteCommandType.SelectNextSection);
+
+  RemoteCommand.selectPreviousSection()
+      : this(RemoteCommandType.SelectPreviousSection);
 
   static RemoteCommand fromRawData(Uint8List data) {
     final str = utf8.decode(data);

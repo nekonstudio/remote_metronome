@@ -50,4 +50,20 @@ class RemoteSynchronizedNotifierSetlistPlayer extends NotifierSetlistPlayer {
       RemoteCommand.selectTrack(currentTrackIndex),
     );
   }
+
+  @override
+  void selectNextSection() {
+    if (isPlaying || !currentTrack.isComplex) return;
+
+    synchronization.sendRemoteCommand(RemoteCommand.selectNextSection());
+    super.selectNextSection();
+  }
+
+  @override
+  void selectPreviousSection() {
+    if (isPlaying || !currentTrack.isComplex) return;
+
+    synchronization.sendRemoteCommand(RemoteCommand.selectPreviousSection());
+    super.selectPreviousSection();
+  }
 }
