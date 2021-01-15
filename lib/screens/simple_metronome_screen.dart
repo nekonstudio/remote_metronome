@@ -36,11 +36,16 @@ class _SimpleMetronomeScreenState extends State<SimpleMetronomeScreen> {
   void initState() {
     super.initState();
 
-    if (context.read(synchronizationProvider).isSynchronized) {
+    final synchronization = context.read(synchronizationProvider);
+
+    synchronization.simpleMetronomeSettingsGetter = () => _controller.value;
+
+    if (synchronization.isSynchronized) {
       final settings = _controller.value;
-      context.read(nearbyDevicesProvider).broadcastCommand(
-            RemoteCommand.setMetronomeSettings(settings),
-          );
+
+      synchronization.sendRemoteCommand(
+        RemoteCommand.setMetronomeSettings(settings),
+      );
     }
   }
 

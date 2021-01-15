@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:metronom/providers/metronome/metronome_settings.dart';
 
 import '../nearby/nearby_devices.dart';
 import 'remote_command.dart';
@@ -18,6 +19,7 @@ class RemoteSynchronization with ChangeNotifier {
   RemoteSynchronization(this.sendRemoteCommand);
 
   final remoteActionNotifier = RemoteActionNotifier(false);
+  MetronomeSettings Function() simpleMetronomeSettingsGetter;
 
   var _mode = DeviceSynchronizationMode.None;
   int _remoteTimeDifference;
