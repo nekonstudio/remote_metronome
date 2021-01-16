@@ -46,7 +46,7 @@ class MetronomeSettingsController extends ValueNotifier<MetronomeSettings> {
     }
 
     _changeParameter(
-      tempo: newTempo.clamp(value.minTempo, value.maxTempo),
+      tempo: newTempo,
     );
   }
 
@@ -69,7 +69,7 @@ class MetronomeSettingsController extends ValueNotifier<MetronomeSettings> {
     }
 
     _changeParameter(
-      tempo: newTempo.clamp(value.minTempo, value.maxTempo),
+      tempo: newTempo,
     );
   }
 
@@ -79,17 +79,16 @@ class MetronomeSettingsController extends ValueNotifier<MetronomeSettings> {
   void _changeClicksPerBeatBy(int value) =>
       _changeParameter(clicksPerBeat: this.value.clicksPerBeat + value);
 
-  void _changeParameter(
-      {int tempo, int beatsPerBar, int clicksPerBeat, bool validate = true}) {
-    final newSettings = value.copyWith(
-      tempo: tempo,
-      beatsPerBar: beatsPerBar,
-      clicksPerBeat: clicksPerBeat,
-    );
+  void _changeParameter({int tempo, int beatsPerBar, int clicksPerBeat}) {
+    final newSettings = value
+        .copyWith(
+          tempo: tempo,
+          beatsPerBar: beatsPerBar,
+          clicksPerBeat: clicksPerBeat,
+        )
+        .clampToValidTempo();
 
-    var isValid = validate ? newSettings.isValid() : true;
-
-    if (isValid) {
+    if (newSettings.isValid()) {
       value = newSettings;
       notifyListeners();
     }

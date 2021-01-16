@@ -28,6 +28,9 @@ class MetronomeSettings extends PropertyValidable {
             propertyValue: clicksPerBeat, minValue: 1, maxValue: 16),
       ];
 
+  MetronomeSettings clampToValidTempo() => MetronomeSettings(
+      tempo.clamp(minTempo, maxTempo), beatsPerBar, clicksPerBeat);
+
   MetronomeSettings copyWith({
     int tempo,
     int beatsPerBar,

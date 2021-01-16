@@ -20,14 +20,6 @@ class SimpleMetronomeScreen extends StatefulWidget {
 }
 
 class _SimpleMetronomeScreenState extends State<SimpleMetronomeScreen> {
-  static const MinTempo = 10;
-  static const MaxTempo = 300;
-
-  static const MinTempoMultiplier = 0.5;
-  static const DefaultTempoMultiplier = 1.0;
-  static const MaxTempoMultiplier = 2.0;
-
-  double _tempoMultiplier = DefaultTempoMultiplier;
   Stopwatch _tapTempoStopwatch = Stopwatch();
 
   final _controller = MetronomeSettingsController(MetronomeSettings(120, 4, 1));
@@ -203,8 +195,8 @@ class _SimpleMetronomeScreenState extends State<SimpleMetronomeScreen> {
                 _buildWithController(
                   (context, metronomeSettings, child) => Slider(
                     value: metronomeSettings.tempo.toDouble(),
-                    min: MinTempo.toDouble(),
-                    max: MaxTempo.toDouble(),
+                    min: metronomeSettings.minTempo.toDouble(),
+                    max: metronomeSettings.maxTempo.toDouble(),
                     onChanged: (value) {
                       changeRemoteMetronomeProperty(() {
                         _controller.changeTempo(value.toInt());
