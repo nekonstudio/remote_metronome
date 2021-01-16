@@ -15,13 +15,16 @@ class MetronomeSettings extends PropertyValidable {
     this.clicksPerBeat,
   );
 
+  int get minTempo => getProperty<RangeValidableProperty>('tempo').minValue;
+  int get maxTempo => getProperty<RangeValidableProperty>('tempo').maxValue;
+
   @override
   List<Validable> get validableProperties => [
-        RangeValidableProperty(
+        RangeValidableProperty('tempo',
             propertyValue: tempo, minValue: 10, maxValue: 300),
-        RangeValidableProperty(
+        RangeValidableProperty('beatsPerBar',
             propertyValue: beatsPerBar, minValue: 1, maxValue: 16),
-        RangeValidableProperty(
+        RangeValidableProperty('clicksPerBeat',
             propertyValue: clicksPerBeat, minValue: 1, maxValue: 16),
       ];
 

@@ -53,8 +53,8 @@ class _SimpleMetronomeScreenState extends State<SimpleMetronomeScreen> {
       Function changeFunction, RemoteCommandType commandType) {
     if (context.read(synchronizationProvider).isSynchronized) {
       if (!context.read(metronomeProvider).isPlaying) {
-        final MetronomeSettings value = changeFunction();
-        print('value: $value');
+        changeFunction();
+        final value = _controller.value;
         if (value != null) {
           context.read(nearbyDevicesProvider).broadcastCommand(
                 RemoteCommand(commandType, jsonParameters: value.toJson()),
@@ -80,7 +80,6 @@ class _SimpleMetronomeScreenState extends State<SimpleMetronomeScreen> {
           changeRemoteMetronomeProperty(
             () {
               _controller.changeTempoBy(value);
-              return _controller.value;
             },
             RemoteCommandType.SetMetronomeSettings,
           );
@@ -134,88 +133,58 @@ class _SimpleMetronomeScreenState extends State<SimpleMetronomeScreen> {
                 ),
                 Container(
                   margin: const EdgeInsets.symmetric(vertical: 20),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      GestureDetector(
-                        onTap: () {
-                          // setState(() {
-                          //   _tempoMultiplier =
-                          //       _tempoMultiplier >= DefaultTempoMultiplier
-                          //           ? MinTempoMultiplier
-                          //           : DefaultTempoMultiplier;
-                          // });
-
-                          changeRemoteMetronomeProperty(
-                            () {
-                              setState(() {
-                                _tempoMultiplier =
-                                    _tempoMultiplier >= DefaultTempoMultiplier
-                                        ? MinTempoMultiplier
-                                        : DefaultTempoMultiplier;
-                              });
-                              // _restartTapTempoStopwatch();
-
-                              return _controller.value;
-                            },
-                            RemoteCommandType.SetMetronomeSettings,
-                          );
-                        },
-                        child: CircleAvatar(
-                          radius: 26,
-                          child: Text('x0.5',
-                              style: TextStyle(
-                                color: Colors.white,
-                              )),
-                          backgroundColor:
-                              _tempoMultiplier < DefaultTempoMultiplier
-                                  ? Colors.blue
-                                  : Colors.black,
+                  child: _buildWithController(
+                    (context, metronomeSettings, child) => Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                        GestureDetector(
+                          onTap: () {
+                            changeRemoteMetronomeProperty(
+                              () {
+                                _controller.toggleHalfTimeTempoMultiplier();
+                              },
+                              RemoteCommandType.SetMetronomeSettings,
+                            );
+                          },
+                          child: CircleAvatar(
+                            radius: 26,
+                            child: Text('x0.5',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                )),
+                            backgroundColor:
+                                _controller.isHalfTimeTempoMultiplierActive
+                                    ? Colors.blue
+                                    : Colors.black,
+                          ),
                         ),
-                      ),
-                      _buildWithController(
-                        (context, metronomeSettings, child) => Text(
+                        Text(
                           '${metronomeSettings.tempo}',
                           style: TextStyle(fontSize: 60),
                         ),
-                      ),
-                      GestureDetector(
-                        onTap: () {
-                          // setState(() {
-                          //   _tempoMultiplier =
-                          //       _tempoMultiplier <= DefaultTempoMultiplier
-                          //           ? MaxTempoMultiplier
-                          //           : DefaultTempoMultiplier;
-                          // });
-
-                          changeRemoteMetronomeProperty(
-                            () {
-                              setState(() {
-                                _tempoMultiplier =
-                                    _tempoMultiplier <= DefaultTempoMultiplier
-                                        ? MaxTempoMultiplier
-                                        : DefaultTempoMultiplier;
-                              });
-                              // _restartTapTempoStopwatch();
-
-                              return _controller.value.tempo;
-                            },
-                            RemoteCommandType.SetMetronomeSettings,
-                          );
-                        },
-                        child: CircleAvatar(
-                          radius: 26,
-                          child: Text('x2',
-                              style: TextStyle(
-                                color: Colors.white,
-                              )),
-                          backgroundColor:
-                              _tempoMultiplier > DefaultTempoMultiplier
-                                  ? Colors.blue
-                                  : Colors.black,
+                        GestureDetector(
+                          onTap: () {
+                            changeRemoteMetronomeProperty(
+                              () {
+                                _controller.toggleDoubleTimeTempoMultiplier();
+                              },
+                              RemoteCommandType.SetMetronomeSettings,
+                            );
+                          },
+                          child: CircleAvatar(
+                            radius: 26,
+                            child: Text('x2',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                )),
+                            backgroundColor:
+                                _controller.isDoubleTimeTempoMultiplierActive
+                                    ? Colors.blue
+                                    : Colors.black,
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
                 Row(
@@ -240,7 +209,6 @@ class _SimpleMetronomeScreenState extends State<SimpleMetronomeScreen> {
                       changeRemoteMetronomeProperty(() {
                         _controller.changeTempo(value.toInt());
                         // _restartTapTempoStopwatch();
-                        return _controller.value;
                       }, RemoteCommandType.SetMetronomeSettings);
                     },
                   ),
@@ -269,7 +237,6 @@ class _SimpleMetronomeScreenState extends State<SimpleMetronomeScreen> {
                               changeRemoteMetronomeProperty(
                                 () {
                                   _controller.decreaseBeatsPerBarBy1();
-                                  return _controller.value;
                                 },
                                 RemoteCommandType.SetMetronomeSettings,
                               );
@@ -290,7 +257,6 @@ class _SimpleMetronomeScreenState extends State<SimpleMetronomeScreen> {
                               changeRemoteMetronomeProperty(
                                 () {
                                   _controller.increaseBeatsPerBarBy1();
-                                  return _controller.value;
                                 },
                                 RemoteCommandType.SetMetronomeSettings,
                               );
@@ -321,11 +287,12 @@ class _SimpleMetronomeScreenState extends State<SimpleMetronomeScreen> {
                         children: [
                           GestureDetector(
                             onTap: () {
-                              _controller.decreaseClicksPerBeatBy1();
-
-                              context
-                                  .read(metronomeProvider)
-                                  .change(_controller.value);
+                              changeRemoteMetronomeProperty(
+                                () {
+                                  _controller.decreaseClicksPerBeatBy1();
+                                },
+                                RemoteCommandType.SetMetronomeSettings,
+                              );
                             },
                             child: CircleAvatar(
                               radius: 13,
@@ -340,11 +307,12 @@ class _SimpleMetronomeScreenState extends State<SimpleMetronomeScreen> {
                           ),
                           GestureDetector(
                             onTap: () {
-                              _controller.increaseClicksPerBeatBy1();
-
-                              context
-                                  .read(metronomeProvider)
-                                  .change(_controller.value);
+                              changeRemoteMetronomeProperty(
+                                () {
+                                  _controller.increaseClicksPerBeatBy1();
+                                },
+                                RemoteCommandType.SetMetronomeSettings,
+                              );
                             },
                             child: CircleAvatar(
                               radius: 13,

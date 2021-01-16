@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:metronom/utils/validable/range_validable_property.dart';
 
 import 'validable.dart';
 
@@ -14,4 +15,18 @@ abstract class PropertyValidable implements Validable {
 
   @protected
   List<Validable> get validableProperties;
+
+  T getProperty<T>(String name) {
+    if (T == RangeValidableProperty) {
+      for (final property in validableProperties) {
+        if (property is RangeValidableProperty) {
+          if (property.name == name) {
+            return property as T;
+          }
+        }
+      }
+    }
+
+    return null;
+  }
 }
