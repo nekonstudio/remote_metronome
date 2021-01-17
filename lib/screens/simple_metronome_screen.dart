@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -9,6 +7,7 @@ import '../providers/metronome/metronome_settings.dart';
 import '../providers/nearby/nearby_devices.dart';
 import '../providers/remote/remote_command.dart';
 import '../providers/remote/remote_synchronization.dart';
+import '../tap_tempo_detector.dart';
 import '../widgets/app_drawer.dart';
 import '../widgets/remote_mode_screen.dart';
 import '../widgets/visualization.dart';
@@ -20,7 +19,9 @@ class SimpleMetronomeScreen extends StatefulWidget {
 }
 
 class _SimpleMetronomeScreenState extends State<SimpleMetronomeScreen> {
-  Stopwatch _tapTempoStopwatch = Stopwatch();
+  final _tapTempoDetectorProvider = ChangeNotifierProvider(
+    (ref) => NotifierTapTempoDetector(),
+  );
 
   final _controller = MetronomeSettingsController(MetronomeSettings(120, 4, 1));
 
@@ -39,6 +40,10 @@ class _SimpleMetronomeScreenState extends State<SimpleMetronomeScreen> {
         RemoteCommand.setMetronomeSettings(settings),
       );
     }
+
+    _controller.addListener(() {
+      context.read(_tapTempoDetectorProvider).reset();
+    });
   }
 
   void changeRemoteMetronomeProperty(
@@ -200,7 +205,6 @@ class _SimpleMetronomeScreenState extends State<SimpleMetronomeScreen> {
                     onChanged: (value) {
                       changeRemoteMetronomeProperty(() {
                         _controller.changeTempo(value.toInt());
-                        // _restartTapTempoStopwatch();
                       }, RemoteCommandType.SetMetronomeSettings);
                     },
                   ),
@@ -329,11 +333,8 @@ class _SimpleMetronomeScreenState extends State<SimpleMetronomeScreen> {
                         onTap: () {
                           final metronome = context.read(metronomeProvider);
                           if (!metronome.isPlaying) {
-                            print('current time: ${DateTime.now()}');
-
                             metronome.start(_controller.value);
-
-                            // _restartTapTempoStopwatch();
+                            context.read(_tapTempoDetectorProvider).reset();
                           } else {
                             metronome.stop();
                           }
@@ -354,32 +355,31 @@ class _SimpleMetronomeScreenState extends State<SimpleMetronomeScreen> {
                 Expanded(
                   child: Column(
                     children: [
-                      CircleAvatar(
-                        radius: 30,
-                        backgroundColor: _tapTempoStopwatch.isRunning
-                            ? Colors.white
-                            : Colors.blueGrey,
+                      Consumer(
+                        builder: (context, watch, child) => CircleAvatar(
+                          radius: 30,
+                          backgroundColor:
+                              watch(_tapTempoDetectorProvider).isActive
+                                  ? Colors.white
+                                  : Colors.blueGrey,
+                          child: child,
+                        ),
                         child: Material(
                           shape: CircleBorder(),
                           color: Colors.blueGrey,
                           clipBehavior: Clip.hardEdge,
                           child: GestureDetector(
                             onTapDown: (_) {
-                              // if (context.read(metronomeProvider).isPlaying) {
-                              //   if (_tapTempoStopwatch.isRunning) {
-                              //     _calculateCurrentTempo(
-                              //         _tapTempoStopwatch.elapsed);
-                              //     _tapTempoStopwatch.reset();
-                              //   }
+                              if (!context.read(metronomeProvider).isPlaying) {
+                                final tapTempoDetector =
+                                    context.read(_tapTempoDetectorProvider);
 
-                              //   setState(() {
-                              //     _tapTempoStopwatch.start();
-                              //   });
-
-                              //   final soundManager = SoundManager();
-                              //   soundManager
-                              //       .playSound(soundManager.mediumClickSoundId);
-                              // }
+                                tapTempoDetector.registerTap();
+                                final tempo = tapTempoDetector.calculatedTempo;
+                                if (tempo != null) {
+                                  _controller.changeTempo(tempo);
+                                }
+                              }
                             },
                             child: CircleAvatar(
                               backgroundColor: Colors.transparent,

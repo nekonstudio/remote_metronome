@@ -20,8 +20,7 @@ class MetronomeSettingsController extends ValueNotifier<MetronomeSettings> {
   void decreaseTempoBy1() => changeTempoBy(-1);
   void increaseTempoBy5() => changeTempoBy(5);
   void decreaseTempoBy5() => changeTempoBy(-5);
-  void changeTempoBy(int value) =>
-      _changeParameter(tempo: this.value.tempo + value);
+  void changeTempoBy(int value) => changeTempo(this.value.tempo + value);
   void increaseBeatsPerBarBy1() => _changeBeatsPerBarBy(1);
   void decreaseBeatsPerBarBy1() => _changeBeatsPerBarBy(-1);
   void increaseClicksPerBeatBy1() => _changeClicksPerBeatBy(1);
