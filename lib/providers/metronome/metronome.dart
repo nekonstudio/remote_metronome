@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/services.dart';
+import 'package:wakelock/wakelock.dart';
 
 import 'metronome_base.dart';
 import 'metronome_settings.dart';
@@ -35,6 +36,8 @@ class Metronome extends MetronomeBase {
         'tempoMultiplier': 1.0 // TODO: remove from platform implementation
       },
     );
+
+    _toggleScreenWakelock();
   }
 
   @override
@@ -53,6 +56,13 @@ class Metronome extends MetronomeBase {
   @override
   void onStop() {
     _invokePlatformMethod('stop');
+
+    _toggleScreenWakelock();
+  }
+
+  @override
+  Stream<dynamic> getCurrentBarBeatStream() {
+    return currentBarBeatStream;
   }
 
   void _invokePlatformMethod(String methodName,
@@ -60,8 +70,5 @@ class Metronome extends MetronomeBase {
     _metronomePlatformChannel.invokeMethod(methodName, parameters);
   }
 
-  @override
-  Stream<dynamic> getCurrentBarBeatStream() {
-    return currentBarBeatStream;
-  }
+  void _toggleScreenWakelock() => Wakelock.toggle(enable: isPlaying);
 }
