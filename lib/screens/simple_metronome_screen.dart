@@ -377,7 +377,9 @@ class _SimpleMetronomeScreenState extends State<SimpleMetronomeScreen> {
                                 tapTempoDetector.registerTap();
                                 final tempo = tapTempoDetector.calculatedTempo;
                                 if (tempo != null) {
-                                  _controller.changeTempo(tempo);
+                                  changeRemoteMetronomeProperty(
+                                      () => _controller.changeTempo(tempo),
+                                      RemoteCommandType.SetMetronomeSettings);
                                 }
                               }
                             },
