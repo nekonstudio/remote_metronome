@@ -101,310 +101,319 @@ class _SimpleMetronomeScreenState extends State<SimpleMetronomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return RemoteModeScreen(
-      title: Text('Metronom'),
-      drawer: AppDrawer(),
-      body: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 30, horizontal: 0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Padding(
-              padding: const EdgeInsets.only(top: 20.0),
-              child: _buildWithController(
-                (context, metronomeSettings, child) =>
-                    Visualization(metronomeSettings.beatsPerBar),
+    return WillPopScope(
+      onWillPop: () {
+        context.read(metronomeProvider).stop();
+        return Future.value(true);
+      },
+      child: RemoteModeScreen(
+        title: Text('Metronom'),
+        drawer: AppDrawer(),
+        body: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 30, horizontal: 0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(top: 20.0),
+                child: _buildWithController(
+                  (context, metronomeSettings, child) =>
+                      Visualization(metronomeSettings.beatsPerBar),
+                ),
               ),
-            ),
-            Column(
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    _buildChangeTempoButton(context, -1),
-                    SizedBox(
-                      width: 50,
-                    ),
-                    _buildChangeTempoButton(context, 1),
-                  ],
-                ),
-                Container(
-                  margin: const EdgeInsets.symmetric(vertical: 20),
-                  child: _buildWithController(
-                    (context, metronomeSettings, child) => Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      children: [
-                        GestureDetector(
-                          onTap: () {
-                            changeRemoteMetronomeProperty(
-                              () {
-                                _controller.toggleHalfTimeTempoMultiplier();
-                              },
-                              RemoteCommandType.SetMetronomeSettings,
-                            );
-                          },
-                          child: CircleAvatar(
-                            radius: 26,
-                            child: Text('x0.5',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                )),
-                            backgroundColor:
-                                _controller.isHalfTimeTempoMultiplierActive
-                                    ? Colors.blue
-                                    : Colors.black,
-                          ),
-                        ),
-                        Text(
-                          '${metronomeSettings.tempo}',
-                          style: TextStyle(fontSize: 60),
-                        ),
-                        GestureDetector(
-                          onTap: () {
-                            changeRemoteMetronomeProperty(
-                              () {
-                                _controller.toggleDoubleTimeTempoMultiplier();
-                              },
-                              RemoteCommandType.SetMetronomeSettings,
-                            );
-                          },
-                          child: CircleAvatar(
-                            radius: 26,
-                            child: Text('x2',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                )),
-                            backgroundColor:
-                                _controller.isDoubleTimeTempoMultiplierActive
-                                    ? Colors.blue
-                                    : Colors.black,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    _buildChangeTempoButton(context, -5),
-                    SizedBox(
-                      width: 50,
-                    ),
-                    _buildChangeTempoButton(context, 5),
-                  ],
-                ),
-                SizedBox(
-                  height: 20,
-                ),
-                _buildWithController(
-                  (context, metronomeSettings, child) => Slider(
-                    value: metronomeSettings.tempo.toDouble(),
-                    min: metronomeSettings.minTempo.toDouble(),
-                    max: metronomeSettings.maxTempo.toDouble(),
-                    onChanged: (value) {
-                      changeRemoteMetronomeProperty(() {
-                        _controller.changeTempo(value.toInt());
-                      }, RemoteCommandType.SetMetronomeSettings);
-                    },
-                  ),
-                ),
-              ],
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                Column(
-                  children: [
-                    Text(
-                      'Uderzeń na takt',
-                      style: TextStyle(fontSize: 12),
-                    ),
-                    SizedBox(
-                      height: 6,
-                    ),
-                    SizedBox(
-                      width: 120,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceAround,
-                        children: [
-                          GestureDetector(
-                            onTap: () {
-                              changeRemoteMetronomeProperty(
-                                () {
-                                  _controller.decreaseBeatsPerBarBy1();
-                                },
-                                RemoteCommandType.SetMetronomeSettings,
-                              );
-                            },
-                            child: CircleAvatar(
-                              radius: 13,
-                              child: Text('-'),
-                            ),
-                          ),
-                          _buildWithController(
-                            (context, settings, child) => Text(
-                              '${settings.beatsPerBar}',
-                              style: TextStyle(fontSize: 26),
-                            ),
-                          ),
-                          GestureDetector(
-                            onTap: () {
-                              changeRemoteMetronomeProperty(
-                                () {
-                                  _controller.increaseBeatsPerBarBy1();
-                                },
-                                RemoteCommandType.SetMetronomeSettings,
-                              );
-                            },
-                            child: CircleAvatar(
-                              radius: 13,
-                              child: Text('+'),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-                Column(
-                  children: [
-                    Text(
-                      'Kliknięć na uderzenie',
-                      style: TextStyle(fontSize: 12),
-                    ),
-                    SizedBox(
-                      height: 6,
-                    ),
-                    SizedBox(
-                      width: 120,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceAround,
-                        children: [
-                          GestureDetector(
-                            onTap: () {
-                              changeRemoteMetronomeProperty(
-                                () {
-                                  _controller.decreaseClicksPerBeatBy1();
-                                },
-                                RemoteCommandType.SetMetronomeSettings,
-                              );
-                            },
-                            child: CircleAvatar(
-                              radius: 13,
-                              child: Text('-'),
-                            ),
-                          ),
-                          _buildWithController(
-                            (context, settings, child) => Text(
-                              '${settings.clicksPerBeat}',
-                              style: TextStyle(fontSize: 26),
-                            ),
-                          ),
-                          GestureDetector(
-                            onTap: () {
-                              changeRemoteMetronomeProperty(
-                                () {
-                                  _controller.increaseClicksPerBeatBy1();
-                                },
-                                RemoteCommandType.SetMetronomeSettings,
-                              );
-                            },
-                            child: CircleAvatar(
-                              radius: 13,
-                              child: Text('+'),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                Expanded(
-                  child: Consumer(
-                    builder: (context, watch, child) {
-                      final isPlaying = watch(isMetronomePlayingProvider);
-                      return GestureDetector(
-                        onTap: () {
-                          final metronome = context.read(metronomeProvider);
-                          if (!metronome.isPlaying) {
-                            metronome.start(_controller.value);
-                            context.read(_tapTempoDetectorProvider).reset();
-                          } else {
-                            metronome.stop();
-                          }
-                        },
-                        child: CircleAvatar(
-                          backgroundColor: Colors.red,
-                          child: Icon(
-                            isPlaying ? Icons.pause : Icons.play_arrow,
-                            color: Colors.white,
-                            size: 35,
-                          ),
-                          radius: 30,
-                        ),
-                      );
-                    },
-                  ),
-                ),
-                Expanded(
-                  child: Column(
+              Column(
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Consumer(
-                        builder: (context, watch, child) => CircleAvatar(
-                          radius: 30,
-                          backgroundColor:
-                              watch(_tapTempoDetectorProvider).isActive
-                                  ? Colors.white
-                                  : Colors.blueGrey,
-                          child: child,
-                        ),
-                        child: Material(
-                          shape: CircleBorder(),
-                          color: Colors.blueGrey,
-                          clipBehavior: Clip.hardEdge,
-                          child: GestureDetector(
-                            onTapDown: (_) {
-                              if (!context.read(metronomeProvider).isPlaying) {
-                                final tapTempoDetector =
-                                    context.read(_tapTempoDetectorProvider);
-
-                                tapTempoDetector.registerTap();
-                                final tempo = tapTempoDetector.calculatedTempo;
-                                if (tempo != null) {
-                                  changeRemoteMetronomeProperty(
-                                      () => _controller.changeTempo(tempo),
-                                      RemoteCommandType.SetMetronomeSettings);
-                                }
-                              }
+                      _buildChangeTempoButton(context, -1),
+                      SizedBox(
+                        width: 50,
+                      ),
+                      _buildChangeTempoButton(context, 1),
+                    ],
+                  ),
+                  Container(
+                    margin: const EdgeInsets.symmetric(vertical: 20),
+                    child: _buildWithController(
+                      (context, metronomeSettings, child) => Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        children: [
+                          GestureDetector(
+                            onTap: () {
+                              changeRemoteMetronomeProperty(
+                                () {
+                                  _controller.toggleHalfTimeTempoMultiplier();
+                                },
+                                RemoteCommandType.SetMetronomeSettings,
+                              );
                             },
                             child: CircleAvatar(
-                              backgroundColor: Colors.transparent,
-                              radius: 28,
-                              child: Consumer(
-                                builder: (context, watch, child) => Icon(
-                                  Icons.touch_app,
-                                  color: watch(metronomeProvider).isPlaying
-                                      ? Colors.grey
-                                      : Colors.white,
-                                  size: 35,
+                              radius: 26,
+                              child: Text('x0.5',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                  )),
+                              backgroundColor:
+                                  _controller.isHalfTimeTempoMultiplierActive
+                                      ? Colors.blue
+                                      : Colors.black,
+                            ),
+                          ),
+                          Text(
+                            '${metronomeSettings.tempo}',
+                            style: TextStyle(fontSize: 60),
+                          ),
+                          GestureDetector(
+                            onTap: () {
+                              changeRemoteMetronomeProperty(
+                                () {
+                                  _controller.toggleDoubleTimeTempoMultiplier();
+                                },
+                                RemoteCommandType.SetMetronomeSettings,
+                              );
+                            },
+                            child: CircleAvatar(
+                              radius: 26,
+                              child: Text('x2',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                  )),
+                              backgroundColor:
+                                  _controller.isDoubleTimeTempoMultiplierActive
+                                      ? Colors.blue
+                                      : Colors.black,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      _buildChangeTempoButton(context, -5),
+                      SizedBox(
+                        width: 50,
+                      ),
+                      _buildChangeTempoButton(context, 5),
+                    ],
+                  ),
+                  SizedBox(
+                    height: 20,
+                  ),
+                  _buildWithController(
+                    (context, metronomeSettings, child) => Slider(
+                      value: metronomeSettings.tempo.toDouble(),
+                      min: metronomeSettings.minTempo.toDouble(),
+                      max: metronomeSettings.maxTempo.toDouble(),
+                      onChanged: (value) {
+                        changeRemoteMetronomeProperty(() {
+                          _controller.changeTempo(value.toInt());
+                        }, RemoteCommandType.SetMetronomeSettings);
+                      },
+                    ),
+                  ),
+                ],
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  Column(
+                    children: [
+                      Text(
+                        'Uderzeń na takt',
+                        style: TextStyle(fontSize: 12),
+                      ),
+                      SizedBox(
+                        height: 6,
+                      ),
+                      SizedBox(
+                        width: 120,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          children: [
+                            GestureDetector(
+                              onTap: () {
+                                changeRemoteMetronomeProperty(
+                                  () {
+                                    _controller.decreaseBeatsPerBarBy1();
+                                  },
+                                  RemoteCommandType.SetMetronomeSettings,
+                                );
+                              },
+                              child: CircleAvatar(
+                                radius: 13,
+                                child: Text('-'),
+                              ),
+                            ),
+                            _buildWithController(
+                              (context, settings, child) => Text(
+                                '${settings.beatsPerBar}',
+                                style: TextStyle(fontSize: 26),
+                              ),
+                            ),
+                            GestureDetector(
+                              onTap: () {
+                                changeRemoteMetronomeProperty(
+                                  () {
+                                    _controller.increaseBeatsPerBarBy1();
+                                  },
+                                  RemoteCommandType.SetMetronomeSettings,
+                                );
+                              },
+                              child: CircleAvatar(
+                                radius: 13,
+                                child: Text('+'),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  Column(
+                    children: [
+                      Text(
+                        'Kliknięć na uderzenie',
+                        style: TextStyle(fontSize: 12),
+                      ),
+                      SizedBox(
+                        height: 6,
+                      ),
+                      SizedBox(
+                        width: 120,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          children: [
+                            GestureDetector(
+                              onTap: () {
+                                changeRemoteMetronomeProperty(
+                                  () {
+                                    _controller.decreaseClicksPerBeatBy1();
+                                  },
+                                  RemoteCommandType.SetMetronomeSettings,
+                                );
+                              },
+                              child: CircleAvatar(
+                                radius: 13,
+                                child: Text('-'),
+                              ),
+                            ),
+                            _buildWithController(
+                              (context, settings, child) => Text(
+                                '${settings.clicksPerBeat}',
+                                style: TextStyle(fontSize: 26),
+                              ),
+                            ),
+                            GestureDetector(
+                              onTap: () {
+                                changeRemoteMetronomeProperty(
+                                  () {
+                                    _controller.increaseClicksPerBeatBy1();
+                                  },
+                                  RemoteCommandType.SetMetronomeSettings,
+                                );
+                              },
+                              child: CircleAvatar(
+                                radius: 13,
+                                child: Text('+'),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  Expanded(
+                    child: Consumer(
+                      builder: (context, watch, child) {
+                        final isPlaying = watch(isMetronomePlayingProvider);
+                        return GestureDetector(
+                          onTap: () {
+                            final metronome = context.read(metronomeProvider);
+                            if (!metronome.isPlaying) {
+                              metronome.start(_controller.value);
+                              context.read(_tapTempoDetectorProvider).reset();
+                            } else {
+                              metronome.stop();
+                            }
+                          },
+                          child: CircleAvatar(
+                            backgroundColor: Colors.red,
+                            child: Icon(
+                              isPlaying ? Icons.pause : Icons.play_arrow,
+                              color: Colors.white,
+                              size: 35,
+                            ),
+                            radius: 30,
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                  Expanded(
+                    child: Column(
+                      children: [
+                        Consumer(
+                          builder: (context, watch, child) => CircleAvatar(
+                            radius: 30,
+                            backgroundColor:
+                                watch(_tapTempoDetectorProvider).isActive
+                                    ? Colors.white
+                                    : Colors.blueGrey,
+                            child: child,
+                          ),
+                          child: Material(
+                            shape: CircleBorder(),
+                            color: Colors.blueGrey,
+                            clipBehavior: Clip.hardEdge,
+                            child: GestureDetector(
+                              onTapDown: (_) {
+                                if (!context
+                                    .read(metronomeProvider)
+                                    .isPlaying) {
+                                  final tapTempoDetector =
+                                      context.read(_tapTempoDetectorProvider);
+
+                                  tapTempoDetector.registerTap();
+                                  final tempo =
+                                      tapTempoDetector.calculatedTempo;
+                                  if (tempo != null) {
+                                    changeRemoteMetronomeProperty(
+                                        () => _controller.changeTempo(tempo),
+                                        RemoteCommandType.SetMetronomeSettings);
+                                  }
+                                }
+                              },
+                              child: CircleAvatar(
+                                backgroundColor: Colors.transparent,
+                                radius: 28,
+                                child: Consumer(
+                                  builder: (context, watch, child) => Icon(
+                                    Icons.touch_app,
+                                    color: watch(metronomeProvider).isPlaying
+                                        ? Colors.grey
+                                        : Colors.white,
+                                    size: 35,
+                                  ),
                                 ),
                               ),
                             ),
                           ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                ),
-              ],
-            ),
-          ],
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );

@@ -86,25 +86,32 @@ class SetlistScreen extends ConsumerWidget with ListItemLongPressPopupMenu {
 
     final tracks = setlist.tracks;
 
-    return WillPopScope(
-      onWillPop: () {
-        if (synchronization.isSynchronized) {
-          final metronomeSettings =
-              synchronization.simpleMetronomeSettingsGetter();
-          synchronization.sendRemoteCommand(
-            RemoteCommand.setMetronomeSettings(metronomeSettings),
-          );
-        }
-        return Future.value(true);
-      },
-      child: Consumer(
-        builder: (context, watch, child) {
-          final player = watch(setlistPlayerProvider(setlist));
-          player.onTrackChanged = _onTrackChanged;
+    return Consumer(
+      builder: (context, watch, child) {
+        final player = watch(setlistPlayerProvider(setlist));
+        player.onTrackChanged = _onTrackChanged;
 
-          final selectedTrack = tracks[player.currentTrackIndex];
+        final selectedTrack = tracks[player.currentTrackIndex];
 
-          return RemoteModeScreen(
+        return WillPopScope(
+          onWillPop: () {
+            if (synchronization.isSynchronized) {
+              synchronization.sendRemoteCommand(
+                RemoteCommand.stopTrack(),
+              );
+
+              final metronomeSettings =
+                  synchronization.simpleMetronomeSettingsGetter();
+              synchronization.sendRemoteCommand(
+                RemoteCommand.setMetronomeSettings(metronomeSettings),
+              );
+            }
+
+            player.stop();
+
+            return Future.value(true);
+          },
+          child: RemoteModeScreen(
             title: tracks.length == 0
                 ? Text(setlist.name)
                 : ListTile(
@@ -216,9 +223,9 @@ class SetlistScreen extends ConsumerWidget with ListItemLongPressPopupMenu {
                 );
               },
             ),
-          );
-        },
-      ),
+          ),
+        );
+      },
     );
   }
 }

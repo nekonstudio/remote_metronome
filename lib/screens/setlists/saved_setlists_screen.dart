@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:get/get.dart';
+import 'package:metronom/providers/metronome/metronome_base.dart';
 
 import '../../mixins/list_item_long_press_popup_menu.dart';
 import '../../models/setlist.dart';
@@ -16,6 +17,8 @@ class SavedSetlistsScreen extends ConsumerWidget
   Widget build(BuildContext context, ScopedReader watch) {
     final setlistManager = watch(setlistManagerProvider);
     final setlists = setlistManager.setlists;
+
+    context.read(metronomeProvider).stop();
 
     return RemoteModeScreen(
       title: Text('Setlisty'),

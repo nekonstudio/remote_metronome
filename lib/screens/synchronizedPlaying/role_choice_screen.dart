@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:metronom/providers/metronome/metronome_base.dart';
 
 import 'client_connecting_screen.dart';
 import 'host_connecting_screen.dart';
@@ -7,6 +9,8 @@ import 'host_connecting_screen.dart';
 class RoleChoiceScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    context.read(metronomeProvider).stop();
+
     return Scaffold(
       appBar: AppBar(
         title: Text('Wspólne odtwarzanie'),
