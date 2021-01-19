@@ -51,8 +51,7 @@ class RoleChoiceScreen extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                Text('Dołącz do istniejącej sesji',
-                    style: Get.textTheme.headline5),
+                Text('Dołącz do sesji', style: Get.textTheme.headline5),
                 Padding(
                   padding:
                       const EdgeInsets.symmetric(horizontal: 30, vertical: 14),

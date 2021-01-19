@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:get/get.dart';
 import 'package:metronom/models/setlist.dart';
+import 'package:metronom/providers/metronome/metronome_base.dart';
 import 'package:metronom/providers/setlist_player/setlist_player.dart';
 import 'package:metronom/screens/setlists/setlist_screen.dart';
 import 'package:metronom/widgets/animated_track_sections.dart';
@@ -11,35 +12,17 @@ import '../../providers/remote/remote_metronome_screen_controller.dart';
 import '../../widgets/visualization.dart';
 
 class ClientPlayingScreen extends StatelessWidget {
+  final String hostName;
+
+  ClientPlayingScreen(this.hostName);
+
   var _isEndedByMe = false;
 
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: () async {
-        final isEnded = await showDialog(
-          barrierDismissible: false,
-          context: context,
-          builder: (context) => AlertDialog(
-            title: Text('Zakończyć wspólne odtwarzanie?'),
-            content: Text('Gospodarz sesji zakończył połączenie'),
-            actions: [
-              FlatButton(
-                onPressed: () => Get.back(result: false),
-                child: Text('Powrót'),
-              ),
-              FlatButton(
-                onPressed: () => Get.back(result: true),
-                child: Text('Zakończ'),
-              ),
-            ],
-          ),
-        );
-        if (isEnded) {
-          _isEndedByMe = true;
-          context.read(nearbyDevicesProvider).finish();
-        }
-        return isEnded;
+        return _showEndDialog(context);
       },
       child: Scaffold(
         appBar: AppBar(
@@ -48,7 +31,6 @@ class ClientPlayingScreen extends StatelessWidget {
         body: ProviderListener<NearbyDevices>(
           provider: nearbyDevicesProvider,
           onChange: (context, nearbyDevices) async {
-            print('changed');
             if (_isEndedByMe) return;
 
             if (!nearbyDevices.hasConnections) {
@@ -65,14 +47,56 @@ class ClientPlayingScreen extends StatelessWidget {
               Get.back();
             }
           },
-          child: _RemoteMetronomePanel(),
+          child: _RemoteMetronomePanel(hostName, () => _showEndDialog(context)),
         ),
       ),
     );
   }
+
+  Future<bool> _showEndDialog(BuildContext context) async {
+    final isEnded = await showDialog(
+      barrierDismissible: false,
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Zakończyć wspólne odtwarzanie?'),
+        content: Text('Gospodarz sesji zakończył połączenie'),
+        actions: [
+          FlatButton(
+            onPressed: () => Get.back(result: false),
+            child: Text('Powrót'),
+          ),
+          FlatButton(
+            onPressed: () => Get.back(result: true),
+            child: Text('Zakończ'),
+          ),
+        ],
+      ),
+    );
+    if (isEnded) {
+      _isEndedByMe = true;
+
+      final state = context.read(remoteScreenStateProvider.state);
+      if (state == _ScreenState.Setlist) {
+        context
+            .read(setlistPlayerProvider(
+                context.read(remoteScreenStateProvider).setlist))
+            .stop();
+      } else {
+        context.read(metronomeProvider).stop();
+      }
+
+      context.read(nearbyDevicesProvider).finish();
+    }
+    return isEnded;
+  }
 }
 
 class _RemoteMetronomePanel extends ConsumerWidget {
+  final String hostName;
+  final Function showEndDialogFunction;
+
+  _RemoteMetronomePanel(this.hostName, this.showEndDialogFunction);
+
   @override
   Widget build(BuildContext context, ScopedReader watch) {
     final controller = watch(remoteMetronomeScreenControllerProvider);
@@ -105,28 +129,69 @@ class _RemoteMetronomePanel extends ConsumerWidget {
     // if (state == _ScreenState.Setlist) {}
 
     return Padding(
-      padding: const EdgeInsets.only(top: 50),
+      padding: const EdgeInsets.only(top: 50, bottom: 20),
       child: Column(
-        // mainAxisSize: MainAxisSize.max,
-        // mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Visualization(beatsPerBar),
-          SizedBox(
-            height: 50,
+          Column(
+            children: [
+              RichText(
+                text: TextSpan(
+                  text: 'Odtwarzaniem zarządza ',
+                  style: DefaultTextStyle.of(context).style,
+                  children: <TextSpan>[
+                    TextSpan(
+                      text: hostName,
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                  ],
+                ),
+              ),
+              // Text('Odtwarzaniem zarządza $hostName'),
+              SizedBox(
+                height: 50,
+              ),
+              Visualization(beatsPerBar),
+              SizedBox(
+                height: 30,
+              ),
+              Text(
+                tempo.toString(),
+                style: TextStyle(fontSize: 60),
+                textAlign: TextAlign.center,
+              ),
+              SizedBox(
+                height: 20,
+              ),
+              if (state == _ScreenState.Setlist)
+                Text(
+                  '${context.read(remoteScreenStateProvider).setlist.name} - ${track.name}',
+                  style: TextStyle(fontSize: 16),
+                ),
+              SizedBox(
+                height: 30,
+              ),
+              if (state == _ScreenState.Setlist && track.isComplex)
+                Container(
+                  padding: const EdgeInsets.symmetric(vertical: 20),
+                  color: Colors.black38,
+                  child: AnimatedTrackSections(
+                    player,
+                    track.sections,
+                  ),
+                ),
+            ],
           ),
-          Text(
-            tempo.toString(),
-            style: TextStyle(fontSize: 60),
-            textAlign: TextAlign.center,
+          RaisedButton(
+            onPressed: () async {
+              final isEnded = await showEndDialogFunction();
+              if (isEnded) {
+                Get.back();
+              }
+              // context.read(nearbyDevicesProvider).finish();
+            },
+            child: Text('Zakończ'),
           ),
-          if (state == _ScreenState.Setlist)
-            Text(context.read(remoteScreenStateProvider).setlist.name),
-          if (state == _ScreenState.Setlist) Text(track.name),
-          if (state == _ScreenState.Setlist && track.isComplex)
-            AnimatedTrackSections(
-              player,
-              track.sections,
-            ),
         ],
       ),
     );

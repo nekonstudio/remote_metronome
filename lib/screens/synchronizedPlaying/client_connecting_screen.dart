@@ -14,7 +14,9 @@ class ClientConnectingScreen extends StatelessWidget {
       provider: synchronizationProvider,
       onChange: (context, synchronization) {
         if (synchronization.deviceMode == DeviceSynchronizationMode.Client) {
-          Get.off(ClientPlayingScreen());
+          final hostName =
+              context.read(nearbyDevicesProvider).connectedDevicesList.first;
+          Get.off(ClientPlayingScreen(hostName));
         }
       },
       child: Scaffold(
