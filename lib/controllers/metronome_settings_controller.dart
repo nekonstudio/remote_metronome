@@ -1,10 +1,13 @@
 import 'package:flutter/foundation.dart';
+import 'package:metronom/providers/storage.dart';
 
 import '../providers/metronome/metronome_settings.dart';
 
 class MetronomeSettingsController extends ValueNotifier<MetronomeSettings> {
-  MetronomeSettingsController(MetronomeSettings defaultSettings)
-      : super(defaultSettings);
+  final Storage storage;
+
+  MetronomeSettingsController(this.storage)
+      : super(storage.getMetronomeSettings());
 
   static const HalfTimeTempoMultipler = 0.5;
   static const DoubleTimeTempoMultipler = 2.0;
@@ -89,6 +92,7 @@ class MetronomeSettingsController extends ValueNotifier<MetronomeSettings> {
 
     if (newSettings.isValid()) {
       value = newSettings;
+      storage.saveMetronomeSettings(value);
       notifyListeners();
     }
   }

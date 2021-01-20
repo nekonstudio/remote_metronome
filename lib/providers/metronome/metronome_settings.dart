@@ -1,12 +1,22 @@
 import 'dart:convert';
 
+import 'package:hive/hive.dart';
+
 import '../../utils/validable/property_validable.dart';
 import '../../utils/validable/range_validable_property.dart';
 import '../../utils/validable/validable.dart';
 
+part 'metronome_settings.g.dart';
+
+@HiveType(typeId: 0)
 class MetronomeSettings extends PropertyValidable {
+  @HiveField(0)
   final int tempo;
+
+  @HiveField(1)
   final int beatsPerBar;
+
+  @HiveField(2)
   final int clicksPerBeat;
 
   MetronomeSettings(

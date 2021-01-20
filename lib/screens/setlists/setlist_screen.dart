@@ -13,7 +13,6 @@ import '../../mixins/list_item_long_press_popup_menu.dart';
 import '../../models/track.dart';
 import '../../providers/metronome/metronome_base.dart';
 import '../../providers/setlists_manager.dart';
-import '../../providers/nearby/nearby_devices.dart';
 import '../../widgets/play_complex_track_panel.dart';
 import '../../widgets/play_simple_track_panel.dart';
 import '../../widgets/remote_mode_screen.dart';
@@ -38,8 +37,8 @@ class SetlistScreen extends ConsumerWidget with ListItemLongPressPopupMenu {
 
   SetlistScreen(this.setlist);
 
-  dynamic _buildPopupMenuItems(
-      BuildContext context, String setlistId, List<Track> tracks) {
+  dynamic _buildPopupMenuItems(BuildContext context, String setlistId,
+      List<Track> tracks, SetlistPlayer player) {
     return [
       PopupMenuItem(
         child: Text('Edytuj'),
@@ -56,9 +55,14 @@ class SetlistScreen extends ConsumerWidget with ListItemLongPressPopupMenu {
           child: Text('Usuń'),
           value: (index) {
             if (!context.read(metronomeProvider).isPlaying) {
-              context
-                  .read(setlistManagerProvider)
-                  .deleteTrack(setlistId, index);
+              final setlistManager = context.read(setlistManagerProvider);
+
+              setlistManager.deleteTrack(setlistId, index);
+
+              if (setlistManager.getSetlist(setlistId).tracksCount ==
+                  player.currentTrackIndex) {
+                player.selectTrack(setlist.tracksCount - 1);
+              }
             } else {
               Get.snackbar('Zatrzymaj odtwarzanie', 'aby usunąć utwór.',
                   colorText: Colors.white);
@@ -86,35 +90,38 @@ class SetlistScreen extends ConsumerWidget with ListItemLongPressPopupMenu {
 
     final tracks = setlist.tracks;
 
-    return Consumer(
-      builder: (context, watch, child) {
-        final player = watch(setlistPlayerProvider(setlist));
-        player.onTrackChanged = _onTrackChanged;
+    return tracks.length <= 0
+        ? WillPopScope(
+            onWillPop: () {
+              _handleRemoteSynchronization(synchronization);
 
-        final selectedTrack = tracks[player.currentTrackIndex];
+              return Future.value(true);
+            },
+            child: RemoteModeScreen(
+              title: Text(setlist.name),
+              body: Center(
+                child: Text('Brak utworów w setliście'),
+              ),
+              floatingActionButton: _buildFloatingActionButton(),
+            ),
+          )
+        : Consumer(
+            builder: (context, watch, child) {
+              final player = watch(setlistPlayerProvider(setlist));
+              player.onTrackChanged = _onTrackChanged;
 
-        return WillPopScope(
-          onWillPop: () {
-            if (synchronization.isSynchronized) {
-              synchronization.sendRemoteCommand(
-                RemoteCommand.stopTrack(),
-              );
+              final selectedTrack = tracks[player.currentTrackIndex];
 
-              final metronomeSettings =
-                  synchronization.simpleMetronomeSettingsGetter();
-              synchronization.sendRemoteCommand(
-                RemoteCommand.setMetronomeSettings(metronomeSettings),
-              );
-            }
+              return WillPopScope(
+                onWillPop: () {
+                  _handleRemoteSynchronization(synchronization);
 
-            player.stop();
+                  player.stop();
 
-            return Future.value(true);
-          },
-          child: RemoteModeScreen(
-            title: tracks.length == 0
-                ? Text(setlist.name)
-                : ListTile(
+                  return Future.value(true);
+                },
+                child: RemoteModeScreen(
+                  title: ListTile(
                     contentPadding: EdgeInsets.zero,
                     title: Text(
                       selectedTrack.name,
@@ -122,11 +129,7 @@ class SetlistScreen extends ConsumerWidget with ListItemLongPressPopupMenu {
                     ),
                     subtitle: Text(setlist.name),
                   ),
-            body: tracks.length == 0
-                ? Center(
-                    child: Text('Brak utworów w setliście'),
-                  )
-                : Container(
+                  body: Container(
                     padding: const EdgeInsets.symmetric(vertical: 20),
                     child: Column(
                       children: [
@@ -169,8 +172,8 @@ class SetlistScreen extends ConsumerWidget with ListItemLongPressPopupMenu {
                                       onLongPress: () => showPopupMenu(
                                         context,
                                         index,
-                                        _buildPopupMenuItems(
-                                            context, setlist.id, tracks),
+                                        _buildPopupMenuItems(context,
+                                            setlist.id, tracks, player),
                                       ),
                                       child: ListTile(
                                         leading: CircleAvatar(
@@ -208,26 +211,41 @@ class SetlistScreen extends ConsumerWidget with ListItemLongPressPopupMenu {
                       ],
                     ),
                   ),
-            floatingActionButton: Consumer(
-              builder: (context, watch, child) {
-                final isPlaying = watch(metronomeProvider).isPlaying;
-                return FloatingActionButton(
-                  backgroundColor:
-                      isPlaying ? Colors.grey : Theme.of(context).accentColor,
-                  child: Icon(Icons.add),
-                  onPressed: () {
-                    if (!isPlaying) {
-                      Get.to(AddEditTrackScreen(setlist.id, null));
-                    }
-                  },
-                );
-              },
-            ),
-          ),
-        );
-      },
-    );
+                  floatingActionButton: _buildFloatingActionButton(),
+                ),
+              );
+            },
+          );
   }
+
+  void _handleRemoteSynchronization(RemoteSynchronization synchronization) {
+    if (synchronization.isSynchronized) {
+      synchronization.sendRemoteCommand(
+        RemoteCommand.stopTrack(),
+      );
+
+      final metronomeSettings = synchronization.simpleMetronomeSettingsGetter();
+      synchronization.sendRemoteCommand(
+        RemoteCommand.setMetronomeSettings(metronomeSettings),
+      );
+    }
+  }
+
+  Widget _buildFloatingActionButton() => Consumer(
+        builder: (context, watch, child) {
+          final isPlaying = watch(metronomeProvider).isPlaying;
+          return FloatingActionButton(
+            backgroundColor:
+                isPlaying ? Colors.grey : Theme.of(context).accentColor,
+            child: Icon(Icons.add),
+            onPressed: () {
+              if (!isPlaying) {
+                Get.to(AddEditTrackScreen(setlist.id, null));
+              }
+            },
+          );
+        },
+      );
 }
 
 class _PlayerPanel extends ConsumerWidget {

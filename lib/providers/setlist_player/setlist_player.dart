@@ -1,3 +1,4 @@
+import 'package:metronom/models/section.dart';
 import 'package:metronom/models/track.dart';
 import 'package:metronom/providers/setlist_player/track_player.dart';
 
@@ -40,8 +41,11 @@ class SetlistPlayer {
   }
 
   void selectTrack(int index) {
-    if (index != _currentTrackIndex)
-      _handleTrackChange(() => _currentTrackIndex = index);
+    if (index != _currentTrackIndex) {
+      if (index >= 0) {
+        _handleTrackChange(() => _currentTrackIndex = index);
+      }
+    }
   }
 
   void selectNextSection() {

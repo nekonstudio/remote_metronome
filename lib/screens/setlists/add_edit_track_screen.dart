@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:get/get.dart';
+import 'package:metronom/models/section.dart';
 import 'package:metronom/providers/metronome/metronome_settings.dart';
 import 'package:swipedetector/swipedetector.dart';
 import 'package:toggle_switch/toggle_switch.dart';

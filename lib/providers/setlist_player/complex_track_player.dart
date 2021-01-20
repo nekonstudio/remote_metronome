@@ -1,8 +1,8 @@
 import 'dart:async';
 
+import 'package:metronom/models/section.dart';
 import 'package:metronom/models/track.dart';
 import 'package:metronom/providers/metronome/metronome.dart';
-import 'package:metronom/providers/metronome/metronome_settings.dart';
 import 'package:metronom/providers/setlist_player/track_player.dart';
 
 class ComplexTrackPlayer extends TrackPlayer {

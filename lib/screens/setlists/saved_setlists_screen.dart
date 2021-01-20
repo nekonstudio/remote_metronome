@@ -22,29 +22,31 @@ class SavedSetlistsScreen extends ConsumerWidget
 
     return RemoteModeScreen(
       title: Text('Setlisty'),
-      body: Container(
-        child: ListView.separated(
-          separatorBuilder: (context, index) => Divider(),
-          itemCount: setlists.length,
-          itemBuilder: (context, index) {
-            final setlist = setlists[index];
-            return InkWell(
-              onTap: () {
-                Get.to(SetlistScreen(setlist));
+      body: setlists.length == 0
+          ? Center(
+              child: Text('Brak setlist'),
+            )
+          : ListView.separated(
+              separatorBuilder: (context, index) => Divider(),
+              itemCount: setlists.length,
+              itemBuilder: (context, index) {
+                final setlist = setlists[index];
+                return InkWell(
+                  onTap: () {
+                    Get.to(SetlistScreen(setlist));
+                  },
+                  onTapDown: (details) => storeTapPosition(details),
+                  onLongPress: () => showPopupMenu(context, index,
+                      _buildPopupMenuItems(context, setlistManager, setlist)),
+                  child: ListTile(
+                    leading: Icon(Icons.menu),
+                    title: Text('${setlist.name}'),
+                    subtitle: Text('Liczba utworów: ${setlist.tracksCount}'),
+                    trailing: Text(''),
+                  ),
+                );
               },
-              onTapDown: (details) => storeTapPosition(details),
-              onLongPress: () => showPopupMenu(context, index,
-                  _buildPopupMenuItems(context, setlistManager, setlist)),
-              child: ListTile(
-                leading: Icon(Icons.menu),
-                title: Text('${setlist.name}'),
-                subtitle: Text('Liczba utworów: ${setlist.tracksCount}'),
-                trailing: Text(''),
-              ),
-            );
-          },
-        ),
-      ),
+            ),
       floatingActionButton: FloatingActionButton(
         child: Icon(Icons.add),
         onPressed: () {

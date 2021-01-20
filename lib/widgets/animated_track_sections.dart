@@ -1,6 +1,6 @@
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
-import 'package:metronom/models/track.dart';
+import 'package:metronom/models/section.dart';
 import 'package:metronom/providers/setlist_player/setlist_player.dart';
 
 class AnimatedTrackSections extends StatefulWidget {

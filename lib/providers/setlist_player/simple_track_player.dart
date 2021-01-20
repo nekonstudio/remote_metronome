@@ -1,6 +1,5 @@
 import 'package:metronom/models/track.dart';
 import 'package:metronom/providers/metronome/metronome.dart';
-import 'package:metronom/providers/metronome/metronome_settings.dart';
 import 'package:metronom/providers/setlist_player/track_player.dart';
 
 class SimpleTrackPlayer extends TrackPlayer {
