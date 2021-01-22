@@ -55,7 +55,7 @@ class ComplexTrackPlayer extends TrackPlayer {
   @override
   void stop() {
     Metronome().stop();
-    _sub.cancel();
+    _sub?.cancel();
 
     _resetSectionDataToDefaults();
   }

@@ -30,10 +30,14 @@ class _SimpleMetronomeScreenState extends State<SimpleMetronomeScreen> {
   void initState() {
     super.initState();
 
+    final storage = context.read(storageProvider);
+    _controller = MetronomeSettingsController(storage);
+    _controller.addListener(() {
+      context.read(_tapTempoDetectorProvider).reset();
+    });
+
     final synchronization = context.read(synchronizationProvider);
-
     synchronization.simpleMetronomeSettingsGetter = () => _controller.value;
-
     if (synchronization.isSynchronized) {
       final settings = _controller.value;
 
@@ -41,12 +45,6 @@ class _SimpleMetronomeScreenState extends State<SimpleMetronomeScreen> {
         RemoteCommand.setMetronomeSettings(settings),
       );
     }
-
-    final storage = context.read(storageProvider);
-    _controller = MetronomeSettingsController(storage);
-    _controller.addListener(() {
-      context.read(_tapTempoDetectorProvider).reset();
-    });
   }
 
   void changeRemoteMetronomeProperty(

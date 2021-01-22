@@ -72,7 +72,10 @@ class RemoteCommandHandler {
 
         print(setlist);
 
-        providerReader(remoteScreenStateProvider).setSetlistState(setlist);
+        if (setlist.tracksCount > 0) {
+          providerReader(remoteScreenStateProvider).setSetlistState(setlist);
+        }
+
         break;
 
       case RemoteCommandType.PlayTrack:
