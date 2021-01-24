@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:metronom/controllers/storage_metronome_settings_controller.dart';
 import 'package:metronom/providers/storage.dart';
 
 import '../controllers/metronome_settings_controller.dart';
@@ -24,14 +25,14 @@ class _SimpleMetronomeScreenState extends State<SimpleMetronomeScreen> {
     (ref) => NotifierTapTempoDetector(),
   );
 
-  MetronomeSettingsController _controller;
+  StorageMetronomeSettingsController _controller;
 
   @override
   void initState() {
     super.initState();
 
     final storage = context.read(storageProvider);
-    _controller = MetronomeSettingsController(storage);
+    _controller = StorageMetronomeSettingsController(storage);
     _controller.addListener(() {
       context.read(_tapTempoDetectorProvider).reset();
     });

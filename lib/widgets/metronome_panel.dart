@@ -1,78 +1,22 @@
 import 'package:flutter/material.dart';
+import 'package:metronom/controllers/metronome_settings_controller.dart';
 import 'package:metronom/providers/metronome/metronome_settings.dart';
 
-class MetronomePanel extends StatefulWidget {
-  MetronomePanel({Key key}) : super(key: key);
+class MetronomePanel extends StatelessWidget {
+  final MetronomeSettingsController controller;
 
-  int _tempo = 120;
-  int _beatsPerBar = 4;
-  int _clicksPerBeat = 1;
+  MetronomePanel(this.controller);
 
-  MetronomeSettings _settings = MetronomeSettings(120, 4, 1);
-
-  MetronomePanel setup(MetronomeSettings settings) {
-    _settings = settings;
-    return this;
-  }
-
-  @override
-  MetronomePanelState createState() => MetronomePanelState();
-}
-
-class MetronomePanelState extends State<MetronomePanel> {
-  bool _isPlaying = false;
-  int currentTempo = 120;
-  int beatsPerBar = 4;
-  int clicksPerBeat = 1;
-  int _currentBarBeat = 0;
-  int _currentClickPerBeat = 1;
-  double _tempoMultiplier = 1.0;
-
-  @override
-  void initState() {
-    super.initState();
-
-    currentTempo = widget._tempo;
-    beatsPerBar = widget._beatsPerBar;
-    clicksPerBeat = widget._clicksPerBeat;
-  }
-
-  void _decreaseBeatsPerBar() {
-    if (beatsPerBar > 1) {
-      setState(() {
-        beatsPerBar--;
-      });
-    }
-  }
-
-  void _increaseBeatsPerBar() {
-    if (beatsPerBar < 16) {
-      setState(() {
-        beatsPerBar++;
-      });
-    }
-  }
-
-  void _decreaseClicksPerBeat() {
-    if (clicksPerBeat > 1) {
-      setState(() {
-        clicksPerBeat--;
-      });
-    }
-  }
-
-  void _increaseClicksPerBeat() {
-    if (clicksPerBeat < 16) {
-      setState(() {
-        clicksPerBeat++;
-      });
-    }
-  }
-
-  void _changeTempoBy(int value) {
-    setState(() {
-      currentTempo += value;
-    });
+  Widget _buildWithController(
+      Widget Function(
+              BuildContext context, MetronomeSettings settings, Widget child)
+          builder,
+      {Widget child}) {
+    return ValueListenableBuilder(
+      valueListenable: controller,
+      builder: builder,
+      child: child,
+    );
   }
 
   Widget _buildChangeTempoButton(int value) {
@@ -81,9 +25,7 @@ class MetronomePanelState extends State<MetronomePanel> {
       height: 40,
       child: FlatButton(
         padding: const EdgeInsets.all(0),
-        onPressed: () {
-          _changeTempoBy(value);
-        },
+        onPressed: () => controller.changeTempoBy(value),
         child: Text((value >= 0) ? '+$value' : '$value'),
         shape: Border.all(color: Colors.lightBlue),
       ),
@@ -92,7 +34,7 @@ class MetronomePanelState extends State<MetronomePanel> {
 
   @override
   Widget build(BuildContext context) {
-    print("Current tempo w metronomie: $currentTempo");
+    // print("Current tempo w metronomie: $currentTempo");
     return Container(
       // padding: const EdgeInsets.symmetric(vertical: 30, horizontal: 0),
       child: Column(
@@ -108,25 +50,25 @@ class MetronomePanelState extends State<MetronomePanel> {
                     children: [
                       _buildChangeTempoButton(-1),
                       _buildChangeTempoButton(-5),
-                      Text(
-                        '$currentTempo',
-                        style: TextStyle(fontSize: 60),
+                      _buildWithController(
+                        (context, settings, child) => Text(
+                          '${settings.tempo}',
+                          style: TextStyle(fontSize: 60),
+                        ),
                       ),
                       _buildChangeTempoButton(5),
                       _buildChangeTempoButton(1),
                     ],
                   ),
                 ),
-                Slider(
-                  value: currentTempo.toDouble(),
-                  min: 10,
-                  max: 300,
-                  onChanged: (value) {
-                    setState(() {
-                      currentTempo = value.toInt();
-                    });
-                  },
-                  onChangeEnd: (value) {},
+                _buildWithController(
+                  (context, settings, child) => Slider(
+                    value: settings.tempo.toDouble(),
+                    min: settings.minTempo.toDouble(),
+                    max: settings.maxTempo.toDouble(),
+                    onChanged: (value) => controller.changeTempo(value.toInt()),
+                    // onChangeEnd: (value) {},
+                  ),
                 ),
               ],
             ),
@@ -150,18 +92,20 @@ class MetronomePanelState extends State<MetronomePanel> {
                         mainAxisAlignment: MainAxisAlignment.spaceAround,
                         children: [
                           GestureDetector(
-                            onTap: _decreaseBeatsPerBar,
+                            onTap: controller.decreaseBeatsPerBarBy1,
                             child: CircleAvatar(
                               radius: 13,
                               child: Text('-'),
                             ),
                           ),
-                          Text(
-                            '$beatsPerBar',
-                            style: TextStyle(fontSize: 26),
+                          _buildWithController(
+                            (context, settings, child) => Text(
+                              '${settings.beatsPerBar}',
+                              style: TextStyle(fontSize: 26),
+                            ),
                           ),
                           GestureDetector(
-                            onTap: _increaseBeatsPerBar,
+                            onTap: controller.increaseBeatsPerBarBy1,
                             child: CircleAvatar(
                               radius: 13,
                               child: Text('+'),
@@ -189,18 +133,20 @@ class MetronomePanelState extends State<MetronomePanel> {
                         mainAxisAlignment: MainAxisAlignment.spaceAround,
                         children: [
                           GestureDetector(
-                            onTap: _decreaseClicksPerBeat,
+                            onTap: controller.decreaseClicksPerBeatBy1,
                             child: CircleAvatar(
                               radius: 13,
                               child: Text('-'),
                             ),
                           ),
-                          Text(
-                            '$clicksPerBeat',
-                            style: TextStyle(fontSize: 26),
+                          _buildWithController(
+                            (context, settings, child) => Text(
+                              '${settings.clicksPerBeat}',
+                              style: TextStyle(fontSize: 26),
+                            ),
                           ),
                           GestureDetector(
-                            onTap: _increaseClicksPerBeat,
+                            onTap: controller.increaseClicksPerBeatBy1,
                             child: CircleAvatar(
                               radius: 13,
                               child: Text('+'),

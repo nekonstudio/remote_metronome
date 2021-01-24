@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:get/get.dart';
+import 'package:metronom/controllers/metronome_settings_controller.dart';
 import 'package:metronom/models/section.dart';
 import 'package:metronom/providers/metronome/metronome_settings.dart';
 import 'package:swipedetector/swipedetector.dart';
@@ -28,8 +29,11 @@ class AddEditTrackScreen extends StatefulWidget {
 }
 
 class _AddEditTrackScreenState extends State<AddEditTrackScreen> {
-  static final _metronomeKey = GlobalKey<MetronomePanelState>();
-  final _metronomePanel = MetronomePanel(key: _metronomeKey);
+  // static final _metronomeKey = GlobalKey<MetronomePanelState>();
+  // final _metronomePanel = MetronomePanel(key: _metronomeKey);
+
+  MetronomeSettingsController _controller;
+
   bool _isComplexTrack = false;
   int _initialModeIndex = 0;
   String _setlistId;
@@ -51,6 +55,14 @@ class _AddEditTrackScreenState extends State<AddEditTrackScreen> {
       _initialModeIndex = _isComplexTrack ? 1 : 0;
       if (_isComplexTrack) _sections = _track.sections;
     }
+
+    MetronomeSettings initialMetronomeSettings = MetronomeSettings(120, 4, 1);
+
+    if (_track != null && !_track.isComplex) {
+      initialMetronomeSettings = _track.settings;
+    }
+
+    _controller = MetronomeSettingsController(initialMetronomeSettings);
   }
 
   String _validate(String value) {
@@ -78,14 +90,7 @@ class _AddEditTrackScreenState extends State<AddEditTrackScreen> {
   void _save(BuildContext context, String value) {
     Track track = _isComplexTrack
         ? Track.complex(value, _sections)
-        : Track.simple(
-            value,
-            MetronomeSettings(
-              _metronomeKey.currentState.currentTempo,
-              _metronomeKey.currentState.beatsPerBar,
-              _metronomeKey.currentState.clicksPerBeat,
-            ),
-          );
+        : Track.simple(value, _controller.value);
 
     final setlistManager = context.read(setlistManagerProvider);
 
@@ -177,10 +182,8 @@ class _AddEditTrackScreenState extends State<AddEditTrackScreen> {
                         SizedBox(
                           height: 20,
                         ),
-                        Visibility(
-                          maintainState: true,
-                          visible: !_isComplexTrack,
-                          child: Container(
+                        if (!_isComplexTrack)
+                          Container(
                             padding: const EdgeInsets.only(bottom: 20),
                             decoration: BoxDecoration(
                                 color: Colors.black26,
@@ -196,16 +199,10 @@ class _AddEditTrackScreenState extends State<AddEditTrackScreen> {
                                     title: Text('Wybierz tempo'),
                                   ),
                                 ),
-                                _isEditingMode
-                                    ? _isComplexTrack
-                                        ? _metronomePanel
-                                        : _metronomePanel.setup(_track.settings)
-                                    : _metronomePanel,
+                                MetronomePanel(_controller),
                               ],
                             ),
                           ),
-                          // child: MetronomePanel(),
-                        ),
                         if (_isComplexTrack)
                           Container(
                               decoration: BoxDecoration(
@@ -347,8 +344,9 @@ class _SectionForm extends StatelessWidget {
   _SectionForm(this.sectionHandler, {this.existingSection});
 
   static final _formKey = GlobalKey<FormState>();
-  static final _metronomeKey = GlobalKey<MetronomePanelState>();
-  MetronomePanel _metronomePanel = MetronomePanel(key: _metronomeKey);
+
+  MetronomeSettingsController _controller;
+
   Section _newSection = Section(title: null, settings: null, barsCount: null);
 
   void _saveForm(BuildContext context) {
@@ -358,11 +356,7 @@ class _SectionForm extends StatelessWidget {
 
     _formKey.currentState.save();
 
-    _newSection.settings = MetronomeSettings(
-      _metronomeKey.currentState.currentTempo,
-      _metronomeKey.currentState.beatsPerBar,
-      _metronomeKey.currentState.clicksPerBeat,
-    );
+    _newSection.settings = _controller.value;
 
     if (existingSection == null) {
       sectionHandler(_newSection);
@@ -375,6 +369,12 @@ class _SectionForm extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final initialMetronomeSettings = existingSection != null
+        ? existingSection.settings
+        : MetronomeSettings(120, 4, 1);
+
+    _controller = MetronomeSettingsController(initialMetronomeSettings);
+
     return Container(
       height: MediaQuery.of(context).viewInsets.bottom + 440,
       child: Column(
@@ -387,9 +387,7 @@ class _SectionForm extends StatelessWidget {
                   existingSection == null ? 'Dodaj sekcję' : 'Edytuj sekcję'),
             ),
           ),
-          existingSection != null
-              ? _metronomePanel.setup(existingSection.settings)
-              : _metronomePanel,
+          MetronomePanel(_controller),
           Form(
             key: _formKey,
             child: Container(

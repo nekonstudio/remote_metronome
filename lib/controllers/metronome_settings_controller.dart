@@ -4,10 +4,8 @@ import 'package:metronom/providers/storage.dart';
 import '../providers/metronome/metronome_settings.dart';
 
 class MetronomeSettingsController extends ValueNotifier<MetronomeSettings> {
-  final Storage storage;
-
-  MetronomeSettingsController(this.storage)
-      : super(storage.getMetronomeSettings());
+  MetronomeSettingsController(MetronomeSettings initialSettings)
+      : super(initialSettings);
 
   static const HalfTimeTempoMultipler = 0.5;
   static const DoubleTimeTempoMultipler = 2.0;
@@ -28,7 +26,7 @@ class MetronomeSettingsController extends ValueNotifier<MetronomeSettings> {
   void decreaseBeatsPerBarBy1() => _changeBeatsPerBarBy(-1);
   void increaseClicksPerBeatBy1() => _changeClicksPerBeatBy(1);
   void decreaseClicksPerBeatBy1() => _changeClicksPerBeatBy(-1);
-  void changeTempo(int newTempo) => _changeParameter(tempo: newTempo);
+  void changeTempo(int newTempo) => changeParameter(tempo: newTempo);
 
   void toggleHalfTimeTempoMultiplier() {
     int newTempo;
@@ -47,7 +45,7 @@ class MetronomeSettingsController extends ValueNotifier<MetronomeSettings> {
           .round();
     }
 
-    _changeParameter(
+    changeParameter(
       tempo: newTempo,
     );
   }
@@ -70,18 +68,19 @@ class MetronomeSettingsController extends ValueNotifier<MetronomeSettings> {
               .round();
     }
 
-    _changeParameter(
+    changeParameter(
       tempo: newTempo,
     );
   }
 
   void _changeBeatsPerBarBy(int value) =>
-      _changeParameter(beatsPerBar: this.value.beatsPerBar + value);
+      changeParameter(beatsPerBar: this.value.beatsPerBar + value);
 
   void _changeClicksPerBeatBy(int value) =>
-      _changeParameter(clicksPerBeat: this.value.clicksPerBeat + value);
+      changeParameter(clicksPerBeat: this.value.clicksPerBeat + value);
 
-  void _changeParameter({int tempo, int beatsPerBar, int clicksPerBeat}) {
+  @protected
+  void changeParameter({int tempo, int beatsPerBar, int clicksPerBeat}) {
     final newSettings = value
         .copyWith(
           tempo: tempo,
@@ -92,7 +91,6 @@ class MetronomeSettingsController extends ValueNotifier<MetronomeSettings> {
 
     if (newSettings.isValid()) {
       value = newSettings;
-      storage.saveMetronomeSettings(value);
       notifyListeners();
     }
   }

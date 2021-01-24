@@ -20,10 +20,8 @@ import 'add_edit_track_screen.dart';
 
 final setlistPlayerProvider =
     ChangeNotifierProvider.autoDispose.family<NotifierSetlistPlayer, Setlist>(
-  (ref, setlist) => ref.watch(synchronizationProvider).deviceMode ==
-          DeviceSynchronizationMode.Host
-      ? RemoteSynchronizedNotifierSetlistPlayer(
-          ref.read(synchronizationProvider), setlist)
+  (ref, setlist) => ref.watch(synchronizationProvider).deviceMode == DeviceSynchronizationMode.Host
+      ? RemoteSynchronizedNotifierSetlistPlayer(ref.read(synchronizationProvider), setlist)
       : NotifierSetlistPlayer(setlist),
 );
 
@@ -37,8 +35,8 @@ class SetlistScreen extends ConsumerWidget with ListItemLongPressPopupMenu {
 
   SetlistScreen(this.setlist);
 
-  dynamic _buildPopupMenuItems(BuildContext context, String setlistId,
-      List<Track> tracks, SetlistPlayer player) {
+  dynamic _buildPopupMenuItems(
+      BuildContext context, String setlistId, List<Track> tracks, SetlistPlayer player) {
     return [
       PopupMenuItem(
         child: Text('Edytuj'),
@@ -46,8 +44,7 @@ class SetlistScreen extends ConsumerWidget with ListItemLongPressPopupMenu {
           if (!context.read(metronomeProvider).isPlaying) {
             Get.to(AddEditTrackScreen(setlistId, tracks[index]));
           } else {
-            Get.snackbar('Zatrzymaj odtwarzanie', 'aby edytować utwór.',
-                colorText: Colors.white);
+            Get.snackbar('Zatrzymaj odtwarzanie', 'aby edytować utwór.', colorText: Colors.white);
           }
         },
       ),
@@ -59,13 +56,11 @@ class SetlistScreen extends ConsumerWidget with ListItemLongPressPopupMenu {
 
               setlistManager.deleteTrack(setlistId, index);
 
-              if (setlistManager.getSetlist(setlistId).tracksCount ==
-                  player.currentTrackIndex) {
+              if (setlistManager.getSetlist(setlistId).tracksCount == player.currentTrackIndex) {
                 player.selectTrack(setlist.tracksCount - 1);
               }
             } else {
-              Get.snackbar('Zatrzymaj odtwarzanie', 'aby usunąć utwór.',
-                  colorText: Colors.white);
+              Get.snackbar('Zatrzymaj odtwarzanie', 'aby usunąć utwór.', colorText: Colors.white);
             }
           }),
     ];
@@ -108,6 +103,7 @@ class SetlistScreen extends ConsumerWidget with ListItemLongPressPopupMenu {
         : Consumer(
             builder: (context, watch, child) {
               final player = watch(setlistPlayerProvider(setlist));
+              // player.updateTrackPlayer();
               player.onTrackChanged = _onTrackChanged;
 
               final selectedTrack = tracks[player.currentTrackIndex];
@@ -140,8 +136,7 @@ class SetlistScreen extends ConsumerWidget with ListItemLongPressPopupMenu {
                             children: [
                               Expanded(
                                 child: selectedTrack.isComplex
-                                    ? PlayComplexTrackPanel(
-                                        player, selectedTrack)
+                                    ? PlayComplexTrackPanel(player, selectedTrack)
                                     : PlaySimpleTrackPanel(selectedTrack),
                               ),
                             ],
@@ -150,10 +145,8 @@ class SetlistScreen extends ConsumerWidget with ListItemLongPressPopupMenu {
                         _PlayerPanel(player),
                         Expanded(
                           flex: 6,
-                          child: NotificationListener<
-                              OverscrollIndicatorNotification>(
-                            onNotification:
-                                (OverscrollIndicatorNotification overscroll) {
+                          child: NotificationListener<OverscrollIndicatorNotification>(
+                            onNotification: (OverscrollIndicatorNotification overscroll) {
                               overscroll.disallowGlow();
                               return true;
                             },
@@ -172,8 +165,7 @@ class SetlistScreen extends ConsumerWidget with ListItemLongPressPopupMenu {
                                       onLongPress: () => showPopupMenu(
                                         context,
                                         index,
-                                        _buildPopupMenuItems(context,
-                                            setlist.id, tracks, player),
+                                        _buildPopupMenuItems(context, setlist.id, tracks, player),
                                       ),
                                       child: ListTile(
                                         leading: CircleAvatar(
@@ -182,15 +174,12 @@ class SetlistScreen extends ConsumerWidget with ListItemLongPressPopupMenu {
                                         title: Text(
                                           '${track.name}',
                                           style: TextStyle(
-                                            color: player.currentTrackIndex ==
-                                                    index
+                                            color: player.currentTrackIndex == index
                                                 ? Theme.of(context).accentColor
                                                 : Colors.white,
-                                            fontWeight:
-                                                player.currentTrackIndex ==
-                                                        index
-                                                    ? FontWeight.bold
-                                                    : FontWeight.normal,
+                                            fontWeight: player.currentTrackIndex == index
+                                                ? FontWeight.bold
+                                                : FontWeight.normal,
                                           ),
                                         ),
                                         subtitle: Text(track.isComplex
@@ -235,8 +224,7 @@ class SetlistScreen extends ConsumerWidget with ListItemLongPressPopupMenu {
         builder: (context, watch, child) {
           final isPlaying = watch(metronomeProvider).isPlaying;
           return FloatingActionButton(
-            backgroundColor:
-                isPlaying ? Colors.grey : Theme.of(context).accentColor,
+            backgroundColor: isPlaying ? Colors.grey : Theme.of(context).accentColor,
             child: Icon(Icons.add),
             onPressed: () {
               if (!isPlaying) {
