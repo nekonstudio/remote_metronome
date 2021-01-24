@@ -1,10 +1,8 @@
-import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:metronom/models/track.dart';
-import 'package:metronom/providers/setlist_player/notifier_setlist_player.dart';
-import 'package:metronom/widgets/animated_track_sections.dart';
 
+import '../models/track.dart';
+import '../providers/setlist_player/notifier_setlist_player.dart';
+import 'animated_track_sections.dart';
 import 'visualization.dart';
 
 class PlayComplexTrackPanel extends StatelessWidget {

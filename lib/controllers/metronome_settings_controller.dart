@@ -1,11 +1,9 @@
 import 'package:flutter/foundation.dart';
-import 'package:metronom/providers/storage.dart';
 
 import '../providers/metronome/metronome_settings.dart';
 
 class MetronomeSettingsController extends ValueNotifier<MetronomeSettings> {
-  MetronomeSettingsController(MetronomeSettings initialSettings)
-      : super(initialSettings);
+  MetronomeSettingsController(MetronomeSettings initialSettings) : super(initialSettings);
 
   static const HalfTimeTempoMultipler = 0.5;
   static const DoubleTimeTempoMultipler = 2.0;
@@ -14,8 +12,7 @@ class MetronomeSettingsController extends ValueNotifier<MetronomeSettings> {
   bool _isDoubleTimeTempoMultiplierActive = false;
 
   bool get isHalfTimeTempoMultiplierActive => _isHalfTimeTempoMultiplierActive;
-  bool get isDoubleTimeTempoMultiplierActive =>
-      _isDoubleTimeTempoMultiplierActive;
+  bool get isDoubleTimeTempoMultiplierActive => _isDoubleTimeTempoMultiplierActive;
 
   void increaseTempoBy1() => changeTempoBy(1);
   void decreaseTempoBy1() => changeTempoBy(-1);
@@ -31,8 +28,7 @@ class MetronomeSettingsController extends ValueNotifier<MetronomeSettings> {
   void toggleHalfTimeTempoMultiplier() {
     int newTempo;
 
-    if (!_isHalfTimeTempoMultiplierActive &&
-        !_isDoubleTimeTempoMultiplierActive) {
+    if (!_isHalfTimeTempoMultiplierActive && !_isDoubleTimeTempoMultiplierActive) {
       _isHalfTimeTempoMultiplierActive = true;
       newTempo = (value.tempo * HalfTimeTempoMultipler).round();
     } else if (_isHalfTimeTempoMultiplierActive) {
@@ -41,8 +37,7 @@ class MetronomeSettingsController extends ValueNotifier<MetronomeSettings> {
     } else {
       _isDoubleTimeTempoMultiplierActive = false;
       _isHalfTimeTempoMultiplierActive = true;
-      newTempo = (value.tempo * HalfTimeTempoMultipler * HalfTimeTempoMultipler)
-          .round();
+      newTempo = (value.tempo * HalfTimeTempoMultipler * HalfTimeTempoMultipler).round();
     }
 
     changeParameter(
@@ -53,8 +48,7 @@ class MetronomeSettingsController extends ValueNotifier<MetronomeSettings> {
   void toggleDoubleTimeTempoMultiplier() {
     int newTempo;
 
-    if (!_isDoubleTimeTempoMultiplierActive &&
-        !_isHalfTimeTempoMultiplierActive) {
+    if (!_isDoubleTimeTempoMultiplierActive && !_isHalfTimeTempoMultiplierActive) {
       _isDoubleTimeTempoMultiplierActive = true;
       newTempo = (value.tempo * DoubleTimeTempoMultipler).round();
     } else if (_isDoubleTimeTempoMultiplierActive) {
@@ -63,9 +57,7 @@ class MetronomeSettingsController extends ValueNotifier<MetronomeSettings> {
     } else {
       _isHalfTimeTempoMultiplierActive = false;
       _isDoubleTimeTempoMultiplierActive = true;
-      newTempo =
-          (value.tempo * DoubleTimeTempoMultipler * DoubleTimeTempoMultipler)
-              .round();
+      newTempo = (value.tempo * DoubleTimeTempoMultipler * DoubleTimeTempoMultipler).round();
     }
 
     changeParameter(

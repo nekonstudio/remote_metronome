@@ -1,28 +1,23 @@
 import 'dart:async';
 
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:metronom/providers/metronome/metronome_base.dart';
-import 'package:metronom/providers/metronome/metronome.dart';
 import 'package:metronom/providers/metronome/metronome_settings.dart';
-import 'package:metronom/providers/metronome/notifier_metronome.dart';
-import 'package:mockito/mockito.dart';
 
-// class MockMetronomeImpl extends Mock implements Metronome {}
 class MockMetronomeImpl extends MetronomeBase {
   @override
   void onStart(MetronomeSettings settings) {
-    // TODO: implement onStart
+    // Do nothing
   }
 
   @override
   void onChange(MetronomeSettings settings) {
-    // TODO: implement onChange
+    // Do nothing
   }
 
   @override
   void onStop() {
-    // TODO: implement onStop
+    // Do nothing
   }
 
   @override

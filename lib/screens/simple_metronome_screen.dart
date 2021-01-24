@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:metronom/controllers/storage_metronome_settings_controller.dart';
-import 'package:metronom/providers/storage.dart';
 
-import '../controllers/metronome_settings_controller.dart';
+import '../controllers/storage_metronome_settings_controller.dart';
 import '../providers/metronome/metronome_base.dart';
 import '../providers/metronome/metronome_settings.dart';
 import '../providers/nearby/nearby_devices.dart';
 import '../providers/remote/remote_command.dart';
 import '../providers/remote/remote_synchronization.dart';
+import '../providers/storage.dart';
 import '../tap_tempo_detector.dart';
 import '../widgets/app_drawer.dart';
 import '../widgets/remote_mode_screen.dart';
@@ -48,8 +47,7 @@ class _SimpleMetronomeScreenState extends State<SimpleMetronomeScreen> {
     }
   }
 
-  void changeRemoteMetronomeProperty(
-      Function changeFunction, RemoteCommandType commandType) {
+  void changeRemoteMetronomeProperty(Function changeFunction, RemoteCommandType commandType) {
     if (context.read(synchronizationProvider).isSynchronized) {
       if (!context.read(metronomeProvider).isPlaying) {
         changeFunction();
@@ -90,9 +88,7 @@ class _SimpleMetronomeScreenState extends State<SimpleMetronomeScreen> {
   }
 
   Widget _buildWithController(
-      Widget Function(
-              BuildContext context, MetronomeSettings settings, Widget child)
-          builder,
+      Widget Function(BuildContext context, MetronomeSettings settings, Widget child) builder,
       {Widget child}) {
     return ValueListenableBuilder(
       valueListenable: _controller,
@@ -156,10 +152,9 @@ class _SimpleMetronomeScreenState extends State<SimpleMetronomeScreen> {
                                   style: TextStyle(
                                     color: Colors.white,
                                   )),
-                              backgroundColor:
-                                  _controller.isHalfTimeTempoMultiplierActive
-                                      ? Colors.blue
-                                      : Colors.black,
+                              backgroundColor: _controller.isHalfTimeTempoMultiplierActive
+                                  ? Colors.blue
+                                  : Colors.black,
                             ),
                           ),
                           Text(
@@ -181,10 +176,9 @@ class _SimpleMetronomeScreenState extends State<SimpleMetronomeScreen> {
                                   style: TextStyle(
                                     color: Colors.white,
                                   )),
-                              backgroundColor:
-                                  _controller.isDoubleTimeTempoMultiplierActive
-                                      ? Colors.blue
-                                      : Colors.black,
+                              backgroundColor: _controller.isDoubleTimeTempoMultiplierActive
+                                  ? Colors.blue
+                                  : Colors.black,
                             ),
                           ),
                         ],
@@ -365,10 +359,9 @@ class _SimpleMetronomeScreenState extends State<SimpleMetronomeScreen> {
                         Consumer(
                           builder: (context, watch, child) => CircleAvatar(
                             radius: 30,
-                            backgroundColor:
-                                watch(_tapTempoDetectorProvider).isActive
-                                    ? Colors.white
-                                    : Colors.blueGrey,
+                            backgroundColor: watch(_tapTempoDetectorProvider).isActive
+                                ? Colors.white
+                                : Colors.blueGrey,
                             child: child,
                           ),
                           child: Material(
@@ -377,15 +370,11 @@ class _SimpleMetronomeScreenState extends State<SimpleMetronomeScreen> {
                             clipBehavior: Clip.hardEdge,
                             child: GestureDetector(
                               onTapDown: (_) {
-                                if (!context
-                                    .read(metronomeProvider)
-                                    .isPlaying) {
-                                  final tapTempoDetector =
-                                      context.read(_tapTempoDetectorProvider);
+                                if (!context.read(metronomeProvider).isPlaying) {
+                                  final tapTempoDetector = context.read(_tapTempoDetectorProvider);
 
                                   tapTempoDetector.registerTap();
-                                  final tempo =
-                                      tapTempoDetector.calculatedTempo;
+                                  final tempo = tapTempoDetector.calculatedTempo;
                                   if (tempo != null) {
                                     changeRemoteMetronomeProperty(
                                         () => _controller.changeTempo(tempo),
