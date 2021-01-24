@@ -47,6 +47,8 @@ class Setlist {
     return _tracks.length;
   }
 
+  bool get hasTracks => tracksCount > 0;
+
   Track getTrack(String id) {
     return _tracks.firstWhere((element) => element.id == id);
   }
@@ -56,8 +58,7 @@ class Setlist {
   }
 
   void editTrack(String trackId, Track newTrack) {
-    final index =
-        _tracks.indexOf(_tracks.firstWhere((element) => element.id == trackId));
+    final index = _tracks.indexOf(_tracks.firstWhere((element) => element.id == trackId));
     _tracks[index] = newTrack;
   }
 
@@ -83,8 +84,7 @@ class Setlist {
       map['name'],
     );
 
-    final tracks =
-        List<Track>.from(map['tracks']?.map((x) => Track.fromMap(x)));
+    final tracks = List<Track>.from(map['tracks']?.map((x) => Track.fromMap(x)));
 
     for (final track in tracks) {
       setlist.addTrack(track);
@@ -95,8 +95,7 @@ class Setlist {
 
   String toJson() => json.encode(toMap());
 
-  factory Setlist.fromJson(String source) =>
-      Setlist.fromMap(json.decode(source));
+  factory Setlist.fromJson(String source) => Setlist.fromMap(json.decode(source));
 
   @override
   String toString() => 'Setlist(name: $name, tracks: $_tracks)';

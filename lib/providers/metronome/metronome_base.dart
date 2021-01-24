@@ -8,7 +8,7 @@ import 'metronome.dart';
 import 'metronome_interface.dart';
 import 'metronome_settings.dart';
 import 'notifier_metronome.dart';
-import 'remote_synchronized_metronome_impl.dart';
+import 'remote_synchronized_metronome.dart';
 
 abstract class MetronomeBase implements MetronomeInterface {
   MetronomeSettings _settings;
@@ -58,8 +58,8 @@ abstract class MetronomeBase implements MetronomeInterface {
     _settings = settings;
     _isPlaying = true;
 
-    _currentBarBeatSubscription = getCurrentBarBeatStream()
-        .listen((barBeat) => _currentBarBeat = barBeat);
+    _currentBarBeatSubscription =
+        getCurrentBarBeatStream().listen((barBeat) => _currentBarBeat = barBeat);
 
     onStart(_settings);
   }
@@ -86,8 +86,7 @@ final metronomeProvider = ChangeNotifierProvider<NotifierMetronome>(
     final deviceMode = ref.watch(synchronizationProvider).deviceMode;
     final metronomeImpl = Metronome();
     final metronome = deviceMode == DeviceSynchronizationMode.Host
-        ? RemoteSynchronizedMetronome(
-            ref.read(synchronizationProvider), metronomeImpl)
+        ? RemoteSynchronizedMetronome(ref.read(synchronizationProvider), metronomeImpl)
         : metronomeImpl;
 
     return NotifierMetronome(metronome);
@@ -97,5 +96,4 @@ final metronomeProvider = ChangeNotifierProvider<NotifierMetronome>(
 final isMetronomePlayingProvider =
     Provider((ref) => ref.watch(metronomeProvider).isPlaying ? true : false);
 
-final currentBeatBarProvider =
-    Provider((ref) => ref.watch(metronomeProvider).currentBarBeat);
+final currentBeatBarProvider = Provider((ref) => ref.watch(metronomeProvider).currentBarBeat);

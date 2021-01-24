@@ -25,51 +25,12 @@ final setlistPlayerProvider =
       : NotifierSetlistPlayer(setlist),
 );
 
-class SetlistScreen extends ConsumerWidget with ListItemLongPressPopupMenu {
-  static const routePath = '/setlist';
-  static const int SCROLL_DURATION = 300;
-
-  ItemScrollController _scrollController = ItemScrollController();
-
+class SetlistScreen extends ConsumerWidget {
   final Setlist setlist;
 
   SetlistScreen(this.setlist);
 
-  dynamic _buildPopupMenuItems(
-      BuildContext context, String setlistId, List<Track> tracks, SetlistPlayer player) {
-    return [
-      PopupMenuItem(
-        child: Text('Edytuj'),
-        value: (index) {
-          if (!context.read(metronomeProvider).isPlaying) {
-            Get.to(AddEditTrackScreen(setlistId, tracks[index]));
-          } else {
-            Get.snackbar('Zatrzymaj odtwarzanie', 'aby edytować utwór.', colorText: Colors.white);
-          }
-        },
-      ),
-      PopupMenuItem(
-          child: Text('Usuń'),
-          value: (index) {
-            if (!context.read(metronomeProvider).isPlaying) {
-              final setlistManager = context.read(setlistManagerProvider);
-
-              setlistManager.deleteTrack(setlistId, index);
-
-              if (setlistManager.getSetlist(setlistId).tracksCount == player.currentTrackIndex) {
-                player.selectTrack(setlist.tracksCount - 1);
-              }
-            } else {
-              Get.snackbar('Zatrzymaj odtwarzanie', 'aby usunąć utwór.', colorText: Colors.white);
-            }
-          }),
-    ];
-  }
-
-  void _onTrackChanged(int currentIndex) {
-    _scrollController.scrollTo(
-        index: currentIndex, duration: Duration(milliseconds: SCROLL_DURATION));
-  }
+  ItemScrollController _scrollController = ItemScrollController();
 
   @override
   Widget build(BuildContext context, ScopedReader watch) {
@@ -83,141 +44,74 @@ class SetlistScreen extends ConsumerWidget with ListItemLongPressPopupMenu {
       );
     }
 
-    final tracks = setlist.tracks;
+    return Consumer(
+      builder: (context, watch, child) {
+        final player = watch(setlistPlayerProvider(setlist));
+        player.onTrackChanged = _onTrackChanged;
 
-    return tracks.length <= 0
-        ? WillPopScope(
-            onWillPop: () {
-              _handleRemoteSynchronization(synchronization);
+        return WillPopScope(
+          onWillPop: () {
+            _handleRemoteSynchronization(synchronization);
 
-              return Future.value(true);
-            },
-            child: RemoteModeScreen(
-              title: Text(setlist.name),
-              body: Center(
-                child: Text('Brak utworów w setliście'),
-              ),
-              floatingActionButton: _buildFloatingActionButton(),
-            ),
-          )
-        : Consumer(
-            builder: (context, watch, child) {
-              final player = watch(setlistPlayerProvider(setlist));
-              // player.updateTrackPlayer();
-              player.onTrackChanged = _onTrackChanged;
+            player.stop();
 
-              final selectedTrack = tracks[player.currentTrackIndex];
-
-              return WillPopScope(
-                onWillPop: () {
-                  _handleRemoteSynchronization(synchronization);
-
-                  player.stop();
-
-                  return Future.value(true);
-                },
-                child: RemoteModeScreen(
-                  title: ListTile(
-                    contentPadding: EdgeInsets.zero,
-                    title: Text(
-                      selectedTrack.name,
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    subtitle: Text(setlist.name),
-                  ),
-                  body: Container(
-                    padding: const EdgeInsets.symmetric(vertical: 20),
-                    child: Column(
-                      children: [
-                        Expanded(
-                          flex: 4,
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.spaceAround,
-                            children: [
-                              Expanded(
-                                child: selectedTrack.isComplex
-                                    ? PlayComplexTrackPanel(player, selectedTrack)
-                                    : PlaySimpleTrackPanel(selectedTrack),
-                              ),
-                            ],
-                          ),
-                        ),
-                        _PlayerPanel(player),
-                        Expanded(
-                          flex: 6,
-                          child: NotificationListener<OverscrollIndicatorNotification>(
-                            onNotification: (OverscrollIndicatorNotification overscroll) {
-                              overscroll.disallowGlow();
-                              return true;
-                            },
-                            child: ScrollablePositionedList.builder(
-                              itemScrollController: _scrollController,
-                              itemCount: setlist.tracksCount,
-                              itemBuilder: (context, index) {
-                                final track = tracks[index];
-                                return Column(
-                                  children: [
-                                    InkWell(
-                                      onTap: () {
-                                        player.selectTrack(index);
-                                      },
-                                      onTapDown: storeTapPosition,
-                                      onLongPress: () => showPopupMenu(
-                                        context,
-                                        index,
-                                        _buildPopupMenuItems(context, setlist.id, tracks, player),
-                                      ),
-                                      child: ListTile(
-                                        leading: CircleAvatar(
-                                            backgroundColor: Colors.transparent,
-                                            child: Text('${index + 1}.')),
-                                        title: Text(
-                                          '${track.name}',
-                                          style: TextStyle(
-                                            color: player.currentTrackIndex == index
-                                                ? Theme.of(context).accentColor
-                                                : Colors.white,
-                                            fontWeight: player.currentTrackIndex == index
-                                                ? FontWeight.bold
-                                                : FontWeight.normal,
-                                          ),
-                                        ),
-                                        subtitle: Text(track.isComplex
-                                            ? 'Złożony'
-                                            : '${track.settings.tempo} BPM'),
-                                      ),
-                                    ),
-                                    if (index < setlist.tracksCount - 1)
-                                      Divider(
-                                        height: 0,
-                                      ),
-                                  ],
-                                );
-                              },
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  floatingActionButton: _buildFloatingActionButton(),
-                ),
-              );
-            },
-          );
+            return Future.value(true);
+          },
+          child: setlist.hasTracks ? _buildSetlistScreen(player) : _buildEmptySetlistScreen(),
+        );
+      },
+    );
   }
 
-  void _handleRemoteSynchronization(RemoteSynchronization synchronization) {
-    if (synchronization.isSynchronized) {
-      synchronization.sendRemoteCommand(
-        RemoteCommand.stopTrack(),
-      );
+  RemoteModeScreen _buildSetlistScreen(NotifierSetlistPlayer player) {
+    final selectedTrack = player.currentTrack;
 
-      final metronomeSettings = synchronization.simpleMetronomeSettingsGetter();
-      synchronization.sendRemoteCommand(
-        RemoteCommand.setMetronomeSettings(metronomeSettings),
-      );
-    }
+    return RemoteModeScreen(
+      title: ListTile(
+        contentPadding: EdgeInsets.zero,
+        title: Text(
+          selectedTrack.name,
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
+        subtitle: Text(setlist.name),
+      ),
+      body: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 20),
+        child: Column(
+          children: [
+            Expanded(
+              flex: 4,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  Expanded(
+                    child: selectedTrack.isComplex
+                        ? PlayComplexTrackPanel(player, selectedTrack)
+                        : PlaySimpleTrackPanel(selectedTrack),
+                  ),
+                ],
+              ),
+            ),
+            _PlayerPanel(player),
+            Expanded(
+              flex: 6,
+              child: _TrackList(setlist, player, scrollController: _scrollController),
+            ),
+          ],
+        ),
+      ),
+      floatingActionButton: _buildFloatingActionButton(),
+    );
+  }
+
+  RemoteModeScreen _buildEmptySetlistScreen() {
+    return RemoteModeScreen(
+      title: Text(setlist.name),
+      body: Center(
+        child: Text('Brak utworów w setliście'),
+      ),
+      floatingActionButton: _buildFloatingActionButton(),
+    );
   }
 
   Widget _buildFloatingActionButton() => Consumer(
@@ -234,6 +128,26 @@ class SetlistScreen extends ConsumerWidget with ListItemLongPressPopupMenu {
           );
         },
       );
+
+  void _handleRemoteSynchronization(RemoteSynchronization synchronization) {
+    if (synchronization.isSynchronized) {
+      synchronization.sendRemoteCommand(
+        RemoteCommand.stopTrack(),
+      );
+
+      final metronomeSettings = synchronization.simpleMetronomeSettingsGetter();
+      synchronization.sendRemoteCommand(
+        RemoteCommand.setMetronomeSettings(metronomeSettings),
+      );
+    }
+  }
+
+  void _onTrackChanged(int currentIndex) {
+    _scrollController.scrollTo(
+      index: currentIndex,
+      duration: Duration(milliseconds: 300),
+    );
+  }
 }
 
 class _PlayerPanel extends ConsumerWidget {
@@ -270,5 +184,94 @@ class _PlayerPanel extends ConsumerWidget {
             .toList(),
       ),
     );
+  }
+}
+
+class _TrackList extends StatelessWidget with ListItemLongPressPopupMenu {
+  final Setlist setlist;
+  final NotifierSetlistPlayer player;
+  final ItemScrollController scrollController;
+
+  _TrackList(
+    this.setlist,
+    this.player, {
+    this.scrollController,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return NotificationListener<OverscrollIndicatorNotification>(
+      onNotification: (OverscrollIndicatorNotification overscroll) {
+        overscroll.disallowGlow();
+        return true;
+      },
+      child: ScrollablePositionedList.separated(
+        itemScrollController: scrollController,
+        itemCount: setlist.tracksCount,
+        separatorBuilder: (context, index) => Divider(height: 1),
+        itemBuilder: (context, index) {
+          final track = setlist.tracks[index];
+          return InkWell(
+            onTap: () {
+              player.selectTrack(index);
+            },
+            onTapDown: storeTapPosition,
+            onLongPress: () => showPopupMenu(
+              context,
+              index,
+              _buildPopupMenuItems(context, setlist.id, setlist.tracks, player),
+            ),
+            child: ListTile(
+              leading: CircleAvatar(
+                backgroundColor: Colors.transparent,
+                child: Text('${index + 1}.'),
+              ),
+              title: Text(
+                '${track.name}',
+                style: TextStyle(
+                  color: player.currentTrackIndex == index
+                      ? Theme.of(context).accentColor
+                      : Colors.white,
+                  fontWeight:
+                      player.currentTrackIndex == index ? FontWeight.bold : FontWeight.normal,
+                ),
+              ),
+              subtitle: Text(track.isComplex ? 'Złożony' : '${track.settings.tempo} BPM'),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  dynamic _buildPopupMenuItems(
+      BuildContext context, String setlistId, List<Track> tracks, SetlistPlayer player) {
+    return [
+      PopupMenuItem(
+        child: Text('Edytuj'),
+        value: (index) {
+          if (!context.read(metronomeProvider).isPlaying) {
+            Get.to(AddEditTrackScreen(setlistId, tracks[index]));
+          } else {
+            Get.snackbar('Zatrzymaj odtwarzanie', 'aby edytować utwór.', colorText: Colors.white);
+          }
+        },
+      ),
+      PopupMenuItem(
+          child: Text('Usuń'),
+          value: (index) {
+            if (!context.read(metronomeProvider).isPlaying) {
+              final setlistManager = context.read(setlistManagerProvider);
+
+              setlistManager.deleteTrack(setlistId, index);
+
+              if (setlistManager.getSetlist(setlistId).tracksCount == player.currentTrackIndex) {
+                player.selectTrack(setlist.tracksCount - 1);
+              }
+            } else {
+              Get.snackbar('Zatrzymaj odtwarzanie', 'aby usunąć utwór.', colorText: Colors.white);
+            }
+          }),
+    ];
   }
 }

@@ -15,7 +15,6 @@ class PlayComplexTrackPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // final player = player;
     final currentSection = track.sections[player.currentSectionIndex];
 
     return Column(

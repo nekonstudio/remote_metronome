@@ -13,8 +13,14 @@ class SetlistPlayer {
 
   SetlistPlayer(this.setlist) {
     _currentTrackIndex = 0;
+    var track = currentTrack;
 
-    _trackPlayer = TrackPlayer.createPlayerForTrack(currentTrack);
+    if (!setlist.hasTracks) {
+      _currentTrackIndex = null;
+      track = null;
+    }
+
+    _trackPlayer = TrackPlayer.createPlayerForTrack(track);
   }
 
   set onTrackChanged(void Function(int) callback) => _onTrackChanged = callback;
@@ -23,8 +29,8 @@ class SetlistPlayer {
   int get currentSectionIndex => _trackPlayer.currentSectionIndex;
   int get currentSectionBar => _trackPlayer.currentSectionBar;
 
-  Track get currentTrack => setlist.tracks[_currentTrackIndex];
-  Section get currentSection => currentTrack.sections[currentSectionIndex];
+  Track get currentTrack => setlist.tracksCount > 0 ? setlist.tracks[_currentTrackIndex] : null;
+  Section get currentSection => currentTrack?.sections[currentSectionIndex];
 
   bool get isPlaying => _trackPlayer.isPlaying;
 

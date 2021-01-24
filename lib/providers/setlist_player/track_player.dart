@@ -1,5 +1,6 @@
+import 'package:metronom/providers/setlist_player/no_track_player.dart';
+
 import '../../models/track.dart';
-import '../metronome/metronome_base.dart';
 import '../metronome/metronome.dart';
 import 'complex_track_player.dart';
 import 'simple_track_player.dart';
@@ -10,9 +11,9 @@ abstract class TrackPlayer {
   TrackPlayer(this.track);
 
   factory TrackPlayer.createPlayerForTrack(Track track) {
-    return track.isComplex
-        ? ComplexTrackPlayer(track)
-        : SimpleTrackPlayer(track);
+    if (track == null) return NoTrackPlayer(track);
+
+    return track.isComplex ? ComplexTrackPlayer(track) : SimpleTrackPlayer(track);
   }
 
   bool get isPlaying => Metronome().isPlaying;
