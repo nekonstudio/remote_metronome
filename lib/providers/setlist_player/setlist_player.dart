@@ -30,7 +30,7 @@ class SetlistPlayer {
   int get currentSectionBar => _trackPlayer.currentSectionBar;
 
   Track get currentTrack => setlist.tracksCount > 0 ? setlist.tracks[_currentTrackIndex] : null;
-  Section get currentSection => currentTrack?.sections[currentSectionIndex];
+  Section get currentSection => currentTrack?.sections?.elementAt(currentSectionIndex);
 
   bool get isPlaying => _trackPlayer.isPlaying;
 

@@ -7,15 +7,14 @@ import 'package:metronom/providers/remote/remote_synchronization.dart';
 import 'package:metronom/providers/setlist_player/notifier_setlist_player.dart';
 import 'package:metronom/providers/setlist_player/remote_synchronized_notifier_setlist_player.dart';
 import 'package:metronom/providers/setlist_player/setlist_player.dart';
+import 'package:metronom/widgets/remote_synchronized_screen.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
 import '../../mixins/list_item_long_press_popup_menu.dart';
 import '../../models/track.dart';
 import '../../providers/metronome/metronome_base.dart';
 import '../../providers/setlists_manager.dart';
-import '../../widgets/play_complex_track_panel.dart';
-import '../../widgets/play_simple_track_panel.dart';
-import '../../widgets/remote_mode_screen.dart';
+import '../../widgets/metronome_track_panel.dart';
 import 'add_edit_track_screen.dart';
 
 final setlistPlayerProvider =
@@ -25,7 +24,7 @@ final setlistPlayerProvider =
       : NotifierSetlistPlayer(setlist),
 );
 
-class SetlistScreen extends ConsumerWidget {
+class SetlistScreen extends RemoteSynchronizedScreen {
   final Setlist setlist;
 
   SetlistScreen(this.setlist);
@@ -33,103 +32,65 @@ class SetlistScreen extends ConsumerWidget {
   ItemScrollController _scrollController = ItemScrollController();
 
   @override
-  Widget build(BuildContext context, ScopedReader watch) {
-    watch(setlistManagerProvider);
+  void initSynchronization(BuildContext context, RemoteSynchronization synchronization) {
+    synchronization.sendRemoteCommand(
+      RemoteCommand.setSetlist(setlist),
+    );
+  }
 
-    final synchronization = context.read(synchronizationProvider);
-
-    if (synchronization.isSynchronized) {
-      synchronization.sendRemoteCommand(
-        RemoteCommand.setSetlist(setlist),
-      );
+  @override
+  Widget buildTitle(BuildContext context) {
+    if (!setlist.hasTracks) {
+      return Text(setlist.name);
     }
 
+    final player = context.read(setlistPlayerProvider(setlist));
+    final selectedTrack = player.currentTrack;
+
+    return ListTile(
+      contentPadding: EdgeInsets.zero,
+      title: Text(
+        selectedTrack.name,
+        style: TextStyle(fontWeight: FontWeight.bold),
+      ),
+      subtitle: Text(setlist.name),
+    );
+  }
+
+  @override
+  Widget buildBody(BuildContext context) {
     return Consumer(
       builder: (context, watch, child) {
+        watch(setlistManagerProvider);
+
         final player = watch(setlistPlayerProvider(setlist));
         player.onTrackChanged = _onTrackChanged;
 
-        return WillPopScope(
-          onWillPop: () {
-            _handleRemoteSynchronization(synchronization);
+        return setlist.hasTracks ? _buildSetlist(player) : _buildEmptySetlist();
+      },
+    );
+  }
 
-            player.stop();
-
-            return Future.value(true);
+  @override
+  Widget buildFloatingActionButton(BuildContext context) {
+    return Consumer(
+      builder: (context, watch, child) {
+        final isPlaying = watch(metronomeProvider).isPlaying;
+        return FloatingActionButton(
+          backgroundColor: isPlaying ? Colors.grey : Theme.of(context).accentColor,
+          child: Icon(Icons.add),
+          onPressed: () {
+            if (!isPlaying) {
+              Get.to(AddEditTrackScreen(setlist.id, null));
+            }
           },
-          child: setlist.hasTracks ? _buildSetlistScreen(player) : _buildEmptySetlistScreen(),
         );
       },
     );
   }
 
-  RemoteModeScreen _buildSetlistScreen(NotifierSetlistPlayer player) {
-    final selectedTrack = player.currentTrack;
-
-    return RemoteModeScreen(
-      title: ListTile(
-        contentPadding: EdgeInsets.zero,
-        title: Text(
-          selectedTrack.name,
-          style: TextStyle(fontWeight: FontWeight.bold),
-        ),
-        subtitle: Text(setlist.name),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 20),
-        child: Column(
-          children: [
-            Expanded(
-              flex: 4,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  Expanded(
-                    child: selectedTrack.isComplex
-                        ? PlayComplexTrackPanel(player, selectedTrack)
-                        : PlaySimpleTrackPanel(selectedTrack),
-                  ),
-                ],
-              ),
-            ),
-            _PlayerPanel(player),
-            Expanded(
-              flex: 6,
-              child: _TrackList(setlist, player, scrollController: _scrollController),
-            ),
-          ],
-        ),
-      ),
-      floatingActionButton: _buildFloatingActionButton(),
-    );
-  }
-
-  RemoteModeScreen _buildEmptySetlistScreen() {
-    return RemoteModeScreen(
-      title: Text(setlist.name),
-      body: Center(
-        child: Text('Brak utworów w setliście'),
-      ),
-      floatingActionButton: _buildFloatingActionButton(),
-    );
-  }
-
-  Widget _buildFloatingActionButton() => Consumer(
-        builder: (context, watch, child) {
-          final isPlaying = watch(metronomeProvider).isPlaying;
-          return FloatingActionButton(
-            backgroundColor: isPlaying ? Colors.grey : Theme.of(context).accentColor,
-            child: Icon(Icons.add),
-            onPressed: () {
-              if (!isPlaying) {
-                Get.to(AddEditTrackScreen(setlist.id, null));
-              }
-            },
-          );
-        },
-      );
-
-  void _handleRemoteSynchronization(RemoteSynchronization synchronization) {
+  @override
+  Future<bool> onScreenClosing(BuildContext context, RemoteSynchronization synchronization) {
     if (synchronization.isSynchronized) {
       synchronization.sendRemoteCommand(
         RemoteCommand.stopTrack(),
@@ -140,6 +101,31 @@ class SetlistScreen extends ConsumerWidget {
         RemoteCommand.setMetronomeSettings(metronomeSettings),
       );
     }
+    context.read(setlistPlayerProvider(setlist)).stop();
+
+    return Future.value(true);
+  }
+
+  Widget _buildSetlist(NotifierSetlistPlayer player) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 20),
+      child: Column(
+        children: [
+          Expanded(flex: 4, child: MetronomeTrackPanel(player)),
+          _PlayerPanel(player),
+          Expanded(
+            flex: 6,
+            child: _TrackList(setlist, player, scrollController: _scrollController),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildEmptySetlist() {
+    return Center(
+      child: Text('Brak utworów w setliście'),
+    );
   }
 
   void _onTrackChanged(int currentIndex) {

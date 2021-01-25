@@ -21,9 +21,10 @@ class _AnimatedTrackSectionsState extends State<AnimatedTrackSections> {
   @override
   Widget build(BuildContext context) {
     final animateToCurrentSection = () => carouselController.animateToPage(
-        widget.player.currentSectionIndex,
-        duration: Duration(milliseconds: AnimatedTrackSections.ScrollDuration),
-        curve: Curves.linear);
+          widget.player.currentSectionIndex,
+          duration: Duration(milliseconds: AnimatedTrackSections.ScrollDuration),
+          curve: Curves.linear,
+        );
 
     if (carouselController.ready) {
       animateToCurrentSection();
@@ -36,8 +37,7 @@ class _AnimatedTrackSectionsState extends State<AnimatedTrackSections> {
         final isCurrent = sectionEntry.key == widget.player.currentSectionIndex;
         final section = sectionEntry.value;
         return AnimatedDefaultTextStyle(
-          duration:
-              Duration(milliseconds: AnimatedTrackSections.ScrollDuration),
+          duration: Duration(milliseconds: AnimatedTrackSections.ScrollDuration),
           style: TextStyle(
             color: isCurrent ? Colors.white : Colors.white70,
             fontWeight: isCurrent ? FontWeight.bold : FontWeight.normal,

@@ -2,15 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:metronom/controllers/metronome_settings_controller.dart';
 import 'package:metronom/providers/metronome/metronome_settings.dart';
 
-class MetronomePanel extends StatelessWidget {
+class MetronomeSettingsPanel extends StatelessWidget {
   final MetronomeSettingsController controller;
 
-  MetronomePanel(this.controller);
+  MetronomeSettingsPanel(this.controller);
 
   Widget _buildWithController(
-      Widget Function(
-              BuildContext context, MetronomeSettings settings, Widget child)
-          builder,
+      Widget Function(BuildContext context, MetronomeSettings settings, Widget child) builder,
       {Widget child}) {
     return ValueListenableBuilder(
       valueListenable: controller,

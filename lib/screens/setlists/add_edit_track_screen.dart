@@ -11,7 +11,7 @@ import 'package:toggle_switch/toggle_switch.dart';
 
 import '../../models/track.dart';
 import '../../providers/setlists_manager.dart';
-import '../../widgets/metronome_panel.dart';
+import '../../widgets/metronome_settings_panel.dart';
 import '../../widgets/remote_mode_screen.dart';
 
 class AddEditTrackScreen extends StatefulWidget {
@@ -88,9 +88,8 @@ class _AddEditTrackScreenState extends State<AddEditTrackScreen> {
   }
 
   void _save(BuildContext context, String value) {
-    Track track = _isComplexTrack
-        ? Track.complex(value, _sections)
-        : Track.simple(value, _controller.value);
+    Track track =
+        _isComplexTrack ? Track.complex(value, _sections) : Track.simple(value, _controller.value);
 
     final setlistManager = context.read(setlistManagerProvider);
 
@@ -186,20 +185,19 @@ class _AddEditTrackScreenState extends State<AddEditTrackScreen> {
                           Container(
                             padding: const EdgeInsets.only(bottom: 20),
                             decoration: BoxDecoration(
-                                color: Colors.black26,
-                                borderRadius: BorderRadius.circular(10)),
+                                color: Colors.black26, borderRadius: BorderRadius.circular(10)),
                             child: Column(
                               children: [
                                 Container(
                                   decoration: BoxDecoration(
                                       color: Colors.black26,
-                                      borderRadius: BorderRadius.vertical(
-                                          top: Radius.circular(10))),
+                                      borderRadius:
+                                          BorderRadius.vertical(top: Radius.circular(10))),
                                   child: ListTile(
                                     title: Text('Wybierz tempo'),
                                   ),
                                 ),
-                                MetronomePanel(_controller),
+                                MetronomeSettingsPanel(_controller),
                               ],
                             ),
                           ),
@@ -213,8 +211,8 @@ class _AddEditTrackScreenState extends State<AddEditTrackScreen> {
                                   Container(
                                     decoration: BoxDecoration(
                                         color: Colors.black45,
-                                        borderRadius: BorderRadius.vertical(
-                                            top: Radius.circular(10))),
+                                        borderRadius:
+                                            BorderRadius.vertical(top: Radius.circular(10))),
                                     child: ListTile(
                                       title: Text('Sekcje utworu'),
                                       // subtitle: FittedBox(
@@ -232,8 +230,7 @@ class _AddEditTrackScreenState extends State<AddEditTrackScreen> {
                                             showModalBottomSheet(
                                                 isScrollControlled: true,
                                                 context: context,
-                                                builder: (_) =>
-                                                    _SectionForm(_addSection));
+                                                builder: (_) => _SectionForm(_addSection));
                                           }),
                                     ),
                                   ),
@@ -246,44 +243,32 @@ class _AddEditTrackScreenState extends State<AddEditTrackScreen> {
                                           ),
                                         )
                                       : Container(
-                                          height: (72 * _sections.length)
-                                              .toDouble(),
+                                          height: (72 * _sections.length).toDouble(),
                                           child: ClipRect(
                                             child: ListView.separated(
-                                              separatorBuilder: (_, __) =>
-                                                  Divider(
+                                              separatorBuilder: (_, __) => Divider(
                                                 height: 0,
                                               ),
-                                              physics:
-                                                  NeverScrollableScrollPhysics(),
+                                              physics: NeverScrollableScrollPhysics(),
                                               itemCount: _sections.length,
-                                              itemBuilder: (context, index) =>
-                                                  Slidable(
-                                                actionPane:
-                                                    SlidableScrollActionPane(),
+                                              itemBuilder: (context, index) => Slidable(
+                                                actionPane: SlidableScrollActionPane(),
                                                 actionExtentRatio: 0.2,
                                                 child: Container(
-                                                  color: Color.fromRGBO(
-                                                      36, 36, 36, 1),
+                                                  color: Color.fromRGBO(36, 36, 36, 1),
                                                   child: ListTile(
                                                     leading: CircleAvatar(
-                                                      backgroundColor:
-                                                          Colors.transparent,
-                                                      child:
-                                                          Text('${index + 1}.'),
+                                                      backgroundColor: Colors.transparent,
+                                                      child: Text('${index + 1}.'),
                                                     ),
-                                                    title: Text(
-                                                        _sections[index].title),
+                                                    title: Text(_sections[index].title),
                                                     subtitle: Text(
                                                         '${_sections[index].settings.tempo} BPM'),
                                                     trailing: CircleAvatar(
-                                                      backgroundColor:
-                                                          Colors.transparent,
+                                                      backgroundColor: Colors.transparent,
                                                       child: Text(
                                                         'x${_sections[index].barsCount}',
-                                                        style: TextStyle(
-                                                            color:
-                                                                Colors.white),
+                                                        style: TextStyle(color: Colors.white),
                                                       ),
                                                     ),
                                                   ),
@@ -295,15 +280,11 @@ class _AddEditTrackScreenState extends State<AddEditTrackScreen> {
                                                     icon: Icons.edit,
                                                     onTap: () {
                                                       showModalBottomSheet(
-                                                          isScrollControlled:
-                                                              true,
+                                                          isScrollControlled: true,
                                                           context: context,
-                                                          builder: (_) =>
-                                                              _SectionForm(
+                                                          builder: (_) => _SectionForm(
                                                                 _editSection,
-                                                                existingSection:
-                                                                    _sections[
-                                                                        index],
+                                                                existingSection: _sections[index],
                                                               ));
                                                     },
                                                   ),
@@ -311,8 +292,7 @@ class _AddEditTrackScreenState extends State<AddEditTrackScreen> {
                                                     caption: 'Usuń',
                                                     color: Colors.red,
                                                     icon: Icons.delete,
-                                                    onTap: () => _deleteSection(
-                                                        _sections[index]),
+                                                    onTap: () => _deleteSection(_sections[index]),
                                                   ),
                                                 ],
                                               ),
@@ -369,9 +349,8 @@ class _SectionForm extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final initialMetronomeSettings = existingSection != null
-        ? existingSection.settings
-        : MetronomeSettings(120, 4, 1);
+    final initialMetronomeSettings =
+        existingSection != null ? existingSection.settings : MetronomeSettings(120, 4, 1);
 
     _controller = MetronomeSettingsController(initialMetronomeSettings);
 
@@ -383,11 +362,10 @@ class _SectionForm extends StatelessWidget {
             color: Colors.black26,
             child: ListTile(
               leading: Icon(Icons.playlist_add),
-              title: Text(
-                  existingSection == null ? 'Dodaj sekcję' : 'Edytuj sekcję'),
+              title: Text(existingSection == null ? 'Dodaj sekcję' : 'Edytuj sekcję'),
             ),
           ),
-          MetronomePanel(_controller),
+          MetronomeSettingsPanel(_controller),
           Form(
             key: _formKey,
             child: Container(
@@ -396,8 +374,7 @@ class _SectionForm extends StatelessWidget {
                 children: [
                   TextFormField(
                     autofocus: true,
-                    initialValue:
-                        existingSection == null ? '' : existingSection.title,
+                    initialValue: existingSection == null ? '' : existingSection.title,
                     decoration: InputDecoration(
                       labelText: 'Nazwa',
                     ),
@@ -417,18 +394,15 @@ class _SectionForm extends StatelessWidget {
                     children: [
                       Expanded(
                         child: TextFormField(
-                          initialValue: existingSection == null
-                              ? ''
-                              : existingSection.barsCount.toString(),
+                          initialValue:
+                              existingSection == null ? '' : existingSection.barsCount.toString(),
                           decoration: InputDecoration(
                             // contentPadding: EdgeInsets.zero,
                             labelText: 'Ilość taktów',
                           ),
-                          keyboardType: TextInputType.numberWithOptions(
-                              decimal: false, signed: false),
-                          inputFormatters: [
-                            FilteringTextInputFormatter.digitsOnly
-                          ],
+                          keyboardType:
+                              TextInputType.numberWithOptions(decimal: false, signed: false),
+                          inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                           onSaved: (value) {
                             _newSection.barsCount = int.parse(value);
                           },
@@ -447,8 +421,7 @@ class _SectionForm extends StatelessWidget {
                       Padding(
                         padding: const EdgeInsets.only(top: 23, left: 20),
                         child: RaisedButton(
-                          child:
-                              Text(existingSection == null ? 'Dodaj' : 'Zmień'),
+                          child: Text(existingSection == null ? 'Dodaj' : 'Zmień'),
                           onPressed: () {
                             _saveForm(context);
                           },

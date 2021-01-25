@@ -32,8 +32,7 @@ class RemoteModeScreen extends StatelessWidget {
             builder: (context, watch, child) {
               final nearbyDevices = watch(nearbyDevicesProvider);
               final hasConnections = nearbyDevices.hasConnections;
-              final connectionsCount =
-                  nearbyDevices.connectedDevicesList.length;
+              final connectionsCount = nearbyDevices.connectedDevicesList.length;
 
               return hasConnections
                   ? _BadgeIconButton(
@@ -42,9 +41,7 @@ class RemoteModeScreen extends StatelessWidget {
                       color: Get.theme.accentColor,
                       onPressed: () {
                         showModalBottomSheet(
-                            context: context,
-                            builder: (context) =>
-                                RemoteConnectedDevicesPanel());
+                            context: context, builder: (context) => RemoteConnectedDevicesPanel());
                       },
                     )
                   : Container();
@@ -59,13 +56,11 @@ class RemoteModeScreen extends StatelessWidget {
           if (!ModalRoute.of(context).isCurrent) return;
 
           if (nearbyDevices.hasConnections) {
-            final disconnectedDeviceName =
-                nearbyDevices.lastDisconnectedDeviceName;
+            final disconnectedDeviceName = nearbyDevices.lastDisconnectedDeviceName;
             if (disconnectedDeviceName != null) {
               Scaffold.of(context).showSnackBar(
                 SnackBar(
-                  content:
-                      Text('Urządzenie $disconnectedDeviceName rozłączyło się'),
+                  content: Text('Urządzenie $disconnectedDeviceName rozłączyło się'),
                 ),
               );
             }
