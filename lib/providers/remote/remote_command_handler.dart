@@ -16,7 +16,7 @@ class RemoteCommandHandler {
 
   RemoteCommandHandler(this.providerReader);
 
-  void handle(RemoteCommand command) {
+  void handle(String senderEndpointId, RemoteCommand command) {
     assert(command != null, 'Null command');
 
     final synchronization = providerReader(synchronizationProvider);
@@ -26,15 +26,14 @@ class RemoteCommandHandler {
     switch (command.type) {
       case RemoteCommandType.ClockSyncRequest:
         final hostStartTime = json.decode(command.jsonParameters) as int;
-        synchronization.onClockSyncRequest(hostStartTime);
+        synchronization.onClockSyncRequest(senderEndpointId, hostStartTime);
         break;
 
       case RemoteCommandType.ClockSyncResponse:
         final parameters = json.decode(command.jsonParameters) as List<dynamic>;
         final startTime = DateTime.fromMillisecondsSinceEpoch(parameters[0]);
-        final clientResponseTime =
-            DateTime.fromMillisecondsSinceEpoch(parameters[1]);
-        synchronization.onClockSyncResponse(startTime, clientResponseTime);
+        final clientResponseTime = DateTime.fromMillisecondsSinceEpoch(parameters[1]);
+        synchronization.onClockSyncResponse(senderEndpointId, startTime, clientResponseTime);
         break;
 
       case RemoteCommandType.ClockSyncSuccess:
@@ -43,10 +42,8 @@ class RemoteCommandHandler {
         break;
 
       case RemoteCommandType.StartMetronome:
-        final metronomeSettings =
-            MetronomeSettings.fromJson(command.jsonParameters);
-        final hostStartTime =
-            DateTime.fromMillisecondsSinceEpoch(command.timestamp);
+        final metronomeSettings = MetronomeSettings.fromJson(command.jsonParameters);
+        final hostStartTime = DateTime.fromMillisecondsSinceEpoch(command.timestamp);
 
         synchronization.hostSynchonizedAction(
           hostStartTime,
@@ -59,8 +56,7 @@ class RemoteCommandHandler {
         break;
 
       case RemoteCommandType.SetMetronomeSettings:
-        final metronomeSettings =
-            MetronomeSettings.fromJson(command.jsonParameters);
+        final metronomeSettings = MetronomeSettings.fromJson(command.jsonParameters);
 
         providerReader(remoteMetronomeScreenControllerProvider)
             .setMetronomeSettings(metronomeSettings);
@@ -81,8 +77,7 @@ class RemoteCommandHandler {
       case RemoteCommandType.PlayTrack:
         final setlist = providerReader(remoteScreenStateProvider).setlist;
         if (setlist != null) {
-          final hostStartTime =
-              DateTime.fromMillisecondsSinceEpoch(command.timestamp);
+          final hostStartTime = DateTime.fromMillisecondsSinceEpoch(command.timestamp);
           final setlistPlayer = providerReader(setlistPlayerProvider(setlist));
 
           synchronization.hostSynchonizedAction(

@@ -33,7 +33,7 @@ class SetlistScreen extends RemoteSynchronizedScreen {
 
   @override
   void initSynchronization(BuildContext context, RemoteSynchronization synchronization) {
-    synchronization.sendRemoteCommand(
+    synchronization.broadcastRemoteCommand(
       RemoteCommand.setSetlist(setlist),
     );
   }
@@ -92,12 +92,12 @@ class SetlistScreen extends RemoteSynchronizedScreen {
   @override
   Future<bool> onScreenClosing(BuildContext context, RemoteSynchronization synchronization) {
     if (synchronization.isSynchronized) {
-      synchronization.sendRemoteCommand(
+      synchronization.broadcastRemoteCommand(
         RemoteCommand.stopTrack(),
       );
 
       final metronomeSettings = synchronization.simpleMetronomeSettingsGetter();
-      synchronization.sendRemoteCommand(
+      synchronization.broadcastRemoteCommand(
         RemoteCommand.setMetronomeSettings(metronomeSettings),
       );
     }

@@ -41,7 +41,7 @@ class _SimpleMetronomeScreenState extends State<SimpleMetronomeScreen> {
     if (synchronization.isSynchronized) {
       final settings = _controller.value;
 
-      synchronization.sendRemoteCommand(
+      synchronization.broadcastRemoteCommand(
         RemoteCommand.setMetronomeSettings(settings),
       );
     }

@@ -14,83 +14,101 @@ class RemoteActionNotifier extends StateNotifier<bool> {
 }
 
 class RemoteSynchronization with ChangeNotifier {
-  final Future<void> Function(RemoteCommand) sendRemoteCommand;
+  final NearbyDevices nearbyDevices;
 
-  RemoteSynchronization(this.sendRemoteCommand);
+  RemoteSynchronization(this.nearbyDevices);
 
   final remoteActionNotifier = RemoteActionNotifier(false);
   MetronomeSettings Function() simpleMetronomeSettingsGetter;
 
   var _mode = DeviceSynchronizationMode.None;
-  int _remoteTimeDifference;
+  int _hostTimeDifference;
+
+  int _targetSynchronizedDevicesCount;
+  int _synchronizedDevicesCount = 0;
 
   DeviceSynchronizationMode get deviceMode => _mode;
   bool get isSynchronized => _mode != DeviceSynchronizationMode.None;
 
-  Future<void> synchronize() async {
-    sendRemoteCommand(
-        RemoteCommand.clockSyncRequest(DateTime.now().millisecondsSinceEpoch));
+  void synchronize() {
+    _targetSynchronizedDevicesCount = nearbyDevices.connectedDevicesCount;
+
+    final timestamp = DateTime.now().millisecondsSinceEpoch;
+    final command = RemoteCommand.clockSyncRequest(timestamp);
+    broadcastRemoteCommand(command);
+  }
+
+  void broadcastRemoteCommand(RemoteCommand command) {
+    nearbyDevices.broadcastCommand(command);
   }
 
   void end() {
+    _synchronizedDevicesCount = 0;
     _mode = DeviceSynchronizationMode.None;
     notifyListeners();
   }
 
-  void onClockSyncRequest(int hostStartTime) {
-    print(
-        'Host start time: ${DateTime.fromMillisecondsSinceEpoch(hostStartTime)}');
+  void onClockSyncRequest(String hostEndpointId, int hostStartTime) {
+    print('Host start time: ${DateTime.fromMillisecondsSinceEpoch(hostStartTime)}');
     print('Client start time: ${DateTime.now()}');
-    sendRemoteCommand(RemoteCommand.clockSyncResponse(
-        hostStartTime, DateTime.now().millisecondsSinceEpoch));
+
+    final timestamp = DateTime.now().millisecondsSinceEpoch;
+    final command = RemoteCommand.clockSyncResponse(hostStartTime, timestamp);
+
+    _sendRemoteCommand(hostEndpointId, command);
   }
 
-  void onClockSyncResponse(DateTime startTime, DateTime clientResponseTime) {
+  void onClockSyncResponse(
+    String clientEndpointId,
+    DateTime startTime,
+    DateTime clientResponseTime,
+  ) {
     final latency = DateTime.now().difference(startTime).inMilliseconds / 2;
 
     print('Latency: ($latency ms)');
 
-    if (latency > 12) {
+    if (latency > 15) {
       // perform clock sync as long as you get satisfying latency for reliable result
       print('To big latency, trying again');
 
-      sendRemoteCommand(
-        RemoteCommand.clockSyncRequest(DateTime.now().millisecondsSinceEpoch),
-      );
+      final timestamp = DateTime.now().millisecondsSinceEpoch;
+      final command = RemoteCommand.clockSyncRequest(timestamp);
+      _sendRemoteCommand(clientEndpointId, command);
     } else {
       print('Start time: $startTime');
       print('Client response time: $clientResponseTime');
-      var remoteTimeDiff =
-          clientResponseTime.difference(startTime).inMilliseconds;
 
-      _remoteTimeDifference = (remoteTimeDiff >= 0)
+      final remoteTimeDiff = clientResponseTime.difference(startTime).inMilliseconds;
+      final timeDifference = (remoteTimeDiff >= 0)
           ? remoteTimeDiff - latency.toInt()
           : remoteTimeDiff + latency.toInt();
 
-      print(
-          'Host clock sync success! Remote time difference: $_remoteTimeDifference');
+      print('Host clock sync success! Remote time difference: $timeDifference');
 
-      sendRemoteCommand(
-        RemoteCommand.clockSyncSuccess(-_remoteTimeDifference),
-      );
+      final command = RemoteCommand.clockSyncSuccess(-timeDifference);
+      _sendRemoteCommand(clientEndpointId, command);
 
-      _mode = DeviceSynchronizationMode.Host;
-      notifyListeners();
+      _synchronizedDevicesCount++;
+
+      if (_synchronizedDevicesCount == _targetSynchronizedDevicesCount) {
+        _mode = DeviceSynchronizationMode.Host;
+        notifyListeners();
+      }
     }
   }
 
-  void onClockSyncSuccess(int remoteTimeDifference) {
-    _remoteTimeDifference = remoteTimeDifference;
+  void onClockSyncSuccess(int hostTimeDifference) {
+    _hostTimeDifference = hostTimeDifference;
     _mode = DeviceSynchronizationMode.Client;
+
     notifyListeners();
-    print(
-        'Client clock sync success! Remote time difference: $remoteTimeDifference');
+    print('Client clock sync success! Remote time difference: $hostTimeDifference');
   }
 
   void clientSynchonizedAction(RemoteCommand remoteCommand, Function action,
       {bool instant = false}) {
     print('hostStartTime: ${DateTime.now()}');
-    sendRemoteCommand(remoteCommand);
+    broadcastRemoteCommand(remoteCommand);
 
     if (instant) {
       action();
@@ -112,35 +130,34 @@ class RemoteSynchronization with ChangeNotifier {
 
   void hostSynchonizedAction(DateTime hostStartTime, Function action) async {
     print('hostStartTime: $hostStartTime');
-    print('remoteTimeDifference: $_remoteTimeDifference');
+    print('remoteTimeDifference: $_hostTimeDifference');
     final latency = DateTime.now()
-        .difference(
-            hostStartTime.add(Duration(milliseconds: -_remoteTimeDifference)))
+        .difference(hostStartTime.add(Duration(milliseconds: -_hostTimeDifference)))
         .inMilliseconds;
 
     print('latency: $latency ms');
 
-    final waitTime =
-        hostStartTime.add(Duration(milliseconds: -_remoteTimeDifference + 500));
+    final waitTime = hostStartTime.add(Duration(milliseconds: -_hostTimeDifference + 500));
 
     print('currentTime =\t${DateTime.now()}');
     print('waitTime =\t\t$waitTime');
 
     await Future.doWhile(() => DateTime.now().isBefore(waitTime));
 
-    final hostNowTime =
-        DateTime.now().add(Duration(milliseconds: _remoteTimeDifference));
+    final hostNowTime = DateTime.now().add(Duration(milliseconds: _hostTimeDifference));
     print('CLIENT START! (host) time: $hostNowTime');
     print('CLIENT START! (client) time: ${DateTime.now()}');
 
     action();
   }
+
+  void _sendRemoteCommand(String receiverEndpointId, RemoteCommand command) {
+    nearbyDevices.sendRemoteCommand(receiverEndpointId, command);
+  }
 }
 
 final synchronizationProvider = ChangeNotifierProvider(
-  (ref) => RemoteSynchronization(
-    ref.read(nearbyDevicesProvider).broadcastCommand,
-  ),
+  (ref) => RemoteSynchronization(ref.read(nearbyDevicesProvider)),
 );
 
 StateNotifierProvider<RemoteActionNotifier> remoteActionNotifierProvider =

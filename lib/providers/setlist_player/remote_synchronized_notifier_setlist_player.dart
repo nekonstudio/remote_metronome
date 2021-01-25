@@ -6,8 +6,7 @@ import 'package:metronom/providers/setlist_player/notifier_setlist_player.dart';
 class RemoteSynchronizedNotifierSetlistPlayer extends NotifierSetlistPlayer {
   final RemoteSynchronization synchronization;
 
-  RemoteSynchronizedNotifierSetlistPlayer(this.synchronization, Setlist setlist)
-      : super(setlist);
+  RemoteSynchronizedNotifierSetlistPlayer(this.synchronization, Setlist setlist) : super(setlist);
 
   @override
   void play() {
@@ -19,7 +18,7 @@ class RemoteSynchronizedNotifierSetlistPlayer extends NotifierSetlistPlayer {
 
   @override
   void stop() {
-    synchronization.sendRemoteCommand(
+    synchronization.broadcastRemoteCommand(
       RemoteCommand.stopTrack(),
     );
     super.stop();
@@ -28,7 +27,7 @@ class RemoteSynchronizedNotifierSetlistPlayer extends NotifierSetlistPlayer {
   @override
   void selectTrack(int index) {
     if (currentTrackIndex != index) {
-      synchronization.sendRemoteCommand(
+      synchronization.broadcastRemoteCommand(
         RemoteCommand.selectTrack(index),
       );
     }
@@ -38,7 +37,7 @@ class RemoteSynchronizedNotifierSetlistPlayer extends NotifierSetlistPlayer {
   @override
   void selectNextTrack() {
     super.selectNextTrack();
-    synchronization.sendRemoteCommand(
+    synchronization.broadcastRemoteCommand(
       RemoteCommand.selectTrack(currentTrackIndex),
     );
   }
@@ -46,7 +45,7 @@ class RemoteSynchronizedNotifierSetlistPlayer extends NotifierSetlistPlayer {
   @override
   void selectPreviousTrack() {
     super.selectPreviousTrack();
-    synchronization.sendRemoteCommand(
+    synchronization.broadcastRemoteCommand(
       RemoteCommand.selectTrack(currentTrackIndex),
     );
   }
@@ -55,7 +54,7 @@ class RemoteSynchronizedNotifierSetlistPlayer extends NotifierSetlistPlayer {
   void selectNextSection() {
     if (isPlaying || !currentTrack.isComplex) return;
 
-    synchronization.sendRemoteCommand(RemoteCommand.selectNextSection());
+    synchronization.broadcastRemoteCommand(RemoteCommand.selectNextSection());
     super.selectNextSection();
   }
 
@@ -63,7 +62,7 @@ class RemoteSynchronizedNotifierSetlistPlayer extends NotifierSetlistPlayer {
   void selectPreviousSection() {
     if (isPlaying || !currentTrack.isComplex) return;
 
-    synchronization.sendRemoteCommand(RemoteCommand.selectPreviousSection());
+    synchronization.broadcastRemoteCommand(RemoteCommand.selectPreviousSection());
     super.selectPreviousSection();
   }
 }

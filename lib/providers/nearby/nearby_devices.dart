@@ -27,6 +27,7 @@ class NearbyDevices with ChangeNotifier {
   List<String> get connectedDevicesList =>
       _connectedDevices.map((deviceInfo) => deviceInfo.name).toList();
 
+  int get connectedDevicesCount => _connectedDevices.length;
   bool get hasConnections => _connectedDevices.isNotEmpty;
 
   String get lastDisconnectedDeviceName => _lastDisconnectedDeviceName;
@@ -74,9 +75,8 @@ class NearbyDevices with ChangeNotifier {
     if (_isDiscovering) return false;
     Nearby().askLocationPermission();
 
-    return _isDiscovering = await Nearby()
-        .startDiscovery(await _myDeviceName, Strategy.P2P_STAR,
-            onEndpointFound: (endpointId, endpointName, serviceId) async {
+    return _isDiscovering = await Nearby().startDiscovery(await _myDeviceName, Strategy.P2P_STAR,
+        onEndpointFound: (endpointId, endpointName, serviceId) async {
       stopDiscovery();
       Nearby().requestConnection(
         await _myDeviceName,
@@ -97,24 +97,24 @@ class NearbyDevices with ChangeNotifier {
 
   Future<void> broadcastCommand(RemoteCommand command) async {
     _connectedDevices.forEach((deviceInfo) {
-      Nearby().sendBytesPayload(deviceInfo.endpointId, command.bytes);
+      sendRemoteCommand(deviceInfo.endpointId, command);
     });
   }
 
-  Future<String> get _myDeviceName async =>
-      FlutterBluetoothSerial.instance.name;
+  Future<void> sendRemoteCommand(String receiverEndpointId, RemoteCommand command) async {
+    await Nearby().sendBytesPayload(receiverEndpointId, command.bytes);
+  }
 
-  void _onConnectionInitiated(
-      String endpointId, ConnectionInfo connectionInfo) async {
+  Future<String> get _myDeviceName async => FlutterBluetoothSerial.instance.name;
+
+  void _onConnectionInitiated(String endpointId, ConnectionInfo connectionInfo) async {
     print('connectionInfo.endpointName: ${connectionInfo.endpointName}');
     final isAccepted = await Nearby().acceptConnection(
       endpointId,
       onPayLoadRecieved: (endpointId, payload) {
         print('message recived');
 
-        _receivedDataHandler.handle(
-          RemoteCommand.fromRawData(payload.bytes),
-        );
+        _receivedDataHandler.handle(endpointId, RemoteCommand.fromRawData(payload.bytes));
       },
       onPayloadTransferUpdate: (endpointId, payloadTransferUpdate) {
         // print(payloadTransferUpdate.status);
@@ -134,8 +134,7 @@ class NearbyDevices with ChangeNotifier {
 
   void _onConnectionResult(String endpointId, Status status) {
     if (status != Status.CONNECTED) {
-      _connectedDevices
-          .removeWhere((element) => element.endpointId == endpointId);
+      _connectedDevices.removeWhere((element) => element.endpointId == endpointId);
       notifyListeners();
     }
   }
@@ -143,16 +142,16 @@ class NearbyDevices with ChangeNotifier {
   void _onDisconnected(String endpointId) async {
     await Nearby().disconnectFromEndpoint(endpointId);
 
-    final lastDeviceIndex = _connectedDevices
-        .indexWhere((element) => element.endpointId == endpointId);
+    final lastDeviceIndex =
+        _connectedDevices.indexWhere((element) => element.endpointId == endpointId);
 
-    _lastDisconnectedDeviceName =
-        _connectedDevices.elementAt(lastDeviceIndex).name;
+    if (lastDeviceIndex > 0) {
+      _lastDisconnectedDeviceName = _connectedDevices.elementAt(lastDeviceIndex).name;
 
-    _connectedDevices.removeAt(lastDeviceIndex);
-    notifyListeners();
+      _connectedDevices.removeAt(lastDeviceIndex);
+      notifyListeners();
+    }
   }
 }
 
-final nearbyDevicesProvider =
-    ChangeNotifierProvider((ref) => NearbyDevices(ref.read));
+final nearbyDevicesProvider = ChangeNotifierProvider((ref) => NearbyDevices(ref.read));
