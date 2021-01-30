@@ -17,6 +17,7 @@ enum RemoteCommandType {
   SelectTrack,
   SelectNextSection,
   SelectPreviousSection,
+  KeepConnectionAlive,
   LatencyTest,
 }
 
@@ -27,8 +28,7 @@ class RemoteCommand {
 
   RemoteCommand(this.type, {this.jsonParameters, this.timestamp}) {
     timestamp ??= DateTime.now().millisecondsSinceEpoch;
-    print(
-        'RemoteCommand(): timestamp: ${DateTime.fromMillisecondsSinceEpoch(timestamp)}');
+    print('RemoteCommand(): timestamp: ${DateTime.fromMillisecondsSinceEpoch(timestamp)}');
   }
 
   RemoteCommand.clockSyncRequest(int startTime)
@@ -46,10 +46,10 @@ class RemoteCommand {
           ]),
         );
 
-  RemoteCommand.clockSyncSuccess(int timeDiff)
+  RemoteCommand.clockSyncSuccess(int timeDiff, int clockSyncLatency)
       : this(
           RemoteCommandType.ClockSyncSuccess,
-          jsonParameters: json.encode(timeDiff),
+          jsonParameters: json.encode([timeDiff, clockSyncLatency]),
         );
 
   RemoteCommand.startMetronome(MetronomeSettings settings)
@@ -84,16 +84,14 @@ class RemoteCommand {
 
   RemoteCommand.selectNextSection() : this(RemoteCommandType.SelectNextSection);
 
-  RemoteCommand.selectPreviousSection()
-      : this(RemoteCommandType.SelectPreviousSection);
+  RemoteCommand.selectPreviousSection() : this(RemoteCommandType.SelectPreviousSection);
 
   static RemoteCommand fromRawData(Uint8List data) {
     final str = utf8.decode(data);
     print('Raw data: $str');
     final values = str.split(';');
 
-    final command =
-        _enumFromString<RemoteCommandType>(values[0], RemoteCommandType.values);
+    final command = _enumFromString<RemoteCommandType>(values[0], RemoteCommandType.values);
 
     final jsonParams = values[1];
 
@@ -101,12 +99,10 @@ class RemoteCommand {
 
     final timestamp = int.parse(values[2]);
 
-    final isValid =
-        (command != null && jsonParams != null && timestamp != null);
+    final isValid = (command != null && jsonParams != null && timestamp != null);
 
     return isValid
-        ? RemoteCommand(command,
-            jsonParameters: jsonParams, timestamp: timestamp)
+        ? RemoteCommand(command, jsonParameters: jsonParams, timestamp: timestamp)
         : null;
   }
 

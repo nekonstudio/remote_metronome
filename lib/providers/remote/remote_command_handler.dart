@@ -37,18 +37,23 @@ class RemoteCommandHandler {
         break;
 
       case RemoteCommandType.ClockSyncSuccess:
-        final remoteTimeDifference = json.decode(command.jsonParameters) as int;
-        synchronization.onClockSyncSuccess(remoteTimeDifference);
+        final parameters = json.decode(command.jsonParameters) as List<dynamic>;
+        final remoteTimeDifference = parameters[0] as int;
+        final clockSyncLatency = parameters[1] as int;
+        synchronization.onClockSyncSuccess(remoteTimeDifference, clockSyncLatency);
         break;
 
       case RemoteCommandType.StartMetronome:
         final metronomeSettings = MetronomeSettings.fromJson(command.jsonParameters);
         final hostStartTime = DateTime.fromMillisecondsSinceEpoch(command.timestamp);
 
-        synchronization.hostSynchonizedAction(
-          hostStartTime,
-          () => providerReader(metronomeProvider).start(metronomeSettings),
-        );
+        synchronization.clientStartMetronome(
+            providerReader(metronomeProvider), metronomeSettings, hostStartTime);
+
+        // synchronization.hostSynchonizedAction(
+        //   hostStartTime,
+        //   () => providerReader(metronomeProvider).start(metronomeSettings),
+        // );
         break;
 
       case RemoteCommandType.StopMetronome:
@@ -118,6 +123,10 @@ class RemoteCommandHandler {
           final setlistPlayer = providerReader(setlistPlayerProvider(setlist));
           setlistPlayer.selectPreviousSection();
         }
+        break;
+
+      case RemoteCommandType.KeepConnectionAlive:
+        // Do nothing
         break;
 
       default:

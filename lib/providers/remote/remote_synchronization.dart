@@ -1,5 +1,10 @@
+import 'dart:async';
+
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:metronom/providers/metronome/metronome.dart';
+import 'package:metronom/providers/metronome/metronome_interface.dart';
 import 'package:metronom/providers/metronome/metronome_settings.dart';
 
 import '../nearby/nearby_devices.dart';
@@ -21,11 +26,20 @@ class RemoteSynchronization with ChangeNotifier {
   final remoteActionNotifier = RemoteActionNotifier(false);
   MetronomeSettings Function() simpleMetronomeSettingsGetter;
 
+  static const _metronomePlatformChannel = const MethodChannel('com.example.metronom/metronom');
+
+  final Stream<dynamic> platformLatencyStream =
+      const EventChannel('com.example.metronom/platformLatencyChannel').receiveBroadcastStream();
+
+  int _clockSyncLatency;
+  int _platformLatency;
+  DateTime _platformExecutionTimestamp;
+
   var _mode = DeviceSynchronizationMode.None;
   int _hostTimeDifference;
-
   int _targetSynchronizedDevicesCount;
   int _synchronizedDevicesCount = 0;
+  Timer _keepConnectionAliveTimer;
 
   DeviceSynchronizationMode get deviceMode => _mode;
   bool get isSynchronized => _mode != DeviceSynchronizationMode.None;
@@ -45,6 +59,8 @@ class RemoteSynchronization with ChangeNotifier {
   void end() {
     _synchronizedDevicesCount = 0;
     _mode = DeviceSynchronizationMode.None;
+    _keepConnectionAliveTimer?.cancel();
+
     notifyListeners();
   }
 
@@ -63,11 +79,11 @@ class RemoteSynchronization with ChangeNotifier {
     DateTime startTime,
     DateTime clientResponseTime,
   ) {
-    final latency = DateTime.now().difference(startTime).inMilliseconds / 2;
+    _clockSyncLatency = (DateTime.now().difference(startTime).inMilliseconds ~/ 2);
 
-    print('Latency: ($latency ms)');
+    print('Clock sync latency: ($_clockSyncLatency ms)');
 
-    if (latency > 15) {
+    if (_clockSyncLatency > 15) {
       // perform clock sync as long as you get satisfying latency for reliable result
       print('To big latency, trying again');
 
@@ -80,29 +96,67 @@ class RemoteSynchronization with ChangeNotifier {
 
       final remoteTimeDiff = clientResponseTime.difference(startTime).inMilliseconds;
       final timeDifference = (remoteTimeDiff >= 0)
-          ? remoteTimeDiff - latency.toInt()
-          : remoteTimeDiff + latency.toInt();
+          ? remoteTimeDiff - _clockSyncLatency.toInt()
+          : remoteTimeDiff + _clockSyncLatency.toInt();
 
       print('Host clock sync success! Remote time difference: $timeDifference');
 
-      final command = RemoteCommand.clockSyncSuccess(-timeDifference);
+      final command = RemoteCommand.clockSyncSuccess(-timeDifference, _clockSyncLatency);
       _sendRemoteCommand(clientEndpointId, command);
 
       _synchronizedDevicesCount++;
 
       if (_synchronizedDevicesCount == _targetSynchronizedDevicesCount) {
         _mode = DeviceSynchronizationMode.Host;
+
+        platformLatencyStream.listen(_setPlatformLatency);
+        // _keepConnectionAliveTimer = Timer.periodic(Duration(seconds: 1), (timer) {
+        //   final command = RemoteCommand(RemoteCommandType.KeepConnectionAlive);
+        //   broadcastRemoteCommand(command);
+        // });
         notifyListeners();
       }
     }
   }
 
-  void onClockSyncSuccess(int hostTimeDifference) {
+  void onClockSyncSuccess(int hostTimeDifference, int clockSyncLatency) {
     _hostTimeDifference = hostTimeDifference;
+    _clockSyncLatency = clockSyncLatency;
     _mode = DeviceSynchronizationMode.Client;
+
+    platformLatencyStream.listen(_setPlatformLatency);
 
     notifyListeners();
     print('Client clock sync success! Remote time difference: $hostTimeDifference');
+  }
+
+  Future<void> hostStartMetronome(Metronome metronome, MetronomeSettings settings) async {
+    broadcastRemoteCommand(RemoteCommand.startMetronome(settings));
+
+    remoteActionNotifier.setActionState(true);
+    // _platformExecutionTimestamp = DateTime.now();
+    // _metronomePlatformChannel.invokeMethod('syncStartPrepare', {
+    //   'tempo': settings.tempo,
+    //   'beatsPerBar': settings.beatsPerBar,
+    //   'clicksPerBeat': settings.clicksPerBeat,
+    //   'tempoMultiplier': 1.0 // TODO: remove from platform implementation
+    // });
+
+    metronome.syncStartPrepare(settings);
+    print('1. HOST START! time:\t' + DateTime.now().toString());
+    Future.delayed(
+      Duration(milliseconds: 500),
+      () {
+        // _platformExecutionTimestamp = DateTime.now();
+        print('2. HOST START! time:\t' + DateTime.now().toString());
+        metronome.syncStart();
+        // _metronomePlatformChannel.invokeMethod('syncStart');
+        Future.delayed(
+          Duration(milliseconds: 120),
+          () => remoteActionNotifier.setActionState(false),
+        );
+      },
+    );
   }
 
   void clientSynchonizedAction(RemoteCommand remoteCommand, Function action,
@@ -114,11 +168,14 @@ class RemoteSynchronization with ChangeNotifier {
       action();
     } else {
       remoteActionNotifier.setActionState(true);
+      // _platformExecutionTimestamp = DateTime.now();
+      // _metronomePlatformChannel.invokeMethod('syncStartPrepare');
       Future.delayed(
         Duration(milliseconds: 500),
         () {
-          print('HOST START! time:\t' + DateTime.now().toString());
+          // print('HOST START! time:\t' + DateTime.now().toString());
           action();
+          // _metronomePlatformChannel.invokeMethod('syncStart');
           Future.delayed(
             Duration(milliseconds: 120),
             () => remoteActionNotifier.setActionState(false),
@@ -126,6 +183,45 @@ class RemoteSynchronization with ChangeNotifier {
         },
       );
     }
+
+    // action(); // TODO: remove
+  }
+
+  Future<void> clientStartMetronome(
+      MetronomeInterface metronome, MetronomeSettings settings, DateTime hostStartTime) async {
+    final latency = DateTime.now()
+        .difference(hostStartTime.add(Duration(milliseconds: -_hostTimeDifference)))
+        .inMilliseconds;
+
+    print('latency: $latency ms');
+
+    final waitTime = hostStartTime
+        .add(Duration(milliseconds: -_hostTimeDifference + 500 + (_clockSyncLatency ~/ 2)));
+    // final waitTime = hostStartTime
+    //     .add(Duration(milliseconds: -_hostTimeDifference + 500 + (_clockSyncLatency ~/ 2) - 10));
+
+    // _metronomePlatformChannel.invokeMethod(
+    //   'syncStartPrepare',
+    //   {
+    //     'tempo': settings.tempo,
+    //     'beatsPerBar': settings.beatsPerBar,
+    //     'clicksPerBeat': settings.clicksPerBeat,
+    //     'tempoMultiplier': 1.0 // TODO: remove from platform implementation
+    //   },
+    // );
+
+    metronome.syncStartPrepare(settings);
+
+    print(
+        '1. CLIENT START! time:\t${DateTime.now().add(Duration(milliseconds: _hostTimeDifference))}');
+
+    await Future.doWhile(() => DateTime.now().isBefore(waitTime));
+
+    // _metronomePlatformChannel.invokeMethod('syncStart');
+    // _platformExecutionTimestamp = DateTime.now();
+    print(
+        '2. CLIENT START! time:\t${DateTime.now().add(Duration(milliseconds: _hostTimeDifference))}');
+    metronome.syncStart();
   }
 
   void hostSynchonizedAction(DateTime hostStartTime, Function action) async {
@@ -137,9 +233,11 @@ class RemoteSynchronization with ChangeNotifier {
 
     print('latency: $latency ms');
 
-    final waitTime = hostStartTime.add(Duration(milliseconds: -_hostTimeDifference + 500));
+    final waitTime = hostStartTime
+        .add(Duration(milliseconds: -_hostTimeDifference + 500 + (_clockSyncLatency ~/ 2) + 25));
 
     print('currentTime =\t${DateTime.now()}');
+    print('currentTimeHost =\t${DateTime.now().add(Duration(milliseconds: _hostTimeDifference))}');
     print('waitTime =\t\t$waitTime');
 
     await Future.doWhile(() => DateTime.now().isBefore(waitTime));
@@ -148,7 +246,17 @@ class RemoteSynchronization with ChangeNotifier {
     print('CLIENT START! (host) time: $hostNowTime');
     print('CLIENT START! (client) time: ${DateTime.now()}');
 
+    // _platformExecutionTimestamp = DateTime.now();
     action();
+  }
+
+  void _setPlatformLatency(dynamic value) {
+    // print(value);
+    // _platformLatency = DateTime.fromMillisecondsSinceEpoch(value)
+    //     .difference(_platformExecutionTimestamp)
+    //     .inMilliseconds;
+
+    // print('platformLatency: $_platformLatency ms');
   }
 
   void _sendRemoteCommand(String receiverEndpointId, RemoteCommand command) {

@@ -5,6 +5,9 @@ abstract class MetronomeInterface {
   void change(MetronomeSettings newSettings);
   void stop();
 
+  void syncStartPrepare(MetronomeSettings settings);
+  void syncStart();
+
   bool get isPlaying;
   int get currentBarBeat;
 }

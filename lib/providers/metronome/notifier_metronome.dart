@@ -44,6 +44,16 @@ class NotifierMetronome with ChangeNotifier implements MetronomeInterface {
     metronome.stop();
   }
 
+  @override
+  void syncStart() {
+    metronome.syncStart();
+  }
+
+  @override
+  void syncStartPrepare(MetronomeSettings settings) {
+    metronome.syncStartPrepare(settings);
+  }
+
   void _subscribeToBarBeatChange() {
     final stream = Metronome().getCurrentBarBeatStream();
     _currentBarBeatStreamSubscription = stream.listen(_onBarBeatChange);

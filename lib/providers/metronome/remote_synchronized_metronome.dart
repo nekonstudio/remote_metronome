@@ -15,10 +15,12 @@ class RemoteSynchronizedMetronome implements MetronomeInterface {
   void start(MetronomeSettings settings) {
     print('Remote Synchronized Metronome start!');
 
-    synchronization.clientSynchonizedAction(
-      RemoteCommand.startMetronome(settings),
-      () => metronome.start(settings),
-    );
+    synchronization.hostStartMetronome(metronome, settings);
+
+    // synchronization.clientSynchonizedAction(
+    //   RemoteCommand.startMetronome(settings),
+    //   () => metronome.start(settings),
+    // );
   }
 
   @override
@@ -42,4 +44,14 @@ class RemoteSynchronizedMetronome implements MetronomeInterface {
 
   @override
   bool get isPlaying => metronome.isPlaying;
+
+  @override
+  void syncStart() {
+    // TODO: implement syncStart
+  }
+
+  @override
+  void syncStartPrepare(MetronomeSettings settings) {
+    // TODO: implement syncStartPrepare
+  }
 }

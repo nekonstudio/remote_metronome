@@ -39,13 +39,22 @@ class NearbyDevices with ChangeNotifier {
 
     stopAdvertising();
     stopDiscovery();
-    Nearby().stopAllEndpoints();
+
+    for (final device in _connectedDevices) {
+      Nearby().disconnectFromEndpoint(device.endpointId);
+    }
+
+    _connectedDevices.clear();
   }
 
   void finish() {
     stopAdvertising();
     stopDiscovery();
-    Nearby().stopAllEndpoints();
+
+    for (final device in _connectedDevices) {
+      Nearby().disconnectFromEndpoint(device.endpointId);
+    }
+
     _connectedDevices.clear();
 
     notifyListeners();
@@ -140,12 +149,12 @@ class NearbyDevices with ChangeNotifier {
   }
 
   void _onDisconnected(String endpointId) async {
-    await Nearby().disconnectFromEndpoint(endpointId);
+    // await Nearby().disconnectFromEndpoint(endpointId);
 
     final lastDeviceIndex =
         _connectedDevices.indexWhere((element) => element.endpointId == endpointId);
 
-    if (lastDeviceIndex > 0) {
+    if (lastDeviceIndex >= 0) {
       _lastDisconnectedDeviceName = _connectedDevices.elementAt(lastDeviceIndex).name;
 
       _connectedDevices.removeAt(lastDeviceIndex);

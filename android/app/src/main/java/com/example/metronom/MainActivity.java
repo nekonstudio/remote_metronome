@@ -58,6 +58,7 @@ public class MainActivity extends FlutterActivity {
             AudioTrack.MODE_STREAM);
 
     Thread m_metronomeThread;
+    Thread m_syncMetronomeThread;
 
     final static int HighSound = 1;
     final static int MediumSound = 2;
@@ -75,7 +76,12 @@ public class MainActivity extends FlutterActivity {
     Integer currentBeatsPerBar = 1;
     int currentClickPerBeat = 1;
 
+    boolean m_syncPlayMetronome = false;
+
     private EventChannel.EventSink eventStream;
+    private EventChannel.EventSink latencyEventStream;
+
+    boolean logFirstSoundPlayTime = false;
 
     Runnable m_metronomePlayer = new Runnable()
     {
@@ -116,6 +122,95 @@ public class MainActivity extends FlutterActivity {
                     }
                 }
 
+                if (logFirstSoundPlayTime) {
+                    currentTime = Calendar.getInstance().getTime();
+                    Log.d(TAG, "time before play: " + sdf.format(currentTime));
+
+                    long timestamp = System.currentTimeMillis();
+
+                    runOnUiThread(() -> {
+                        if (latencyEventStream != null) {
+                            latencyEventStream.success(timestamp);
+                        }
+                    });
+
+                    logFirstSoundPlayTime = false;
+                }
+
+
+
+                m_audioTrack.write(samples, 0, samples.length);
+
+//                if (logFirstSoundPlayTime) {
+//                    currentTime = Calendar.getInstance().getTime();
+//                    Log.d(TAG, "time after play: " + sdf.format(currentTime));
+//
+//                    logFirstSoundPlayTime = false;
+//                }
+
+                currentClickPerBeat++;
+                if (currentClickPerBeat > clicksPerBeat) {
+                    currentClickPerBeat = 1;
+
+                    currentBeatsPerBar++;
+                    if (currentBeatsPerBar > beatsPerBar) {
+                        currentBeatsPerBar = 1;
+                    }
+                }
+            }
+
+        }
+    };
+
+    Runnable m_syncMetronomePlayer = new Runnable()
+    {
+        public void run() {
+            Thread.currentThread().setPriority(Thread.MAX_PRIORITY);
+
+            while(!m_stop)
+            {
+                runOnUiThread(() -> {
+                    if (eventStream != null) {
+                        final int copy = currentBeatsPerBar;
+                        eventStream.success(copy);
+                    }
+                });
+
+                int soundId = currentBeatsPerBar == 1
+                        ? currentClickPerBeat == 1 ? HighSound : LowSound
+                        : currentClickPerBeat == 1 ? MediumSound : LowSound;
+
+                int bufferSize = size * 2;
+                byte[] samples = new byte[bufferSize];
+                byte[] buffer = m_soundBuffers.get(soundId);
+
+//                long startTime = SystemClock.elapsedRealtime();
+                for (int i = 0; i < bufferSize; ++i) {
+
+                    if (i < buffer.length) {
+                        samples[i] = buffer[i];
+                    }
+                    else {
+                        samples[i] = 0;
+                    }
+                }
+
+                while (!m_syncPlayMetronome) {
+                    android.os.SystemClock.sleep(1);
+                }
+
+                if (logFirstSoundPlayTime) {
+                    long timestamp = System.currentTimeMillis();
+
+                    runOnUiThread(() -> {
+                        if (latencyEventStream != null) {
+                            latencyEventStream.success(timestamp);
+                        }
+                    });
+
+                    logFirstSoundPlayTime = false;
+                }
+
                 m_audioTrack.write(samples, 0, samples.length);
 
                 currentClickPerBeat++;
@@ -128,6 +223,8 @@ public class MainActivity extends FlutterActivity {
                     }
                 }
             }
+
+            m_syncPlayMetronome = false;
 
         }
     };
@@ -194,6 +291,21 @@ public class MainActivity extends FlutterActivity {
             }
         });
 
+        EventChannel latencyChannel = new EventChannel(flutterEngine.getDartExecutor().getBinaryMessenger(), "com.example.metronom/platformLatencyChannel");
+        latencyChannel.setStreamHandler(new EventChannel.StreamHandler() {
+            @Override
+            public void onListen(Object arguments, EventChannel.EventSink events) {
+                latencyEventStream = events;
+            }
+
+            @Override
+            public void onCancel(Object arguments) {
+                Log.d(TAG, "onCancel: ");
+                latencyEventStream.endOfStream();
+                latencyEventStream = null;
+            }
+        });
+
         new MethodChannel(flutterEngine.getDartExecutor().getBinaryMessenger(), CHANNEL)
             .setMethodCallHandler(
                 (call, result) -> {
@@ -204,12 +316,25 @@ public class MainActivity extends FlutterActivity {
                             result.success(null);
                             break;
                         case "start":
+
                             setup(call);
                             start();
 
                             result.success(null);
 
                             break;
+
+                        case "syncStartPrepare":
+                            setup(call);
+                            syncStart();
+
+                            break;
+
+                        case "syncStart":
+                            m_syncPlayMetronome = true;
+                            break;
+
+
                         case "stop":
                             stop();
                             result.success(null);
@@ -275,8 +400,22 @@ public class MainActivity extends FlutterActivity {
 
         m_audioTrack.play();
 
+        logFirstSoundPlayTime = true;
+
         m_metronomeThread = new Thread(m_metronomePlayer);
         m_metronomeThread.start();
+    }
+
+    private void syncStart() {
+        m_stop = false;
+
+        m_audioTrack.play();
+
+        m_syncPlayMetronome = false;
+        logFirstSoundPlayTime = true;
+
+        m_syncMetronomeThread = new Thread(m_syncMetronomePlayer);
+        m_syncMetronomeThread.start();
     }
 
     private void stop()
@@ -288,6 +427,8 @@ public class MainActivity extends FlutterActivity {
 
         currentBeatsPerBar = 1;
         currentClickPerBeat = 1;
+
+        logFirstSoundPlayTime = false;
 
         eventStream.success(0);
         Log.d(TAG, "stop: " + currentBeatsPerBar);

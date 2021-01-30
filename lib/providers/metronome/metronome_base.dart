@@ -39,6 +39,27 @@ abstract class MetronomeBase implements MetronomeInterface {
     _performIfIsPlayingEquals(true, _resetAndStop);
   }
 
+  @override
+  void syncStartPrepare(MetronomeSettings settings) {
+    _performIfIsPlayingEquals(
+      false,
+      () {
+        _settings = settings;
+        _isPlaying = true;
+
+        _currentBarBeatSubscription =
+            getCurrentBarBeatStream().listen((barBeat) => _currentBarBeat = barBeat);
+
+        onSyncStartPrepare(_settings);
+      },
+    );
+  }
+
+  @override
+  void syncStart() {
+    onSyncStart();
+  }
+
   void _performIfIsPlayingEquals(bool value, Function action) {
     if (value == _isPlaying) {
       action();
@@ -53,6 +74,11 @@ abstract class MetronomeBase implements MetronomeInterface {
   void onChange(MetronomeSettings settings);
   @protected
   void onStop();
+
+  @protected
+  void onSyncStartPrepare(MetronomeSettings settings);
+  @protected
+  void onSyncStart();
 
   void _setupAndStart(MetronomeSettings settings) {
     _settings = settings;
