@@ -1,57 +1,43 @@
-import 'package:metronom/providers/metronome/metronome_interface.dart';
+import 'package:flutter/services.dart';
 
-import '../remote/remote_command.dart';
 import '../remote/remote_synchronization.dart';
 import 'metronome.dart';
+import 'metronome_base.dart';
 import 'metronome_settings.dart';
 
-class RemoteSynchronizedMetronome implements MetronomeInterface {
+abstract class RemoteSynchronizedMetronome extends MetronomeBase {
   final RemoteSynchronization synchronization;
-  final Metronome metronome;
 
-  RemoteSynchronizedMetronome(this.synchronization, this.metronome);
+  RemoteSynchronizedMetronome(this.synchronization);
 
-  @override
-  void start(MetronomeSettings settings) {
-    print('Remote Synchronized Metronome start!');
-
-    synchronization.hostStartMetronome(metronome, settings);
-
-    // synchronization.clientSynchonizedAction(
-    //   RemoteCommand.startMetronome(settings),
-    //   () => metronome.start(settings),
-    // );
-  }
+  static const _metronomePlatformChannel = const MethodChannel('com.example.metronom/metronom');
 
   @override
-  void stop() {
-    print('remote stop');
-
-    synchronization.clientSynchonizedAction(
-      RemoteCommand.stopMetronome(),
-      () => metronome.stop(),
-      instant: true,
-    );
-  }
-
-  @override
-  void change(MetronomeSettings newSettings) {
+  void onChange(MetronomeSettings newSettings) {
     // do nothing on remote metronome change
   }
 
   @override
-  int get currentBarBeat => metronome.currentBarBeat;
-
-  @override
-  bool get isPlaying => metronome.isPlaying;
-
-  @override
-  void syncStart() {
-    // TODO: implement syncStart
+  void onStop() {
+    Metronome().onStop();
   }
 
   @override
-  void syncStartPrepare(MetronomeSettings settings) {
-    // TODO: implement syncStartPrepare
+  Stream getCurrentBarBeatStream() => Metronome().currentBarBeatStream;
+
+  void prepareToRun(MetronomeSettings settings) {
+    _metronomePlatformChannel.invokeMethod(
+      'syncStartPrepare',
+      {
+        'tempo': settings.tempo,
+        'beatsPerBar': settings.beatsPerBar,
+        'clicksPerBeat': settings.clicksPerBeat,
+        'tempoMultiplier': 1.0 // TODO: remove from platform implementation
+      },
+    );
+  }
+
+  void run() {
+    _metronomePlatformChannel.invokeMethod('syncStart');
   }
 }

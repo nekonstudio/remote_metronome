@@ -46,14 +46,9 @@ class RemoteCommandHandler {
       case RemoteCommandType.StartMetronome:
         final metronomeSettings = MetronomeSettings.fromJson(command.jsonParameters);
         final hostStartTime = DateTime.fromMillisecondsSinceEpoch(command.timestamp);
+        synchronization.hostStartTime = hostStartTime;
 
-        synchronization.clientStartMetronome(
-            providerReader(metronomeProvider), metronomeSettings, hostStartTime);
-
-        // synchronization.hostSynchonizedAction(
-        //   hostStartTime,
-        //   () => providerReader(metronomeProvider).start(metronomeSettings),
-        // );
+        providerReader(metronomeProvider).start(metronomeSettings);
         break;
 
       case RemoteCommandType.StopMetronome:
