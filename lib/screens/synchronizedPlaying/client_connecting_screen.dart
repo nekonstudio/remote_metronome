@@ -6,16 +6,17 @@ import 'package:metronom/screens/synchronizedPlaying/client_playing_screen.dart'
 
 import '../../providers/nearby/nearby_devices.dart';
 
+import '../../providers/remote/device_synchronization_mode_notifier.dart';
+
 class ClientConnectingScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     context.read(nearbyDevicesProvider).discover();
-    return ProviderListener<RemoteSynchronization>(
-      provider: synchronizationProvider,
-      onChange: (context, synchronization) {
-        if (synchronization.deviceMode == DeviceSynchronizationMode.Client) {
-          final hostName =
-              context.read(nearbyDevicesProvider).connectedDevicesList.first;
+    return ProviderListener<DeviceSynchronizationModeNotifier>(
+      provider: deviceSynchronizationModeNotifierProvider,
+      onChange: (context, deviceSynchronizationModeNotifier) {
+        if (deviceSynchronizationModeNotifier.mode == DeviceSynchronizationMode.Client) {
+          final hostName = context.read(nearbyDevicesProvider).connectedDevicesList.first;
           Get.off(ClientPlayingScreen(hostName));
         }
       },
@@ -45,9 +46,7 @@ class ClientConnectingScreen extends StatelessWidget {
                     final text1 = isConnected
                         ? 'Połączono z ${nearbyDevices.connectedDevicesList.first}!'
                         : 'Trwa wyszukiwanie dostępnych urządzeń';
-                    final text2 = isConnected
-                        ? 'Oczekiwanie na zatwierdzenie sesji.'
-                        : '';
+                    final text2 = isConnected ? 'Oczekiwanie na zatwierdzenie sesji.' : '';
                     return Column(
                       children: [Text(text1), SizedBox(height: 5), Text(text2)],
                     );

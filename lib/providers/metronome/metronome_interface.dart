@@ -1,3 +1,4 @@
+import 'package:metronom/providers/remote/device_synchronization_mode_notifier.dart';
 import 'package:metronom/providers/remote/remote_synchronization.dart';
 
 import 'client_synchronized_metronome.dart';
@@ -7,7 +8,7 @@ import 'metronome_settings.dart';
 
 abstract class MetronomeInterface {
   factory MetronomeInterface.createBySynchronizationMode(RemoteSynchronization synchronization) {
-    switch (synchronization.deviceMode) {
+    switch (synchronization.synchronizationMode.mode) {
       case DeviceSynchronizationMode.Host:
         return ClientSynchronizedMetronome(synchronization);
       case DeviceSynchronizationMode.Client:

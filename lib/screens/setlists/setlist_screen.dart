@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:get/get.dart';
 import 'package:metronom/models/setlist.dart';
+import 'package:metronom/providers/remote/device_synchronization_mode_notifier.dart';
 import 'package:metronom/providers/remote/remote_command.dart';
 import 'package:metronom/providers/remote/remote_synchronization.dart';
 import 'package:metronom/providers/setlist_player/notifier_setlist_player.dart';
@@ -19,9 +20,10 @@ import 'add_edit_track_screen.dart';
 
 final setlistPlayerProvider =
     ChangeNotifierProvider.autoDispose.family<NotifierSetlistPlayer, Setlist>(
-  (ref, setlist) => ref.watch(synchronizationProvider).deviceMode == DeviceSynchronizationMode.Host
-      ? RemoteSynchronizedNotifierSetlistPlayer(ref.read(synchronizationProvider), setlist)
-      : NotifierSetlistPlayer(setlist),
+  (ref, setlist) =>
+      ref.watch(deviceSynchronizationModeNotifierProvider).mode == DeviceSynchronizationMode.Host
+          ? RemoteSynchronizedNotifierSetlistPlayer(ref.read(synchronizationProvider), setlist)
+          : NotifierSetlistPlayer(setlist),
 );
 
 class SetlistScreen extends RemoteSynchronizedScreen {
@@ -91,7 +93,7 @@ class SetlistScreen extends RemoteSynchronizedScreen {
 
   @override
   Future<bool> onScreenClosing(BuildContext context, RemoteSynchronization synchronization) {
-    if (synchronization.isSynchronized) {
+    if (synchronization.synchronizationMode.isSynchronized) {
       synchronization.broadcastRemoteCommand(
         RemoteCommand.stopTrack(),
       );

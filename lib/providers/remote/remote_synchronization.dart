@@ -1,16 +1,12 @@
 import 'dart:async';
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:metronom/providers/metronome/metronome.dart';
-import 'package:metronom/providers/metronome/metronome_interface.dart';
 import 'package:metronom/providers/metronome/metronome_settings.dart';
 
 import '../nearby/nearby_devices.dart';
+import 'device_synchronization_mode_notifier.dart';
 import 'remote_command.dart';
-
-enum DeviceSynchronizationMode { Host, Client, None }
 
 class RemoteActionNotifier extends StateNotifier<bool> {
   RemoteActionNotifier(bool state) : super(state);
@@ -18,10 +14,11 @@ class RemoteActionNotifier extends StateNotifier<bool> {
   void setActionState(bool value) => state = value;
 }
 
-class RemoteSynchronization with ChangeNotifier {
+class RemoteSynchronization {
   final NearbyDevices nearbyDevices;
+  final DeviceSynchronizationModeNotifier synchronizationMode;
 
-  RemoteSynchronization(this.nearbyDevices);
+  RemoteSynchronization(this.nearbyDevices, this.synchronizationMode);
 
   final remoteActionNotifier = RemoteActionNotifier(false);
   MetronomeSettings Function() simpleMetronomeSettingsGetter;
@@ -33,7 +30,6 @@ class RemoteSynchronization with ChangeNotifier {
   int _platformLatency;
   DateTime _platformExecutionTimestamp;
 
-  var _mode = DeviceSynchronizationMode.None;
   int _hostTimeDifference;
   int _targetSynchronizedDevicesCount;
   int _synchronizedDevicesCount = 0;
@@ -43,9 +39,6 @@ class RemoteSynchronization with ChangeNotifier {
 
   int get clockSyncLatency => _clockSyncLatency;
   int get hostTimeDifference => _hostTimeDifference;
-
-  DeviceSynchronizationMode get deviceMode => _mode;
-  bool get isSynchronized => _mode != DeviceSynchronizationMode.None;
 
   void synchronize() {
     _targetSynchronizedDevicesCount = nearbyDevices.connectedDevicesCount;
@@ -61,10 +54,9 @@ class RemoteSynchronization with ChangeNotifier {
 
   void end() {
     _synchronizedDevicesCount = 0;
-    _mode = DeviceSynchronizationMode.None;
-    _keepConnectionAliveTimer?.cancel();
+    synchronizationMode.changeMode(DeviceSynchronizationMode.None);
 
-    notifyListeners();
+    _keepConnectionAliveTimer?.cancel();
   }
 
   void onClockSyncRequest(String hostEndpointId, int hostStartTime) {
@@ -110,14 +102,13 @@ class RemoteSynchronization with ChangeNotifier {
       _synchronizedDevicesCount++;
 
       if (_synchronizedDevicesCount == _targetSynchronizedDevicesCount) {
-        _mode = DeviceSynchronizationMode.Host;
+        synchronizationMode.changeMode(DeviceSynchronizationMode.Host);
 
         platformLatencyStream.listen(_setPlatformLatency);
         // _keepConnectionAliveTimer = Timer.periodic(Duration(seconds: 1), (timer) {
         //   final command = RemoteCommand(RemoteCommandType.KeepConnectionAlive);
         //   broadcastRemoteCommand(command);
         // });
-        notifyListeners();
       }
     }
   }
@@ -125,11 +116,11 @@ class RemoteSynchronization with ChangeNotifier {
   void onClockSyncSuccess(int hostTimeDifference, int clockSyncLatency) {
     _hostTimeDifference = hostTimeDifference;
     _clockSyncLatency = clockSyncLatency;
-    _mode = DeviceSynchronizationMode.Client;
+
+    synchronizationMode.changeMode(DeviceSynchronizationMode.Client);
 
     platformLatencyStream.listen(_setPlatformLatency);
 
-    notifyListeners();
     print('Client clock sync success! Remote time difference: $hostTimeDifference');
   }
 
@@ -201,8 +192,11 @@ class RemoteSynchronization with ChangeNotifier {
   }
 }
 
-final synchronizationProvider = ChangeNotifierProvider(
-  (ref) => RemoteSynchronization(ref.read(nearbyDevicesProvider)),
+final synchronizationProvider = Provider(
+  (ref) => RemoteSynchronization(
+    ref.read(nearbyDevicesProvider),
+    ref.read(deviceSynchronizationModeNotifierProvider),
+  ),
 );
 
 StateNotifierProvider<RemoteActionNotifier> remoteActionNotifierProvider =

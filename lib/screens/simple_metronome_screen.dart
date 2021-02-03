@@ -38,7 +38,7 @@ class _SimpleMetronomeScreenState extends State<SimpleMetronomeScreen> {
 
     final synchronization = context.read(synchronizationProvider);
     synchronization.simpleMetronomeSettingsGetter = () => _controller.value;
-    if (synchronization.isSynchronized) {
+    if (synchronization.synchronizationMode.isSynchronized) {
       final settings = _controller.value;
 
       synchronization.broadcastRemoteCommand(
@@ -48,7 +48,7 @@ class _SimpleMetronomeScreenState extends State<SimpleMetronomeScreen> {
   }
 
   void changeRemoteMetronomeProperty(Function changeFunction, RemoteCommandType commandType) {
-    if (context.read(synchronizationProvider).isSynchronized) {
+    if (context.read(synchronizationProvider).synchronizationMode.isSynchronized) {
       if (!context.read(metronomeProvider).isPlaying) {
         changeFunction();
         final value = _controller.value;

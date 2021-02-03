@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:get/get.dart';
+import 'package:metronom/providers/remote/device_synchronization_mode_notifier.dart';
 
 import '../../providers/nearby/nearby_devices.dart';
 import '../../providers/remote/remote_synchronization.dart';
@@ -38,8 +39,7 @@ class HostConnectingScreen extends StatelessWidget {
           print('hasConnections? $hasConnections');
 
           return FloatingActionButton(
-            backgroundColor:
-                hasConnections ? Get.theme.accentColor : Colors.grey,
+            backgroundColor: hasConnections ? Get.theme.accentColor : Colors.grey,
             child: child,
             onPressed: hasConnections
                 ? () async {
@@ -49,12 +49,10 @@ class HostConnectingScreen extends StatelessWidget {
                     await showDialog(
                         context: context,
                         barrierDismissible: false,
-                        builder: (context) =>
-                            ProviderListener<RemoteSynchronization>(
-                              provider: synchronizationProvider,
-                              onChange: (context, synchronization) {
-                                print(synchronization.isSynchronized);
-                                if (synchronization.isSynchronized) {
+                        builder: (context) => ProviderListener<DeviceSynchronizationModeNotifier>(
+                              provider: deviceSynchronizationModeNotifierProvider,
+                              onChange: (context, deviceSynchronizationModeNotifier) {
+                                if (deviceSynchronizationModeNotifier.isSynchronized) {
                                   Get.back();
                                 }
                               },

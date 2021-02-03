@@ -11,7 +11,7 @@ abstract class RemoteSynchronizedScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final synchronization = context.read(synchronizationProvider);
 
-    if (synchronization.isSynchronized) {
+    if (synchronization.synchronizationMode.isSynchronized) {
       initSynchronization(context, synchronization);
     }
 

@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:metronom/providers/remote/device_synchronization_mode_notifier.dart';
 
 import '../remote/remote_synchronization.dart';
 import 'metronome.dart';
@@ -83,8 +84,9 @@ abstract class MetronomeBase implements MetronomeInterface {
 
 final metronomeProvider = ChangeNotifierProvider<NotifierMetronome>(
   (ref) {
+    ref.watch(deviceSynchronizationModeNotifierProvider);
     final metronome = MetronomeInterface.createBySynchronizationMode(
-      ref.watch(synchronizationProvider),
+      ref.read(synchronizationProvider),
     );
 
     return NotifierMetronome(metronome);
