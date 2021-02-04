@@ -1,12 +1,12 @@
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:metronom/models/section.dart';
-import 'package:metronom/providers/setlist_player/setlist_player.dart';
+import 'package:metronom/providers/setlist_player/setlist_player_interface.dart';
 
 class AnimatedTrackSections extends StatefulWidget {
   static const ScrollDuration = 300;
 
-  final SetlistPlayer player;
+  final SetlistPlayerInterface player;
   final List<Section> sections;
 
   AnimatedTrackSections(this.player, this.sections);

@@ -2,15 +2,15 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
-import 'metronome.dart';
+import 'metronome_base.dart';
 import 'metronome_interface.dart';
 import 'metronome_settings.dart';
 
 class NotifierMetronome with ChangeNotifier implements MetronomeInterface {
-  final MetronomeInterface metronome;
+  final MetronomeBase impl;
   StreamSubscription<dynamic> _currentBarBeatStreamSubscription;
 
-  NotifierMetronome(this.metronome) {
+  NotifierMetronome(this.impl) {
     _subscribeToBarBeatChange();
   }
 
@@ -24,28 +24,28 @@ class NotifierMetronome with ChangeNotifier implements MetronomeInterface {
   }
 
   @override
-  bool get isPlaying => metronome.isPlaying;
+  bool get isPlaying => impl.isPlaying;
 
   @override
-  int get currentBarBeat => metronome.currentBarBeat;
+  int get currentBarBeat => impl.currentBarBeat;
 
   @override
   void start(MetronomeSettings settings) {
-    metronome.start(settings);
+    impl.start(settings);
   }
 
   @override
   void change(MetronomeSettings newSettings) {
-    metronome.change(newSettings);
+    impl.change(newSettings);
   }
 
   @override
   void stop() {
-    metronome.stop();
+    impl.stop();
   }
 
   void _subscribeToBarBeatChange() {
-    final stream = Metronome().getCurrentBarBeatStream();
+    final stream = impl.getCurrentBarBeatStream();
     _currentBarBeatStreamSubscription = stream.listen(_onBarBeatChange);
   }
 

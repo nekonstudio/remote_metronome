@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:metronom/providers/metronome/metronome_settings.dart';
 import 'package:metronom/providers/metronome/remote_synchronized_metronome.dart';
 import 'package:metronom/providers/remote/remote_command.dart';
@@ -9,9 +10,8 @@ class ClientSynchronizedMetronome extends RemoteSynchronizedMetronome {
   @override
   void onStart(MetronomeSettings settings) {
     synchronization.remoteActionNotifier.setActionState(true);
-    synchronization.broadcastRemoteCommand(
-      RemoteCommand.startMetronome(settings),
-    );
+
+    broadcastCommand(settings);
 
     prepareToRun(settings);
 
@@ -39,5 +39,14 @@ class ClientSynchronizedMetronome extends RemoteSynchronizedMetronome {
     );
 
     super.onStop();
+  }
+
+  @protected
+  void broadcastCommand(dynamic parameters) {
+    assert(parameters is MetronomeSettings);
+
+    synchronization.broadcastRemoteCommand(
+      RemoteCommand.startMetronome(parameters),
+    );
   }
 }

@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:metronom/providers/setlist_player/setlist_player_interface.dart';
 
-import '../providers/setlist_player/notifier_setlist_player.dart';
 import 'animated_track_sections.dart';
 import 'visualization.dart';
 
 class MetronomeTrackPanel extends StatelessWidget {
-  final NotifierSetlistPlayer player;
+  final SetlistPlayerInterface player;
 
   const MetronomeTrackPanel(this.player);
 

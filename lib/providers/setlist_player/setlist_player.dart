@@ -1,17 +1,21 @@
-import 'package:metronom/models/section.dart';
-import 'package:metronom/models/track.dart';
-import 'package:metronom/providers/setlist_player/track_player.dart';
+import 'package:flutter/material.dart';
 
+import '../../models/section.dart';
 import '../../models/setlist.dart';
+import '../../models/track.dart';
+import '../metronome/metronome_base.dart';
+import 'setlist_player_interface.dart';
+import 'track_player.dart';
 
-class SetlistPlayer {
+class SetlistPlayer implements SetlistPlayerInterface {
   final Setlist setlist;
+  final MetronomeBase metronome;
 
   TrackPlayer _trackPlayer;
   int _currentTrackIndex;
   void Function(int) _onTrackChanged;
 
-  SetlistPlayer(this.setlist) {
+  SetlistPlayer(this.setlist, this.metronome) {
     _currentTrackIndex = 0;
     var track = currentTrack;
 
@@ -20,7 +24,12 @@ class SetlistPlayer {
       track = null;
     }
 
-    _trackPlayer = TrackPlayer.createPlayerForTrack(track);
+    // _trackPlayer = TrackPlayer.createPlayerForTrack(track);
+    createTrackPlayer(track);
+  }
+
+  void createTrackPlayer(Track track) {
+    _trackPlayer = TrackPlayer.createPlayerForTrack(track, metronome);
   }
 
   set onTrackChanged(void Function(int) callback) => _onTrackChanged = callback;
@@ -74,7 +83,8 @@ class SetlistPlayer {
     trackChangeFunction();
     _onTrackChanged?.call(_currentTrackIndex);
 
-    _trackPlayer = TrackPlayer.createPlayerForTrack(currentTrack);
+    // _trackPlayer = TrackPlayer.createPlayerForTrack(currentTrack);
+    createTrackPlayer(currentTrack);
   }
 
   void _setNextTrackIndex() {

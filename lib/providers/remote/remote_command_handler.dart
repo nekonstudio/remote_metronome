@@ -79,11 +79,9 @@ class RemoteCommandHandler {
         if (setlist != null) {
           final hostStartTime = DateTime.fromMillisecondsSinceEpoch(command.timestamp);
           final setlistPlayer = providerReader(setlistPlayerProvider(setlist));
+          synchronization.hostStartTime = hostStartTime;
 
-          synchronization.hostSynchonizedAction(
-            hostStartTime,
-            setlistPlayer.play,
-          );
+          setlistPlayer.play();
         }
         break;
 

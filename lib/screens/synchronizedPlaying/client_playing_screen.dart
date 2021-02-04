@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:get/get.dart';
 import 'package:metronom/models/setlist.dart';
 import 'package:metronom/providers/metronome/metronome_base.dart';
-import 'package:metronom/providers/setlist_player/setlist_player.dart';
+import 'package:metronom/providers/setlist_player/setlist_player_interface.dart';
 import 'package:metronom/screens/setlists/setlist_screen.dart';
 import 'package:metronom/widgets/animated_track_sections.dart';
 
@@ -77,10 +77,7 @@ class ClientPlayingScreen extends StatelessWidget {
 
       final state = context.read(remoteScreenStateProvider.state);
       if (state == _ScreenState.Setlist) {
-        context
-            .read(setlistPlayerProvider(
-                context.read(remoteScreenStateProvider).setlist))
-            .stop();
+        context.read(setlistPlayerProvider(context.read(remoteScreenStateProvider).setlist)).stop();
       } else {
         context.read(metronomeProvider).stop();
       }
@@ -106,10 +103,9 @@ class _RemoteMetronomePanel extends ConsumerWidget {
 
     final state = watch(remoteScreenStateProvider.state);
 
-    SetlistPlayer player;
+    SetlistPlayerInterface player;
     if (state == _ScreenState.Setlist) {
-      player = watch(setlistPlayerProvider(
-          context.read(remoteScreenStateProvider).setlist));
+      player = watch(setlistPlayerProvider(context.read(remoteScreenStateProvider).setlist));
     }
 
     final track = player?.currentTrack;
@@ -213,5 +209,5 @@ class _ScreenStateNotifier extends StateNotifier<_ScreenState> {
   }
 }
 
-final remoteScreenStateProvider = StateNotifierProvider(
-    (ref) => _ScreenStateNotifier(_ScreenState.SimpleMetronome));
+final remoteScreenStateProvider =
+    StateNotifierProvider((ref) => _ScreenStateNotifier(_ScreenState.SimpleMetronome));

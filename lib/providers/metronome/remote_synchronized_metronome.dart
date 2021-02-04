@@ -14,7 +14,7 @@ abstract class RemoteSynchronizedMetronome extends MetronomeBase {
 
   @override
   void onChange(MetronomeSettings newSettings) {
-    // do nothing on remote metronome change
+    Metronome().onChange(newSettings);
   }
 
   @override

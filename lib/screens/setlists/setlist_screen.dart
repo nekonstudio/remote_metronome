@@ -6,8 +6,9 @@ import 'package:metronom/providers/remote/device_synchronization_mode_notifier.d
 import 'package:metronom/providers/remote/remote_command.dart';
 import 'package:metronom/providers/remote/remote_synchronization.dart';
 import 'package:metronom/providers/setlist_player/notifier_setlist_player.dart';
-import 'package:metronom/providers/setlist_player/remote_synchronized_notifier_setlist_player.dart';
+import 'package:metronom/providers/setlist_player/remote_synchronized_setlist_player.dart';
 import 'package:metronom/providers/setlist_player/setlist_player.dart';
+import 'package:metronom/providers/setlist_player/setlist_player_interface.dart';
 import 'package:metronom/widgets/remote_synchronized_screen.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
@@ -18,12 +19,28 @@ import '../../providers/setlists_manager.dart';
 import '../../widgets/metronome_track_panel.dart';
 import 'add_edit_track_screen.dart';
 
+class IsRemoteSetlistScreenNotifier extends StateNotifier<bool> {
+  IsRemoteSetlistScreenNotifier(bool state) : super(state);
+
+  void changeState(bool value) => state = value;
+}
+
+final isRemoteSetlistScreenProvider = StateNotifierProvider(
+  (ref) => IsRemoteSetlistScreenNotifier(false),
+);
+
 final setlistPlayerProvider =
     ChangeNotifierProvider.autoDispose.family<NotifierSetlistPlayer, Setlist>(
-  (ref, setlist) =>
-      ref.watch(deviceSynchronizationModeNotifierProvider).mode == DeviceSynchronizationMode.Host
-          ? RemoteSynchronizedNotifierSetlistPlayer(ref.read(synchronizationProvider), setlist)
-          : NotifierSetlistPlayer(setlist),
+  (ref, setlist) {
+    final isSynchronized = ref.watch(deviceSynchronizationModeNotifierProvider).isSynchronized;
+    final metronome = ref.watch(metronomeImplProvider);
+
+    return NotifierSetlistPlayer(
+      isSynchronized
+          ? RemoteSynchronizedSetlistPlayer(ref.read(synchronizationProvider), setlist, metronome)
+          : SetlistPlayer(setlist, metronome),
+    );
+  },
 );
 
 class SetlistScreen extends RemoteSynchronizedScreen {
@@ -35,6 +52,11 @@ class SetlistScreen extends RemoteSynchronizedScreen {
 
   @override
   void initSynchronization(BuildContext context, RemoteSynchronization synchronization) {
+    Future.delayed(
+      Duration(milliseconds: 50),
+      () => context.read(isRemoteSetlistScreenProvider).changeState(true),
+    );
+
     synchronization.broadcastRemoteCommand(
       RemoteCommand.setSetlist(setlist),
     );
@@ -46,14 +68,18 @@ class SetlistScreen extends RemoteSynchronizedScreen {
       return Text(setlist.name);
     }
 
-    final player = context.read(setlistPlayerProvider(setlist));
-    final selectedTrack = player.currentTrack;
-
     return ListTile(
       contentPadding: EdgeInsets.zero,
-      title: Text(
-        selectedTrack.name,
-        style: TextStyle(fontWeight: FontWeight.bold),
+      title: Consumer(
+        builder: (context, watch, child) {
+          final player = watch(setlistPlayerProvider(setlist));
+          final selectedTrack = player.currentTrack;
+
+          return Text(
+            selectedTrack.name,
+            style: TextStyle(fontWeight: FontWeight.bold),
+          );
+        },
       ),
       subtitle: Text(setlist.name),
     );
@@ -104,6 +130,7 @@ class SetlistScreen extends RemoteSynchronizedScreen {
       );
     }
     context.read(setlistPlayerProvider(setlist)).stop();
+    context.read(isRemoteSetlistScreenProvider).changeState(false);
 
     return Future.value(true);
   }
@@ -139,7 +166,7 @@ class SetlistScreen extends RemoteSynchronizedScreen {
 }
 
 class _PlayerPanel extends ConsumerWidget {
-  final SetlistPlayer player;
+  final SetlistPlayerInterface player;
 
   _PlayerPanel(this.player);
 
@@ -233,7 +260,7 @@ class _TrackList extends StatelessWidget with ListItemLongPressPopupMenu {
   }
 
   dynamic _buildPopupMenuItems(
-      BuildContext context, String setlistId, List<Track> tracks, SetlistPlayer player) {
+      BuildContext context, String setlistId, List<Track> tracks, SetlistPlayerInterface player) {
     return [
       PopupMenuItem(
         child: Text('Edytuj'),

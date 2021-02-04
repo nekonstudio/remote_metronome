@@ -1,16 +1,16 @@
-import 'package:metronom/models/track.dart';
-import 'package:metronom/providers/metronome/metronome.dart';
-import 'package:metronom/providers/setlist_player/track_player.dart';
+import '../../models/track.dart';
+import '../metronome/metronome_base.dart';
+import 'track_player.dart';
 
 class SimpleTrackPlayer extends TrackPlayer {
-  SimpleTrackPlayer(Track track) : super(track) {
+  SimpleTrackPlayer(Track track, MetronomeBase metronome) : super(track, metronome) {
     assert(track.isComplex == false);
     print('SimpleTrackPlayer(${track.name})');
   }
 
   @override
   void play() {
-    Metronome().start(track.settings);
+    metronome.start(track.settings);
   }
 
   @override

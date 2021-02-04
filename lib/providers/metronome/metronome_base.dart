@@ -3,13 +3,16 @@ import 'dart:async';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:metronom/providers/remote/device_synchronization_mode_notifier.dart';
+import 'package:metronom/screens/setlists/setlist_screen.dart';
 
 import '../remote/remote_synchronization.dart';
+import 'client_synchronized_metronome.dart';
+import 'client_synchronized_track_metronome.dart';
+import 'host_synchronized_metronome.dart';
 import 'metronome.dart';
 import 'metronome_interface.dart';
 import 'metronome_settings.dart';
 import 'notifier_metronome.dart';
-import 'remote_synchronized_metronome.dart';
 
 abstract class MetronomeBase implements MetronomeInterface {
   MetronomeSettings _settings;
@@ -82,14 +85,29 @@ abstract class MetronomeBase implements MetronomeInterface {
   }
 }
 
+final metronomeImplProvider = Provider<MetronomeBase>((ref) {
+  ref.watch(deviceSynchronizationModeNotifierProvider);
+  final synchronization = ref.read(synchronizationProvider);
+  final isRemoteSetlistScreen = ref.watch(isRemoteSetlistScreenProvider.state);
+
+  switch (synchronization.synchronizationMode.mode) {
+    case DeviceSynchronizationMode.Host:
+      return isRemoteSetlistScreen
+          ? ClientSynchronizedTrackMetronome(synchronization)
+          : ClientSynchronizedMetronome(synchronization);
+    case DeviceSynchronizationMode.Client:
+      return HostSynchronizedMetronome(synchronization);
+    case DeviceSynchronizationMode.None:
+      return Metronome();
+    default:
+      throw Exception('Not supported Metronome type');
+  }
+});
+
 final metronomeProvider = ChangeNotifierProvider<NotifierMetronome>(
   (ref) {
-    ref.watch(deviceSynchronizationModeNotifierProvider);
-    final metronome = MetronomeInterface.createBySynchronizationMode(
-      ref.read(synchronizationProvider),
-    );
-
-    return NotifierMetronome(metronome);
+    final metronomeImpl = ref.watch(metronomeImplProvider);
+    return NotifierMetronome(metronomeImpl);
   },
 );
 

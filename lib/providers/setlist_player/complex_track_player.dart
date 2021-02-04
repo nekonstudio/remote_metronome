@@ -1,12 +1,12 @@
 import 'dart:async';
 
-import 'package:metronom/models/section.dart';
-import 'package:metronom/models/track.dart';
-import 'package:metronom/providers/metronome/metronome.dart';
-import 'package:metronom/providers/setlist_player/track_player.dart';
+import '../../models/section.dart';
+import '../../models/track.dart';
+import '../metronome/metronome_base.dart';
+import 'track_player.dart';
 
 class ComplexTrackPlayer extends TrackPlayer {
-  ComplexTrackPlayer(Track track) : super(track) {
+  ComplexTrackPlayer(Track track, MetronomeBase metronome) : super(track, metronome) {
     assert(track.isComplex == true);
 
     print('ComplexTrackPlayer(${track.name})');
@@ -27,11 +27,11 @@ class ComplexTrackPlayer extends TrackPlayer {
 
   @override
   void play() {
-    _sub = Metronome().getCurrentBarBeatStream().listen((currentBarBeat) {
+    _sub = metronome.getCurrentBarBeatStream().listen((currentBarBeat) {
       _handleCurrentBarBeatChange(currentBarBeat as int);
     });
 
-    Metronome().start(_currentSection.settings);
+    metronome.start(_currentSection.settings);
   }
 
   @override
@@ -54,7 +54,7 @@ class ComplexTrackPlayer extends TrackPlayer {
 
   @override
   void stop() {
-    Metronome().stop();
+    metronome.stop();
     _sub?.cancel();
 
     _resetSectionDataToDefaults();
@@ -71,12 +71,11 @@ class ComplexTrackPlayer extends TrackPlayer {
   void _changeToNextSectionOnLastBarBeat(int currentBarBeat) {
     final isNotLastSection = _currentSectionIndex < track.sections.length - 1;
     final isLastSectionBar = _currentSectionBar == _currentSection.barsCount;
-    final isLastBarBeat =
-        currentBarBeat == _currentSection.settings.beatsPerBar;
+    final isLastBarBeat = currentBarBeat == _currentSection.settings.beatsPerBar;
 
     if (isNotLastSection && isLastSectionBar && isLastBarBeat) {
       final nextSection = track.sections[_currentSectionIndex + 1];
-      Metronome().change(nextSection.settings);
+      metronome.change(nextSection.settings);
     }
   }
 
@@ -103,7 +102,7 @@ class ComplexTrackPlayer extends TrackPlayer {
   void _onSectionChange() {
     _currentSectionBar = 1;
 
-    Metronome().change(_currentSection.settings);
+    metronome.change(_currentSection.settings);
   }
 
   void _resetSectionDataToDefaults() {
