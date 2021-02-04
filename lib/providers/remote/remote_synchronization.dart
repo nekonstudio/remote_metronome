@@ -1,9 +1,8 @@
 import 'dart:async';
 
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:metronom/providers/metronome/metronome_settings.dart';
 
+import '../metronome/metronome_settings.dart';
 import '../nearby/nearby_devices.dart';
 import 'device_synchronization_mode_notifier.dart';
 import 'remote_command.dart';
@@ -23,13 +22,7 @@ class RemoteSynchronization {
   final remoteActionNotifier = RemoteActionNotifier(false);
   MetronomeSettings Function() simpleMetronomeSettingsGetter;
 
-  final Stream<dynamic> platformLatencyStream =
-      const EventChannel('com.example.metronom/platformLatencyChannel').receiveBroadcastStream();
-
   int _clockSyncLatency;
-  int _platformLatency;
-  DateTime _platformExecutionTimestamp;
-
   int _hostTimeDifference;
   int _targetSynchronizedDevicesCount;
   int _synchronizedDevicesCount = 0;
@@ -104,7 +97,6 @@ class RemoteSynchronization {
       if (_synchronizedDevicesCount == _targetSynchronizedDevicesCount) {
         synchronizationMode.changeMode(DeviceSynchronizationMode.Host);
 
-        platformLatencyStream.listen(_setPlatformLatency);
         // _keepConnectionAliveTimer = Timer.periodic(Duration(seconds: 1), (timer) {
         //   final command = RemoteCommand(RemoteCommandType.KeepConnectionAlive);
         //   broadcastRemoteCommand(command);
@@ -119,72 +111,7 @@ class RemoteSynchronization {
 
     synchronizationMode.changeMode(DeviceSynchronizationMode.Client);
 
-    platformLatencyStream.listen(_setPlatformLatency);
-
     print('Client clock sync success! Remote time difference: $hostTimeDifference');
-  }
-
-  void clientSynchonizedAction(RemoteCommand remoteCommand, Function action,
-      {bool instant = false}) {
-    print('hostStartTime: ${DateTime.now()}');
-    broadcastRemoteCommand(remoteCommand);
-
-    if (instant) {
-      action();
-    } else {
-      remoteActionNotifier.setActionState(true);
-      // _platformExecutionTimestamp = DateTime.now();
-      // _metronomePlatformChannel.invokeMethod('syncStartPrepare');
-      Future.delayed(
-        Duration(milliseconds: 500),
-        () {
-          // print('HOST START! time:\t' + DateTime.now().toString());
-          action();
-          // _metronomePlatformChannel.invokeMethod('syncStart');
-          Future.delayed(
-            Duration(milliseconds: 120),
-            () => remoteActionNotifier.setActionState(false),
-          );
-        },
-      );
-    }
-
-    // action(); // TODO: remove
-  }
-
-  void hostSynchonizedAction(DateTime hostStartTime, Function action) async {
-    print('hostStartTime: $hostStartTime');
-    print('remoteTimeDifference: $_hostTimeDifference');
-    final latency = DateTime.now()
-        .difference(hostStartTime.add(Duration(milliseconds: -_hostTimeDifference)))
-        .inMilliseconds;
-
-    print('latency: $latency ms');
-
-    final waitTime = hostStartTime
-        .add(Duration(milliseconds: -_hostTimeDifference + 500 + (_clockSyncLatency ~/ 2) + 25));
-
-    print('currentTime =\t${DateTime.now()}');
-    print('currentTimeHost =\t${DateTime.now().add(Duration(milliseconds: _hostTimeDifference))}');
-    print('waitTime =\t\t$waitTime');
-
-    await Future.doWhile(() => DateTime.now().isBefore(waitTime));
-
-    final hostNowTime = DateTime.now().add(Duration(milliseconds: _hostTimeDifference));
-    print('CLIENT START! (host) time: $hostNowTime');
-    print('CLIENT START! (client) time: ${DateTime.now()}');
-
-    // _platformExecutionTimestamp = DateTime.now();
-    action();
-  }
-
-  void _setPlatformLatency(dynamic value) {
-    // print(value);
-    // _platformLatency = DateTime.fromMillisecondsSinceEpoch(value)
-    //     .difference(_platformExecutionTimestamp)
-    //     .inMilliseconds;
-
-    // print('platformLatency: $_platformLatency ms');
   }
 
   void _sendRemoteCommand(String receiverEndpointId, RemoteCommand command) {

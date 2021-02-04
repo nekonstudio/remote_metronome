@@ -16,9 +16,8 @@ class NotifierMetronome with ChangeNotifier implements MetronomeInterface {
 
   @override
   void dispose() {
-    _currentBarBeatStreamSubscription.cancel();
-
     print('NotifierMetronome dispose');
+    _currentBarBeatStreamSubscription.cancel();
 
     super.dispose();
   }

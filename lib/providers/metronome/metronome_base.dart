@@ -62,8 +62,9 @@ abstract class MetronomeBase implements MetronomeInterface {
     _settings = settings;
     _isPlaying = true;
 
-    _currentBarBeatSubscription =
-        getCurrentBarBeatStream().listen((barBeat) => _currentBarBeat = barBeat);
+    _currentBarBeatSubscription = getCurrentBarBeatStream().listen((barBeat) {
+      _currentBarBeat = barBeat;
+    });
 
     onStart(_settings);
   }

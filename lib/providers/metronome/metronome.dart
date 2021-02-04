@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:wakelock/wakelock.dart';
 
@@ -7,20 +8,10 @@ import 'metronome_base.dart';
 import 'metronome_settings.dart';
 
 class Metronome extends MetronomeBase {
-  static Metronome _instance;
+  @protected
+  static const platformChannel = const MethodChannel('com.example.metronom/metronom');
 
-  factory Metronome() {
-    if (_instance == null) {
-      _instance = Metronome._();
-    }
-    return _instance;
-  }
-
-  Metronome._();
-
-  static const _metronomePlatformChannel = const MethodChannel('com.example.metronom/metronom');
-
-  final Stream<dynamic> currentBarBeatStream =
+  static Stream<dynamic> currentBarBeatStream =
       const EventChannel('com.example.metronom/barBeatChannel').receiveBroadcastStream();
 
   @override
@@ -64,7 +55,7 @@ class Metronome extends MetronomeBase {
   }
 
   void _invokePlatformMethod(String methodName, [Map<String, dynamic> parameters]) {
-    _metronomePlatformChannel.invokeMethod(methodName, parameters);
+    platformChannel.invokeMethod(methodName, parameters);
   }
 
   void _toggleScreenWakelock() => Wakelock.toggle(enable: isPlaying);

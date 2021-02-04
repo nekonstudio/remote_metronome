@@ -10,8 +10,9 @@ class ClientSynchronizedMetronome extends RemoteSynchronizedMetronome {
   @override
   void onStart(MetronomeSettings settings) {
     synchronization.remoteActionNotifier.setActionState(true);
-
-    broadcastCommand(settings);
+    synchronization.broadcastRemoteCommand(
+      onStartCommand(settings),
+    );
 
     prepareToRun(settings);
 
@@ -35,18 +36,19 @@ class ClientSynchronizedMetronome extends RemoteSynchronizedMetronome {
   @override
   void onStop() {
     synchronization.broadcastRemoteCommand(
-      RemoteCommand.stopMetronome(),
+      onStopCommand(),
     );
 
     super.onStop();
   }
 
   @protected
-  void broadcastCommand(dynamic parameters) {
+  RemoteCommand onStartCommand(dynamic parameters) {
     assert(parameters is MetronomeSettings);
 
-    synchronization.broadcastRemoteCommand(
-      RemoteCommand.startMetronome(parameters),
-    );
+    return RemoteCommand.startMetronome(parameters);
   }
+
+  @protected
+  RemoteCommand onStopCommand() => RemoteCommand.stopMetronome();
 }

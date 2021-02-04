@@ -1,32 +1,14 @@
-import 'package:flutter/services.dart';
-
 import '../remote/remote_synchronization.dart';
 import 'metronome.dart';
-import 'metronome_base.dart';
 import 'metronome_settings.dart';
 
-abstract class RemoteSynchronizedMetronome extends MetronomeBase {
+abstract class RemoteSynchronizedMetronome extends Metronome {
   final RemoteSynchronization synchronization;
 
   RemoteSynchronizedMetronome(this.synchronization);
 
-  static const _metronomePlatformChannel = const MethodChannel('com.example.metronom/metronom');
-
-  @override
-  void onChange(MetronomeSettings newSettings) {
-    Metronome().onChange(newSettings);
-  }
-
-  @override
-  void onStop() {
-    Metronome().onStop();
-  }
-
-  @override
-  Stream getCurrentBarBeatStream() => Metronome().currentBarBeatStream;
-
   void prepareToRun(MetronomeSettings settings) {
-    _metronomePlatformChannel.invokeMethod(
+    Metronome.platformChannel.invokeMethod(
       'syncStartPrepare',
       {
         'tempo': settings.tempo,
@@ -38,6 +20,6 @@ abstract class RemoteSynchronizedMetronome extends MetronomeBase {
   }
 
   void run() {
-    _metronomePlatformChannel.invokeMethod('syncStart');
+    Metronome.platformChannel.invokeMethod('syncStart');
   }
 }
