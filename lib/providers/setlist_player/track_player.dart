@@ -29,4 +29,6 @@ abstract class TrackPlayer {
   void stop() {
     metronome.stop();
   }
+
+  void copy(TrackPlayer other) {}
 }

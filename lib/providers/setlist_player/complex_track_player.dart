@@ -17,6 +17,20 @@ class ComplexTrackPlayer extends TrackPlayer {
   int _previousBarBeat = 1;
   StreamSubscription<dynamic> _sub;
 
+  @override
+  void copy(TrackPlayer other) {
+    final complexTrackPlayer = other as ComplexTrackPlayer;
+    _currentSectionIndex = complexTrackPlayer.currentSectionIndex;
+    _currentSectionBar = complexTrackPlayer.currentSectionBar;
+    _previousBarBeat = complexTrackPlayer._previousBarBeat;
+
+    if (isPlaying) {
+      _sub = metronome.getCurrentBarBeatStream().listen((currentBarBeat) {
+        _handleCurrentBarBeatChange(currentBarBeat as int);
+      });
+    }
+  }
+
   Section get _currentSection => track.sections[_currentSectionIndex];
 
   @override

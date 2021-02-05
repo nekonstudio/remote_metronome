@@ -24,8 +24,15 @@ class SetlistPlayer implements SetlistPlayerInterface {
       track = null;
     }
 
-    // _trackPlayer = TrackPlayer.createPlayerForTrack(track);
     createTrackPlayer(track);
+  }
+
+  void copy(SetlistPlayer other) {
+    // order of execution matters
+    _currentTrackIndex = other.currentTrackIndex;
+    metronome.copy(other.metronome);
+    createTrackPlayer(currentTrack);
+    _trackPlayer.copy(other._trackPlayer);
   }
 
   void createTrackPlayer(Track track) {

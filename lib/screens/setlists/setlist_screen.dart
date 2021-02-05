@@ -29,17 +29,28 @@ final isRemoteSetlistScreenProvider = StateNotifierProvider(
   (ref) => IsRemoteSetlistScreenNotifier(false),
 );
 
+SetlistPlayer _setlistPlayerCopy;
+
 final setlistPlayerProvider =
     ChangeNotifierProvider.autoDispose.family<NotifierSetlistPlayer, Setlist>(
   (ref, setlist) {
-    final isSynchronized = ref.watch(deviceSynchronizationModeNotifierProvider).isSynchronized;
+    final modeProvider = ref.watch(deviceSynchronizationModeNotifierProvider);
     final metronome = ref.watch(metronomeImplProvider);
 
-    return NotifierSetlistPlayer(
-      isSynchronized
-          ? RemoteSynchronizedSetlistPlayer(ref.read(synchronizationProvider), setlist, metronome)
-          : SetlistPlayer(setlist, metronome),
-    );
+    final impl = modeProvider.isSynchronized
+        ? RemoteSynchronizedSetlistPlayer(ref.read(synchronizationProvider), setlist, metronome)
+        : SetlistPlayer(setlist, metronome);
+
+    if (_setlistPlayerCopy != null) {
+      if (modeProvider.previousMode == DeviceSynchronizationMode.Host) {
+        modeProvider.resetPreviousMode();
+        impl.copy(_setlistPlayerCopy);
+      }
+    }
+
+    _setlistPlayerCopy = impl;
+
+    return NotifierSetlistPlayer(impl);
   },
 );
 

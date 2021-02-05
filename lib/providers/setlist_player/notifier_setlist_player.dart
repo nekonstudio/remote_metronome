@@ -130,22 +130,22 @@ class NotifierSetlistPlayer with ChangeNotifier implements SetlistPlayerInterfac
   bool get isPlaying => impl.isPlaying;
 
   void _onCurrentBarBeatChanged() {
+    notifyListeners();
     // HACK!
     // This is delayed a little bit to ensure that values have changed
-    // notifyListeners();
-    Future.delayed(Duration(milliseconds: 10), () {
-      if (_previousCurrentSectionIndexValue != currentSectionIndex) {
-        _previousCurrentSectionIndexValue = currentSectionIndex;
+    // Future.delayed(Duration(milliseconds: 10), () {
+    //   if (_previousCurrentSectionIndexValue != currentSectionIndex) {
+    //     _previousCurrentSectionIndexValue = currentSectionIndex;
 
-        notifyListeners();
-      }
+    //     notifyListeners();
+    //   }
 
-      if (_previousCurrentSectionBarValue != currentSectionBar) {
-        _previousCurrentSectionBarValue = currentSectionBar;
+    //   if (_previousCurrentSectionBarValue != currentSectionBar) {
+    //     _previousCurrentSectionBarValue = currentSectionBar;
 
-        notifyListeners();
-      }
-    });
+    //     notifyListeners();
+    //   }
+    // });
   }
 
   @override
