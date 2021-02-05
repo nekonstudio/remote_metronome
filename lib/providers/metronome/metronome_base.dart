@@ -43,9 +43,15 @@ abstract class MetronomeBase implements MetronomeInterface {
     _performIfIsPlayingEquals(true, _resetAndStop);
   }
 
-  void _performIfIsPlayingEquals(bool value, Function action) {
-    if (value == _isPlaying) {
-      action();
+  void copy(MetronomeBase other) {
+    _settings = other.settings;
+    _currentBarBeat = other.currentBarBeat;
+    _isPlaying = other.isPlaying;
+
+    if (_isPlaying) {
+      _currentBarBeatSubscription = getCurrentBarBeatStream().listen((barBeat) {
+        _currentBarBeat = barBeat;
+      });
     }
   }
 
@@ -57,6 +63,12 @@ abstract class MetronomeBase implements MetronomeInterface {
   void onChange(MetronomeSettings settings);
   @protected
   void onStop();
+
+  void _performIfIsPlayingEquals(bool value, Function action) {
+    if (value == _isPlaying) {
+      action();
+    }
+  }
 
   void _setupAndStart(MetronomeSettings settings) {
     _settings = settings;
@@ -105,9 +117,17 @@ final metronomeImplProvider = Provider<MetronomeBase>((ref) {
   }
 });
 
+MetronomeBase _metronomeCopy;
+
 final metronomeProvider = ChangeNotifierProvider<NotifierMetronome>(
   (ref) {
     final metronomeImpl = ref.watch(metronomeImplProvider);
+
+    if (_metronomeCopy != null) {
+      metronomeImpl.copy(_metronomeCopy);
+    }
+    _metronomeCopy = metronomeImpl;
+
     return NotifierMetronome(metronomeImpl);
   },
 );
