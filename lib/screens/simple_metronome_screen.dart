@@ -141,7 +141,7 @@ class _SimpleMetronomeScreenState extends State<SimpleMetronomeScreen> {
                             onTap: () {
                               changeRemoteMetronomeProperty(
                                 () {
-                                  _controller.toggleHalfTimeTempoMultiplier();
+                                  _controller.halfTempo();
                                 },
                                 RemoteCommandType.SetMetronomeSettings,
                               );
@@ -152,9 +152,7 @@ class _SimpleMetronomeScreenState extends State<SimpleMetronomeScreen> {
                                   style: TextStyle(
                                     color: Colors.white,
                                   )),
-                              backgroundColor: _controller.isHalfTimeTempoMultiplierActive
-                                  ? Colors.blue
-                                  : Colors.black,
+                              backgroundColor: Colors.black,
                             ),
                           ),
                           Text(
@@ -165,7 +163,7 @@ class _SimpleMetronomeScreenState extends State<SimpleMetronomeScreen> {
                             onTap: () {
                               changeRemoteMetronomeProperty(
                                 () {
-                                  _controller.toggleDoubleTimeTempoMultiplier();
+                                  _controller.doubleTempo();
                                 },
                                 RemoteCommandType.SetMetronomeSettings,
                               );
@@ -176,9 +174,7 @@ class _SimpleMetronomeScreenState extends State<SimpleMetronomeScreen> {
                                   style: TextStyle(
                                     color: Colors.white,
                                   )),
-                              backgroundColor: _controller.isDoubleTimeTempoMultiplierActive
-                                  ? Colors.blue
-                                  : Colors.black,
+                              backgroundColor: Colors.black,
                             ),
                           ),
                         ],
@@ -205,7 +201,7 @@ class _SimpleMetronomeScreenState extends State<SimpleMetronomeScreen> {
                       max: metronomeSettings.maxTempo.toDouble(),
                       onChanged: (value) {
                         changeRemoteMetronomeProperty(() {
-                          _controller.changeTempo(value.toInt());
+                          _controller.setTempo(value.toInt());
                         }, RemoteCommandType.SetMetronomeSettings);
                       },
                     ),
@@ -376,8 +372,7 @@ class _SimpleMetronomeScreenState extends State<SimpleMetronomeScreen> {
                                   tapTempoDetector.registerTap();
                                   final tempo = tapTempoDetector.calculatedTempo;
                                   if (tempo != null) {
-                                    changeRemoteMetronomeProperty(
-                                        () => _controller.changeTempo(tempo),
+                                    changeRemoteMetronomeProperty(() => _controller.setTempo(tempo),
                                         RemoteCommandType.SetMetronomeSettings);
                                   }
                                 }

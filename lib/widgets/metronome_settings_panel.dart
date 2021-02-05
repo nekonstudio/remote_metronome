@@ -64,7 +64,7 @@ class MetronomeSettingsPanel extends StatelessWidget {
                     value: settings.tempo.toDouble(),
                     min: settings.minTempo.toDouble(),
                     max: settings.maxTempo.toDouble(),
-                    onChanged: (value) => controller.changeTempo(value.toInt()),
+                    onChanged: (value) => controller.setTempo(value.toInt()),
                     // onChangeEnd: (value) {},
                   ),
                 ),
