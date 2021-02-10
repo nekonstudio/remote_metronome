@@ -8,7 +8,7 @@ class ClientSynchronizedMetronome extends RemoteSynchronizedMetronome {
   ClientSynchronizedMetronome(RemoteSynchronization synchronization) : super(synchronization);
 
   @override
-  void onStart(MetronomeSettings settings) {
+  void startImplementation(MetronomeSettings settings) {
     synchronization.remoteActionNotifier.setActionState(true);
     synchronization.broadcastRemoteCommand(
       onStartCommand(settings),
@@ -34,12 +34,12 @@ class ClientSynchronizedMetronome extends RemoteSynchronizedMetronome {
   }
 
   @override
-  void onStop() {
+  void stopImplementation() {
     synchronization.broadcastRemoteCommand(
       onStopCommand(),
     );
 
-    super.onStop();
+    invokePlatformMethod('stop');
   }
 
   @protected

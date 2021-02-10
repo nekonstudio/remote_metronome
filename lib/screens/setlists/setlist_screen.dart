@@ -139,9 +139,9 @@ class SetlistScreen extends RemoteSynchronizedScreen {
       synchronization.broadcastRemoteCommand(
         RemoteCommand.setMetronomeSettings(metronomeSettings),
       );
-
-      context.read(isRemoteSetlistScreenProvider).changeState(false);
     }
+
+    context.read(isRemoteSetlistScreenProvider).changeState(false);
     context.read(setlistPlayerProvider(setlist)).stop();
 
     return Future.value(true);

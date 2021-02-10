@@ -1,8 +1,10 @@
+import 'package:metronom/providers/metronome/wakelock_metronome.dart';
+
 import '../remote/remote_synchronization.dart';
 import 'metronome.dart';
 import 'metronome_settings.dart';
 
-abstract class RemoteSynchronizedMetronome extends Metronome {
+abstract class RemoteSynchronizedMetronome extends WakelockMetronome {
   final RemoteSynchronization synchronization;
 
   RemoteSynchronizedMetronome(this.synchronization);

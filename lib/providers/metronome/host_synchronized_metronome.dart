@@ -6,7 +6,7 @@ class HostSynchronizedMetronome extends RemoteSynchronizedMetronome {
   HostSynchronizedMetronome(RemoteSynchronization synchronization) : super(synchronization);
 
   @override
-  void onStart(MetronomeSettings settings) {
+  void startImplementation(MetronomeSettings settings) {
     assert(synchronization.hostStartTime != null,
         'synchronization.hostStartTime must be set before HostSynchronizedMetronome.start() call');
 
