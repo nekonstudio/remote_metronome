@@ -1,12 +1,11 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
-import 'package:metronom/models/section.dart';
-import 'package:metronom/models/setlist.dart';
-import 'package:metronom/models/track.dart';
-import 'package:metronom/providers/metronome/metronome.dart';
-import 'package:metronom/providers/setlist_player/setlist_player.dart';
-import 'package:metronom/providers/setlist_player/setlist_player_interface.dart';
+
+import '../../models/section.dart';
+import '../../models/track.dart';
+import 'setlist_player.dart';
+import 'setlist_player_interface.dart';
 
 class NotifierSetlistPlayer with ChangeNotifier implements SetlistPlayerInterface {
   final SetlistPlayer impl;
@@ -14,23 +13,21 @@ class NotifierSetlistPlayer with ChangeNotifier implements SetlistPlayerInterfac
   bool _previousIsPlayingValue;
   int _previousCurrentTrackIndexValue;
   int _previousCurrentSectionIndexValue;
-  int _previousCurrentSectionBarValue;
-  StreamSubscription<dynamic> _subscription;
+
+  StreamSubscription<dynamic> _currentBarBeatSubscription;
 
   NotifierSetlistPlayer(this.impl) {
     _previousIsPlayingValue = impl.isPlaying;
     _previousCurrentTrackIndexValue = impl.currentTrackIndex;
     _previousCurrentSectionIndexValue = impl.currentSectionIndex;
-    _previousCurrentSectionBarValue = impl.currentSectionBar;
 
-    _subscription = impl.metronome.getCurrentBarBeatStream().listen(
-          (_) => _onCurrentBarBeatChanged(),
-        );
+    _currentBarBeatSubscription =
+        impl.metronome.getCurrentBarBeatStream().listen((_) => _onCurrentBarBeatChanged());
   }
 
   @override
   void dispose() {
-    _subscription.cancel();
+    _currentBarBeatSubscription.cancel();
     super.dispose();
   }
 
@@ -129,25 +126,15 @@ class NotifierSetlistPlayer with ChangeNotifier implements SetlistPlayerInterfac
   @override
   bool get isPlaying => impl.isPlaying;
 
-  void _onCurrentBarBeatChanged() {
-    notifyListeners();
-    // HACK!
-    // This is delayed a little bit to ensure that values have changed
-    // Future.delayed(Duration(milliseconds: 10), () {
-    //   if (_previousCurrentSectionIndexValue != currentSectionIndex) {
-    //     _previousCurrentSectionIndexValue = currentSectionIndex;
-
-    //     notifyListeners();
-    //   }
-
-    //   if (_previousCurrentSectionBarValue != currentSectionBar) {
-    //     _previousCurrentSectionBarValue = currentSectionBar;
-
-    //     notifyListeners();
-    //   }
-    // });
-  }
+  void _onCurrentBarBeatChanged() => notifyListeners();
 
   @override
   set onTrackChanged(void Function(int trackIndex) callback) => impl.onTrackChanged = callback;
+
+  @override
+  void update() {
+    impl.update();
+
+    notifyListeners();
+  }
 }
