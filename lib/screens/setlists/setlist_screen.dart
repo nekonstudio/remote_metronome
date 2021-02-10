@@ -75,24 +75,24 @@ class SetlistScreen extends RemoteSynchronizedScreen {
 
   @override
   Widget buildTitle(BuildContext context) {
-    if (!setlist.hasTracks) {
-      return Text(setlist.name);
-    }
+    return Consumer(
+      builder: (context, watch, child) {
+        final player = watch(setlistPlayerProvider(setlist));
+        final selectedTrack = player.currentTrack;
 
-    return ListTile(
-      contentPadding: EdgeInsets.zero,
-      title: Consumer(
-        builder: (context, watch, child) {
-          final player = watch(setlistPlayerProvider(setlist));
-          final selectedTrack = player.currentTrack;
+        if (!setlist.hasTracks || selectedTrack == null) {
+          return Text(setlist.name);
+        }
 
-          return Text(
+        return ListTile(
+          contentPadding: EdgeInsets.zero,
+          title: Text(
             selectedTrack.name,
             style: TextStyle(fontWeight: FontWeight.bold),
-          );
-        },
-      ),
-      subtitle: Text(setlist.name),
+          ),
+          subtitle: Text(setlist.name),
+        );
+      },
     );
   }
 
@@ -214,7 +214,7 @@ class _PlayerPanel extends ConsumerWidget {
   }
 }
 
-class _TrackList extends StatelessWidget with ListItemLongPressPopupMenu {
+class _TrackList extends StatefulWidget {
   final Setlist setlist;
   final NotifierSetlistPlayer player;
   final ItemScrollController scrollController;
@@ -226,6 +226,11 @@ class _TrackList extends StatelessWidget with ListItemLongPressPopupMenu {
   });
 
   @override
+  __TrackListState createState() => __TrackListState();
+}
+
+class __TrackListState extends State<_TrackList> with ListItemLongPressPopupMenu {
+  @override
   Widget build(BuildContext context) {
     return NotificationListener<OverscrollIndicatorNotification>(
       onNotification: (OverscrollIndicatorNotification overscroll) {
@@ -233,20 +238,21 @@ class _TrackList extends StatelessWidget with ListItemLongPressPopupMenu {
         return true;
       },
       child: ScrollablePositionedList.separated(
-        itemScrollController: scrollController,
-        itemCount: setlist.tracksCount,
+        itemScrollController: widget.scrollController,
+        itemCount: widget.setlist.tracksCount,
         separatorBuilder: (context, index) => Divider(height: 1),
         itemBuilder: (context, index) {
-          final track = setlist.tracks[index];
+          final track = widget.setlist.tracks[index];
           return InkWell(
             onTap: () {
-              player.selectTrack(index);
+              widget.player.selectTrack(index);
             },
             onTapDown: storeTapPosition,
             onLongPress: () => showPopupMenu(
               context,
               index,
-              _buildPopupMenuItems(context, setlist.id, setlist.tracks, player),
+              _buildPopupMenuItems(
+                  context, widget.setlist.id, widget.setlist.tracks, widget.player),
             ),
             child: ListTile(
               leading: CircleAvatar(
@@ -256,11 +262,12 @@ class _TrackList extends StatelessWidget with ListItemLongPressPopupMenu {
               title: Text(
                 '${track.name}',
                 style: TextStyle(
-                  color: player.currentTrackIndex == index
+                  color: widget.player.currentTrackIndex == index
                       ? Theme.of(context).accentColor
                       : Colors.white,
-                  fontWeight:
-                      player.currentTrackIndex == index ? FontWeight.bold : FontWeight.normal,
+                  fontWeight: widget.player.currentTrackIndex == index
+                      ? FontWeight.bold
+                      : FontWeight.normal,
                 ),
               ),
               subtitle: Text(track.isComplex ? 'Złożony' : '${track.settings.tempo} BPM'),
@@ -277,27 +284,37 @@ class _TrackList extends StatelessWidget with ListItemLongPressPopupMenu {
       PopupMenuItem(
         child: Text('Edytuj'),
         value: (index) {
-          if (!context.read(metronomeProvider).isPlaying) {
-            Get.to(AddEditTrackScreen(setlistId, tracks[index]));
-          } else {
-            Get.snackbar('Zatrzymaj odtwarzanie', 'aby edytować utwór.', colorText: Colors.white);
-          }
+          player.stop();
+          Get.to(AddEditTrackScreen(setlistId, tracks[index]));
+          // if (!context.read(metronomeProvider).isPlaying) {
+          //   Get.to(AddEditTrackScreen(setlistId, tracks[index]));
+          // } else {
+          //   Get.snackbar('Zatrzymaj odtwarzanie', 'aby edytować utwór.', colorText: Colors.white);
+          // }
         },
       ),
       PopupMenuItem(
           child: Text('Usuń'),
           value: (index) {
-            if (!context.read(metronomeProvider).isPlaying) {
-              final setlistManager = context.read(setlistManagerProvider);
+            player.stop();
+            final setlistManager = context.read(setlistManagerProvider);
 
-              setlistManager.deleteTrack(setlistId, index);
+            setlistManager.deleteTrack(setlistId, index);
 
-              if (setlistManager.getSetlist(setlistId).tracksCount == player.currentTrackIndex) {
-                player.selectTrack(setlist.tracksCount - 1);
-              }
-            } else {
-              Get.snackbar('Zatrzymaj odtwarzanie', 'aby usunąć utwór.', colorText: Colors.white);
+            if (setlistManager.getSetlist(setlistId).tracksCount == player.currentTrackIndex) {
+              player.selectTrack(widget.setlist.tracksCount - 1);
             }
+            // if (!context.read(metronomeProvider).isPlaying) {
+            //   final setlistManager = context.read(setlistManagerProvider);
+
+            //   setlistManager.deleteTrack(setlistId, index);
+
+            //   if (setlistManager.getSetlist(setlistId).tracksCount == player.currentTrackIndex) {
+            //     player.selectTrack(widget.setlist.tracksCount - 1);
+            //   }
+            // } else {
+            //   Get.snackbar('Zatrzymaj odtwarzanie', 'aby usunąć utwór.', colorText: Colors.white);
+            // }
           }),
     ];
   }

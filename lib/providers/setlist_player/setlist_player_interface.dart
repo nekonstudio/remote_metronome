@@ -9,6 +9,7 @@ abstract class SetlistPlayerInterface {
   void selectNextSection();
   void selectPreviousSection();
   void stop();
+  void update();
 
   bool get isPlaying;
 

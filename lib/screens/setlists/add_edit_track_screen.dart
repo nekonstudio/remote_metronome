@@ -6,6 +6,7 @@ import 'package:get/get.dart';
 import 'package:metronom/controllers/metronome_settings_controller.dart';
 import 'package:metronom/models/section.dart';
 import 'package:metronom/providers/metronome/metronome_settings.dart';
+import 'package:metronom/screens/setlists/setlist_screen.dart';
 import 'package:swipedetector/swipedetector.dart';
 import 'package:toggle_switch/toggle_switch.dart';
 
@@ -92,11 +93,14 @@ class _AddEditTrackScreenState extends State<AddEditTrackScreen> {
         _isComplexTrack ? Track.complex(value, _sections) : Track.simple(value, _controller.value);
 
     final setlistManager = context.read(setlistManagerProvider);
+    final setlist = setlistManager.getSetlist(_setlistId);
+    final setlistPlayer = context.read(setlistPlayerProvider(setlist));
 
     if (_isEditingMode) {
       setlistManager.editTrack(_setlistId, _track.id, track);
     } else {
       setlistManager.addTrack(_setlistId, track);
+      setlistPlayer.update();
     }
 
     Get.back();

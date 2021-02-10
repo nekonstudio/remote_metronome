@@ -16,15 +16,11 @@ class SetlistPlayer implements SetlistPlayerInterface {
   void Function(int) _onTrackChanged;
 
   SetlistPlayer(this.setlist, this.metronome) {
-    _currentTrackIndex = 0;
-    var track = currentTrack;
-
-    if (!setlist.hasTracks) {
-      _currentTrackIndex = null;
-      track = null;
+    if (setlist.hasTracks) {
+      _currentTrackIndex = 0;
     }
 
-    createTrackPlayer(track);
+    createTrackPlayer(currentTrack);
   }
 
   void copy(SetlistPlayer other) {
@@ -80,6 +76,14 @@ class SetlistPlayer implements SetlistPlayerInterface {
 
   void stop() {
     _trackPlayer.stop();
+  }
+
+  void update() {
+    if (setlist.hasTracks) {
+      _currentTrackIndex = 0;
+    }
+
+    createTrackPlayer(currentTrack);
   }
 
   void _handleTrackChange(Function trackChangeFunction) {
