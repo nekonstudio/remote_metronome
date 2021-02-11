@@ -79,8 +79,10 @@ class SetlistPlayer implements SetlistPlayerInterface {
   }
 
   void update() {
-    if (setlist.hasTracks) {
-      _currentTrackIndex = 0;
+    if (!setlist.hasTracks) {
+      _currentTrackIndex = null;
+    } else {
+      _currentTrackIndex ??= 0;
     }
 
     createTrackPlayer(currentTrack);
@@ -94,7 +96,6 @@ class SetlistPlayer implements SetlistPlayerInterface {
     trackChangeFunction();
     _onTrackChanged?.call(_currentTrackIndex);
 
-    // _trackPlayer = TrackPlayer.createPlayerForTrack(currentTrack);
     createTrackPlayer(currentTrack);
   }
 

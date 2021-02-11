@@ -100,8 +100,9 @@ class _AddEditTrackScreenState extends State<AddEditTrackScreen> {
       setlistManager.editTrack(_setlistId, _track.id, track);
     } else {
       setlistManager.addTrack(_setlistId, track);
-      setlistPlayer.update();
     }
+
+    setlistPlayer.update();
 
     Get.back();
   }

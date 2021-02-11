@@ -285,36 +285,25 @@ class __TrackListState extends State<_TrackList> with ListItemLongPressPopupMenu
         child: Text('Edytuj'),
         value: (index) {
           player.stop();
+
           Get.to(AddEditTrackScreen(setlistId, tracks[index]));
-          // if (!context.read(metronomeProvider).isPlaying) {
-          //   Get.to(AddEditTrackScreen(setlistId, tracks[index]));
-          // } else {
-          //   Get.snackbar('Zatrzymaj odtwarzanie', 'aby edytować utwór.', colorText: Colors.white);
-          // }
         },
       ),
       PopupMenuItem(
           child: Text('Usuń'),
           value: (index) {
             player.stop();
-            final setlistManager = context.read(setlistManagerProvider);
 
+            final setlistManager = context.read(setlistManagerProvider);
             setlistManager.deleteTrack(setlistId, index);
 
-            if (setlistManager.getSetlist(setlistId).tracksCount == player.currentTrackIndex) {
-              player.selectTrack(widget.setlist.tracksCount - 1);
+            final tracksCount = setlistManager.getSetlist(setlistId).tracksCount;
+            final nextTrackIndex = tracksCount - 1;
+            if (tracksCount == player.currentTrackIndex && nextTrackIndex >= 0) {
+              player.selectTrack(nextTrackIndex);
+            } else {
+              player.update();
             }
-            // if (!context.read(metronomeProvider).isPlaying) {
-            //   final setlistManager = context.read(setlistManagerProvider);
-
-            //   setlistManager.deleteTrack(setlistId, index);
-
-            //   if (setlistManager.getSetlist(setlistId).tracksCount == player.currentTrackIndex) {
-            //     player.selectTrack(widget.setlist.tracksCount - 1);
-            //   }
-            // } else {
-            //   Get.snackbar('Zatrzymaj odtwarzanie', 'aby usunąć utwór.', colorText: Colors.white);
-            // }
           }),
     ];
   }
