@@ -51,4 +51,10 @@ class RemoteSynchronizedSetlistPlayer extends SetlistPlayer {
     synchronization.broadcastRemoteCommand(RemoteCommand.selectPreviousSection());
     super.selectPreviousSection();
   }
+
+  @override
+  void update() {
+    synchronization.broadcastRemoteCommand(RemoteCommand.setSetlist(setlist));
+    super.update();
+  }
 }

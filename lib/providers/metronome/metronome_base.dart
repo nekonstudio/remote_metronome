@@ -2,17 +2,17 @@ import 'dart:async';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:metronom/providers/remote/device_synchronization_mode_notifier.dart';
-import 'package:metronom/screens/setlists/setlist_screen.dart';
 
+import '../../screens/setlists/setlist_screen.dart';
+import '../remote/device_synchronization_mode_notifier.dart';
 import '../remote/remote_synchronization.dart';
 import 'client_synchronized_metronome.dart';
 import 'client_synchronized_track_metronome.dart';
 import 'host_synchronized_metronome.dart';
-import 'metronome.dart';
 import 'metronome_interface.dart';
 import 'metronome_settings.dart';
 import 'notifier_metronome.dart';
+import 'wakelock_metronome.dart';
 
 abstract class MetronomeBase implements MetronomeInterface {
   MetronomeSettings _settings;
@@ -111,7 +111,7 @@ final metronomeImplProvider = Provider<MetronomeBase>((ref) {
     case DeviceSynchronizationMode.Client:
       return HostSynchronizedMetronome(synchronization);
     case DeviceSynchronizationMode.None:
-      return Metronome();
+      return WakelockMetronome();
     default:
       throw Exception('Not supported Metronome type');
   }
