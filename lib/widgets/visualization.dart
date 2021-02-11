@@ -16,15 +16,35 @@ class Visualization extends ConsumerWidget {
   @override
   Widget build(BuildContext context, ScopedReader watch) {
     final currentBarBeat = watch(currentBeatBarProvider);
-    return Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: List.generate(
-          beatsPerBar,
-          (index) => CircleAvatar(
+    return Column(
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: List.generate(
+            beatsPerBar <= 8 ? beatsPerBar : 8,
+            (index) => CircleAvatar(
               backgroundColor: _calculateColor(
-            index,
-            currentBarBeat,
-          )),
-        ));
+                index,
+                currentBarBeat,
+              ),
+            ),
+          ),
+        ),
+        if (beatsPerBar > 8) SizedBox(height: 5),
+        if (beatsPerBar > 8)
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: List.generate(
+              beatsPerBar - 8,
+              (index) => CircleAvatar(
+                backgroundColor: _calculateColor(
+                  index + 8,
+                  currentBarBeat,
+                ),
+              ),
+            ),
+          )
+      ],
+    );
   }
 }
