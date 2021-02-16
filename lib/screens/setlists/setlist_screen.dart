@@ -22,7 +22,9 @@ import 'add_edit_track_screen.dart';
 class IsRemoteSetlistScreenNotifier extends StateNotifier<bool> {
   IsRemoteSetlistScreenNotifier(bool state) : super(state);
 
-  void changeState(bool value) => state = value;
+  void changeState(bool value) {
+    if (value != state) state = value;
+  }
 }
 
 final isRemoteSetlistScreenProvider = StateNotifierProvider(

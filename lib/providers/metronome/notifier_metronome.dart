@@ -11,6 +11,7 @@ class NotifierMetronome with ChangeNotifier implements MetronomeInterface {
   StreamSubscription<dynamic> _currentBarBeatStreamSubscription;
 
   NotifierMetronome(this.impl) {
+    print('NotifierMetronome()');
     _subscribeToBarBeatChange();
   }
 

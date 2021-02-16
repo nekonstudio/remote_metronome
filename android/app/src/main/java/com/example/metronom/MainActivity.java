@@ -72,6 +72,7 @@ public class MainActivity extends FlutterActivity {
 
     int beatsPerBar = 4;
     int clicksPerBeat = 1;
+    int previousClicksPerBeat = 1;
 
     Integer currentBeatsPerBar = 1;
     int currentClickPerBeat = 1;
@@ -102,6 +103,9 @@ public class MainActivity extends FlutterActivity {
                         eventStream.success(copy);
                     }
                 });
+//
+//                Log.d(TAG, "currentClickPerBeat: " + currentClickPerBeat);
+//                Log.d(TAG, "currentBeatsPerBar: " + currentBeatsPerBar);
 
                 int soundId = currentBeatsPerBar == 1
                         ? currentClickPerBeat == 1 ? HighSound : LowSound
@@ -149,7 +153,16 @@ public class MainActivity extends FlutterActivity {
 //                }
 
                 currentClickPerBeat++;
-                if (currentClickPerBeat > clicksPerBeat) {
+                if (previousClicksPerBeat < clicksPerBeat) {
+                    currentClickPerBeat = 1;
+//                    currentBeatsPerBar = 1;
+                    currentBeatsPerBar++;
+                    if (currentBeatsPerBar > beatsPerBar) {
+                        currentBeatsPerBar = 1;
+                    }
+                    previousClicksPerBeat = clicksPerBeat;
+                }
+                else if (currentClickPerBeat > clicksPerBeat) {
                     currentClickPerBeat = 1;
 
                     currentBeatsPerBar++;
@@ -355,7 +368,9 @@ public class MainActivity extends FlutterActivity {
                             result.success(null);
                             break;
                         case "smoothChange":
+                            previousClicksPerBeat = clicksPerBeat;
                             setup(call);
+//                            currentClickPerBeat = 0;
 
                             result.success(null);
                             break;
@@ -402,6 +417,8 @@ public class MainActivity extends FlutterActivity {
 
         logFirstSoundPlayTime = true;
 
+        previousClicksPerBeat = clicksPerBeat;
+
         m_metronomeThread = new Thread(m_metronomePlayer);
         m_metronomeThread.start();
     }
@@ -427,6 +444,7 @@ public class MainActivity extends FlutterActivity {
 
         currentBeatsPerBar = 1;
         currentClickPerBeat = 1;
+        previousClicksPerBeat = 1;
 
         logFirstSoundPlayTime = false;
 

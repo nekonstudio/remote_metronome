@@ -14,6 +14,7 @@ class ComplexTrackPlayer extends TrackPlayer {
 
   int _currentSectionIndex = 0;
   int _currentSectionBar = 1;
+  int _currentClickPerBeat = 1;
   int _previousBarBeat = 1;
   StreamSubscription<dynamic> _sub;
 
@@ -87,7 +88,11 @@ class ComplexTrackPlayer extends TrackPlayer {
     final isLastSectionBar = _currentSectionBar == _currentSection.barsCount;
     final isLastBarBeat = currentBarBeat == _currentSection.settings.beatsPerBar;
 
-    if (isNotLastSection && isLastSectionBar && isLastBarBeat) {
+    final sectionClicksPerBeat = _currentSection.settings.clicksPerBeat;
+    final isPenultimateClickPerBeat =
+        sectionClicksPerBeat == 1 || _currentClickPerBeat == sectionClicksPerBeat;
+
+    if (isNotLastSection && isLastSectionBar && isLastBarBeat && isPenultimateClickPerBeat) {
       final nextSection = track.sections[_currentSectionIndex + 1];
       metronome.change(nextSection.settings);
     }
@@ -101,6 +106,13 @@ class ComplexTrackPlayer extends TrackPlayer {
         _currentSectionBar = 1;
 
         _currentSectionIndex++;
+      }
+    }
+
+    if (_currentSectionIndex < track.sections.length) {
+      _currentClickPerBeat++;
+      if (_currentClickPerBeat > _currentSection.settings.clicksPerBeat) {
+        _currentClickPerBeat = 1;
       }
     }
 
@@ -123,5 +135,6 @@ class ComplexTrackPlayer extends TrackPlayer {
     _currentSectionIndex = 0;
     _currentSectionBar = 1;
     _previousBarBeat = 1;
+    _currentClickPerBeat = 1;
   }
 }
