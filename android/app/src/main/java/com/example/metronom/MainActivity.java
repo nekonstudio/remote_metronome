@@ -227,7 +227,16 @@ public class MainActivity extends FlutterActivity {
                 m_audioTrack.write(samples, 0, samples.length);
 
                 currentClickPerBeat++;
-                if (currentClickPerBeat > clicksPerBeat) {
+                if (previousClicksPerBeat < clicksPerBeat) {
+                    currentClickPerBeat = 1;
+//                    currentBeatsPerBar = 1;
+                    currentBeatsPerBar++;
+                    if (currentBeatsPerBar > beatsPerBar) {
+                        currentBeatsPerBar = 1;
+                    }
+                    previousClicksPerBeat = clicksPerBeat;
+                }
+                else if (currentClickPerBeat > clicksPerBeat) {
                     currentClickPerBeat = 1;
 
                     currentBeatsPerBar++;
@@ -341,10 +350,14 @@ public class MainActivity extends FlutterActivity {
                             setup(call);
                             syncStart();
 
+                            result.success(null);
+
                             break;
 
                         case "syncStart":
                             m_syncPlayMetronome = true;
+
+                            result.success(null);
                             break;
 
 
@@ -430,6 +443,8 @@ public class MainActivity extends FlutterActivity {
 
         m_syncPlayMetronome = false;
         logFirstSoundPlayTime = true;
+
+        previousClicksPerBeat = clicksPerBeat;
 
         m_syncMetronomeThread = new Thread(m_syncMetronomePlayer);
         m_syncMetronomeThread.start();

@@ -143,8 +143,8 @@ class SetlistScreen extends RemoteSynchronizedScreen {
       );
     }
 
-    context.read(isRemoteSetlistScreenProvider).changeState(false);
     context.read(setlistPlayerProvider(setlist)).stop();
+    context.read(isRemoteSetlistScreenProvider).changeState(false);
 
     return Future.value(true);
   }
