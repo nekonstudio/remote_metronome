@@ -44,11 +44,11 @@ public class MainActivity extends FlutterActivity {
                             _metronome.start(MetronomeSettings.fromMethodCall(call));
                             break;
 
-                        case "syncStartPrepare":
+                        case "prepareSynchronizedStart":
                             _metronome.prepareSynchronizedStart(MetronomeSettings.fromMethodCall(call));
                             break;
 
-                        case "syncStart":
+                        case "synchronizedStart":
                             _metronome.synchronizedStart();
                             break;
 
@@ -56,7 +56,7 @@ public class MainActivity extends FlutterActivity {
                             _metronome.stop();
                             break;
 
-                        case "smoothChange":
+                        case "change":
                             _metronome.change(MetronomeSettings.fromMethodCall(call));
                             break;
 

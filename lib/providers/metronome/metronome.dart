@@ -21,7 +21,6 @@ class Metronome extends MetronomeBase {
         'tempo': settings.tempo,
         'beatsPerBar': settings.beatsPerBar,
         'clicksPerBeat': settings.clicksPerBeat,
-        'tempoMultiplier': 1.0 // TODO: remove from platform implementation
       },
     );
   }
@@ -29,12 +28,11 @@ class Metronome extends MetronomeBase {
   @override
   void onChange(MetronomeSettings settings) {
     invokePlatformMethod(
-      'smoothChange',
+      'change',
       {
         'tempo': settings.tempo,
         'beatsPerBar': settings.beatsPerBar,
         'clicksPerBeat': settings.clicksPerBeat,
-        'tempoMultiplier': 1.0 // TODO: remove from platform implementation
       },
     );
   }

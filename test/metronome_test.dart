@@ -21,16 +21,6 @@ class MockMetronomeImpl extends MetronomeBase {
   }
 
   @override
-  void onSyncStart() {
-    // TODO: implement onSyncStart
-  }
-
-  @override
-  void onSyncStartPrepare(MetronomeSettings settings) {
-    // TODO: implement onSyncStartPrepare
-  }
-
-  @override
   Stream<int> getCurrentBarBeatStream() {
     StreamController<int> controller;
     Timer timer;

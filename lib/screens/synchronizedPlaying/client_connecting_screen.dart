@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:get/get.dart';
-import 'package:metronom/providers/remote/remote_synchronization.dart';
 import 'package:metronom/screens/synchronizedPlaying/client_playing_screen.dart';
 
 import '../../providers/nearby/nearby_devices.dart';
