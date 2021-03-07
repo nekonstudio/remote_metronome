@@ -8,16 +8,16 @@ import 'remote_connected_devices_panel.dart';
 
 class RemoteModeScreen extends StatelessWidget {
   final Widget title;
-  final Widget subtitle;
   final Widget body;
+  final Widget subtitle;
   final Widget drawer;
   final Widget floatingActionButton;
 
   const RemoteModeScreen({
     Key key,
-    this.title,
+    @required this.title,
+    @required this.body,
     this.subtitle,
-    this.body,
     this.drawer,
     this.floatingActionButton,
   }) : super(key: key);

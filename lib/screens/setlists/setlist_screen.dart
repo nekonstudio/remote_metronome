@@ -9,6 +9,7 @@ import 'package:metronom/providers/setlist_player/notifier_setlist_player.dart';
 import 'package:metronom/providers/setlist_player/remote_synchronized_setlist_player.dart';
 import 'package:metronom/providers/setlist_player/setlist_player.dart';
 import 'package:metronom/providers/setlist_player/setlist_player_interface.dart';
+import 'package:metronom/screens/track/track_screen.dart';
 import 'package:metronom/widgets/remote_synchronized_screen.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
@@ -122,7 +123,7 @@ class SetlistScreen extends RemoteSynchronizedScreen {
           child: Icon(Icons.add),
           onPressed: () {
             if (!isPlaying) {
-              Get.to(AddEditTrackScreen(setlist.id, null));
+              Get.to(TrackScreen(setlistId: setlist.id));
             }
           },
         );
@@ -287,8 +288,7 @@ class __TrackListState extends State<_TrackList> with ListItemLongPressPopupMenu
         child: Text('Edytuj'),
         value: (index) {
           player.stop();
-
-          Get.to(AddEditTrackScreen(setlistId, tracks[index]));
+          Get.to(TrackScreen(setlistId: setlistId, track: tracks[index]));
         },
       ),
       PopupMenuItem(

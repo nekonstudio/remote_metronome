@@ -16,6 +16,7 @@ abstract class PropertyValidable implements Validable {
   @protected
   List<Validable> get validableProperties;
 
+  @protected
   T getProperty<T>(String name) {
     if (T == RangeValidableProperty) {
       for (final property in validableProperties) {
