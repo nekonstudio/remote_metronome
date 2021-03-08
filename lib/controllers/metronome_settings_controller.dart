@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
 
-import '../providers/metronome/metronome_settings.dart';
+import '../modules/metronome/models/metronome_settings.dart';
 
 class MetronomeSettingsController extends ValueNotifier<MetronomeSettings> {
   MetronomeSettingsController({MetronomeSettings initialSettings = const MetronomeSettings()})

@@ -1,8 +1,9 @@
 import 'dart:async';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:metronom/providers/metronome/metronome_base.dart';
-import 'package:metronom/providers/metronome/metronome_settings.dart';
+
+import '../lib/modules/metronome/logic/metronome_base.dart';
+import '../lib/modules/metronome/models/metronome_settings.dart';
 
 class MockMetronomeImpl extends MetronomeBase {
   @override

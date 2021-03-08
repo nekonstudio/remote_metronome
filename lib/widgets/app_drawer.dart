@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:get/get.dart';
+import 'package:metronom/modules/remote_synchronization/providers/nearby_devices_provider.dart';
 
-import '../providers/nearby/nearby_devices.dart';
-import '../screens/synchronizedPlaying/role_choice_screen.dart';
-import '../screens/setlists/saved_setlists_screen.dart';
-import 'remote_connected_devices_panel.dart';
+import '../modules/remote_synchronization/screens/role_choice_screen.dart';
+import '../modules/remote_synchronization/widgets/remote_connected_devices_panel.dart';
+import '../modules/setlists/screens/saved_setlists_screen.dart';
 
 class AppDrawer extends StatelessWidget {
   @override
@@ -40,10 +40,8 @@ class AppDrawer extends StatelessWidget {
           ),
           Consumer(
             builder: (context, watch, child) {
-              final hasConnections =
-                  watch(nearbyDevicesProvider).hasConnections;
-              final color =
-                  hasConnections ? Get.theme.accentColor : Colors.white;
+              final hasConnections = watch(nearbyDevicesProvider).hasConnections;
+              final color = hasConnections ? Get.theme.accentColor : Colors.white;
 
               return ListTile(
                 onTap: () {
