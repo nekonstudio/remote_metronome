@@ -63,7 +63,7 @@ class _AddEditTrackScreenState extends State<AddEditTrackScreen> {
       initialMetronomeSettings = _track.settings;
     }
 
-    _controller = MetronomeSettingsController(initialMetronomeSettings);
+    _controller = MetronomeSettingsController(initialSettings: initialMetronomeSettings);
   }
 
   String _validate(String value) {
@@ -357,7 +357,7 @@ class _SectionForm extends StatelessWidget {
     final initialMetronomeSettings =
         existingSection != null ? existingSection.settings : MetronomeSettings(120, 4, 1);
 
-    _controller = MetronomeSettingsController(initialMetronomeSettings);
+    _controller = MetronomeSettingsController(initialSettings: initialMetronomeSettings);
 
     return Container(
       height: MediaQuery.of(context).viewInsets.bottom + 440,

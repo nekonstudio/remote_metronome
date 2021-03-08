@@ -4,6 +4,8 @@ import 'package:metronom/utils/validable/range_validable_property.dart';
 import 'validable.dart';
 
 abstract class PropertyValidable implements Validable {
+  const PropertyValidable();
+
   @override
   bool isValid() {
     for (final property in validableProperties) {

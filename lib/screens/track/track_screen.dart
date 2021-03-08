@@ -39,7 +39,7 @@ class _TrackScreenState extends State<TrackScreen> {
     _screenModeSwitchIndex = _isComplexTrack ? 1 : 0;
     _trackSections = widget.track?.sections ?? [];
     final initialSettings = widget.track?.settings ?? MetronomeSettings(120, 4, 1);
-    _settingsController = MetronomeSettingsController(initialSettings);
+    _settingsController = MetronomeSettingsController(initialSettings: initialSettings);
   }
 
   @override
@@ -74,7 +74,7 @@ class _TrackScreenState extends State<TrackScreen> {
                       height: 20,
                     ),
                     _isComplexTrack
-                        ? ComplexTrackScreenBody(_trackSections, _settingsController)
+                        ? ComplexTrackScreenBody(_trackSections)
                         : SimpleTrackScreenBody(_settingsController),
                   ],
                 ),

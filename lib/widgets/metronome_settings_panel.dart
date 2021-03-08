@@ -32,134 +32,123 @@ class MetronomeSettingsPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // print("Current tempo w metronomie: $currentTempo");
-    return Container(
-      // padding: const EdgeInsets.symmetric(vertical: 30, horizontal: 0),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Container(
-            child: Column(
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Column(
+          children: [
+            Container(
+              margin: const EdgeInsets.symmetric(vertical: 20),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  _buildChangeTempoButton(-1),
+                  _buildChangeTempoButton(-5),
+                  _buildWithController(
+                    (context, settings, child) => Text(
+                      '${settings.tempo}',
+                      style: TextStyle(fontSize: 60),
+                    ),
+                  ),
+                  _buildChangeTempoButton(5),
+                  _buildChangeTempoButton(1),
+                ],
+              ),
+            ),
+            _buildWithController(
+              (context, settings, child) => Slider(
+                value: settings.tempo.toDouble(),
+                min: settings.minTempo.toDouble(),
+                max: settings.maxTempo.toDouble(),
+                onChanged: (value) => controller.setTempo(value.toInt()),
+              ),
+            ),
+          ],
+        ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: [
+            Column(
               children: [
+                Text(
+                  'Uderzeń na takt',
+                  style: TextStyle(fontSize: 12),
+                ),
+                SizedBox(
+                  height: 6,
+                ),
                 Container(
-                  margin: const EdgeInsets.symmetric(vertical: 20),
+                  width: 120,
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
-                      _buildChangeTempoButton(-1),
-                      _buildChangeTempoButton(-5),
-                      _buildWithController(
-                        (context, settings, child) => Text(
-                          '${settings.tempo}',
-                          style: TextStyle(fontSize: 60),
+                      GestureDetector(
+                        onTap: controller.decreaseBeatsPerBarBy1,
+                        child: CircleAvatar(
+                          radius: 13,
+                          child: Text('-'),
                         ),
                       ),
-                      _buildChangeTempoButton(5),
-                      _buildChangeTempoButton(1),
+                      _buildWithController(
+                        (context, settings, child) => Text(
+                          '${settings.beatsPerBar}',
+                          style: TextStyle(fontSize: 26),
+                        ),
+                      ),
+                      GestureDetector(
+                        onTap: controller.increaseBeatsPerBarBy1,
+                        child: CircleAvatar(
+                          radius: 13,
+                          child: Text('+'),
+                        ),
+                      ),
                     ],
-                  ),
-                ),
-                _buildWithController(
-                  (context, settings, child) => Slider(
-                    value: settings.tempo.toDouble(),
-                    min: settings.minTempo.toDouble(),
-                    max: settings.maxTempo.toDouble(),
-                    onChanged: (value) => controller.setTempo(value.toInt()),
-                    // onChangeEnd: (value) {},
                   ),
                 ),
               ],
             ),
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              Container(
-                child: Column(
-                  children: [
-                    Text(
-                      'Uderzeń na takt',
-                      style: TextStyle(fontSize: 12),
-                    ),
-                    SizedBox(
-                      height: 6,
-                    ),
-                    Container(
-                      width: 120,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceAround,
-                        children: [
-                          GestureDetector(
-                            onTap: controller.decreaseBeatsPerBarBy1,
-                            child: CircleAvatar(
-                              radius: 13,
-                              child: Text('-'),
-                            ),
-                          ),
-                          _buildWithController(
-                            (context, settings, child) => Text(
-                              '${settings.beatsPerBar}',
-                              style: TextStyle(fontSize: 26),
-                            ),
-                          ),
-                          GestureDetector(
-                            onTap: controller.increaseBeatsPerBarBy1,
-                            child: CircleAvatar(
-                              radius: 13,
-                              child: Text('+'),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
+            Column(
+              children: [
+                Text(
+                  'Kliknięć na uderzenie',
+                  style: TextStyle(fontSize: 12),
                 ),
-              ),
-              Container(
-                child: Column(
-                  children: [
-                    Text(
-                      'Kliknięć na uderzenie',
-                      style: TextStyle(fontSize: 12),
-                    ),
-                    SizedBox(
-                      height: 6,
-                    ),
-                    Container(
-                      width: 120,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceAround,
-                        children: [
-                          GestureDetector(
-                            onTap: controller.decreaseClicksPerBeatBy1,
-                            child: CircleAvatar(
-                              radius: 13,
-                              child: Text('-'),
-                            ),
-                          ),
-                          _buildWithController(
-                            (context, settings, child) => Text(
-                              '${settings.clicksPerBeat}',
-                              style: TextStyle(fontSize: 26),
-                            ),
-                          ),
-                          GestureDetector(
-                            onTap: controller.increaseClicksPerBeatBy1,
-                            child: CircleAvatar(
-                              radius: 13,
-                              child: Text('+'),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
+                SizedBox(
+                  height: 6,
                 ),
-              ),
-            ],
-          ),
-        ],
-      ),
+                Container(
+                  width: 120,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      GestureDetector(
+                        onTap: controller.decreaseClicksPerBeatBy1,
+                        child: CircleAvatar(
+                          radius: 13,
+                          child: Text('-'),
+                        ),
+                      ),
+                      _buildWithController(
+                        (context, settings, child) => Text(
+                          '${settings.clicksPerBeat}',
+                          style: TextStyle(fontSize: 26),
+                        ),
+                      ),
+                      GestureDetector(
+                        onTap: controller.increaseClicksPerBeatBy1,
+                        child: CircleAvatar(
+                          radius: 13,
+                          child: Text('+'),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ],
     );
   }
 }

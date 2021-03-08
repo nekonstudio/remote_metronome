@@ -9,15 +9,16 @@ import 'metronome_settings_panel.dart';
 
 class ComplexTrackScreenBody extends StatefulWidget {
   final List<Section> trackSections;
-  final MetronomeSettingsController controller;
 
-  const ComplexTrackScreenBody(this.trackSections, this.controller);
+  const ComplexTrackScreenBody(this.trackSections);
 
   @override
   _ComplexTrackScreenBodyState createState() => _ComplexTrackScreenBodyState();
 }
 
 class _ComplexTrackScreenBodyState extends State<ComplexTrackScreenBody> {
+  MetronomeSettingsController _metronomeSettingsController;
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -37,11 +38,12 @@ class _ComplexTrackScreenBodyState extends State<ComplexTrackScreenBody> {
                   size: 35,
                 ),
                 onPressed: () {
+                  _metronomeSettingsController = MetronomeSettingsController();
                   showModalBottomSheet(
                     isScrollControlled: true,
                     context: context,
                     builder: (_) => _SectionForm(
-                      controller: widget.controller,
+                      controller: _metronomeSettingsController,
                       onFormSubmit: _addSection,
                     ),
                   );
@@ -64,13 +66,18 @@ class _ComplexTrackScreenBodyState extends State<ComplexTrackScreenBody> {
                       ),
                       physics: NeverScrollableScrollPhysics(),
                       itemCount: widget.trackSections.length,
-                      itemBuilder: (context, index) => _SectionListItem(
-                        index: index,
-                        section: widget.trackSections[index],
-                        settingsController: widget.controller,
-                        onSectionEdit: (newSection) => _editSection(index, newSection),
-                        onSectionDelete: _deleteSection,
-                      ),
+                      itemBuilder: (context, index) {
+                        final section = widget.trackSections[index];
+                        _metronomeSettingsController =
+                            MetronomeSettingsController(initialSettings: section.settings);
+                        return _SectionListItem(
+                          index: index,
+                          section: section,
+                          settingsController: _metronomeSettingsController,
+                          onSectionEdit: (newSection) => _editSection(index, newSection),
+                          onSectionDelete: _deleteSection,
+                        );
+                      },
                     ),
                   ),
                 ),

@@ -5,7 +5,7 @@ class StorageMetronomeSettingsController extends MetronomeSettingsController {
   final Storage storage;
 
   StorageMetronomeSettingsController(this.storage)
-      : super(storage.getMetronomeSettings());
+      : super(initialSettings: storage.getMetronomeSettings());
 
   @override
   void changeParameter({int tempo, int beatsPerBar, int clicksPerBeat}) {
