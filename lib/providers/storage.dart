@@ -17,11 +17,10 @@ class Storage {
 
   MetronomeSettings getMetronomeSettings() => _data.get(
         'metronomeSettings',
-        defaultValue: MetronomeSettings(120, 4, 1),
+        defaultValue: MetronomeSettings(),
       );
 
-  void saveMetronomeSettings(MetronomeSettings value) =>
-      _data.put('metronomeSettings', value);
+  void saveMetronomeSettings(MetronomeSettings value) => _data.put('metronomeSettings', value);
 
   List<Setlist> getSetlists() {
     final jsonValue = _data.get(

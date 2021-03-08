@@ -3,8 +3,7 @@ import 'package:flutter/foundation.dart';
 import '../providers/metronome/metronome_settings.dart';
 
 class MetronomeSettingsController extends ValueNotifier<MetronomeSettings> {
-  MetronomeSettingsController(
-      {MetronomeSettings initialSettings = const MetronomeSettings(120, 4, 1)})
+  MetronomeSettingsController({MetronomeSettings initialSettings = const MetronomeSettings()})
       : super(initialSettings);
 
   static const HalfTimeTempoMultipler = 0.5;

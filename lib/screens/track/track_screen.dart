@@ -38,7 +38,7 @@ class _TrackScreenState extends State<TrackScreen> {
     _isComplexTrack = widget.track?.isComplex ?? false;
     _screenModeSwitchIndex = _isComplexTrack ? 1 : 0;
     _trackSections = widget.track?.sections ?? [];
-    final initialSettings = widget.track?.settings ?? MetronomeSettings(120, 4, 1);
+    final initialSettings = widget.track?.settings ?? MetronomeSettings();
     _settingsController = MetronomeSettingsController(initialSettings: initialSettings);
   }
 

@@ -19,11 +19,7 @@ class MetronomeSettings extends PropertyValidable {
   @HiveField(2)
   final int clicksPerBeat;
 
-  const MetronomeSettings(
-    this.tempo,
-    this.beatsPerBar,
-    this.clicksPerBeat,
-  );
+  const MetronomeSettings({this.tempo = 120, this.beatsPerBar = 4, this.clicksPerBeat = 1});
 
   int get minTempo => getProperty<RangeValidableProperty>('tempo').minValue;
   int get maxTempo => getProperty<RangeValidableProperty>('tempo').maxValue;
@@ -37,8 +33,11 @@ class MetronomeSettings extends PropertyValidable {
             propertyValue: clicksPerBeat, minValue: 1, maxValue: 16),
       ];
 
-  MetronomeSettings clampToValidTempo() =>
-      MetronomeSettings(tempo.clamp(minTempo, maxTempo), beatsPerBar, clicksPerBeat);
+  MetronomeSettings clampToValidTempo() => MetronomeSettings(
+        tempo: tempo.clamp(minTempo, maxTempo),
+        beatsPerBar: beatsPerBar,
+        clicksPerBeat: clicksPerBeat,
+      );
 
   MetronomeSettings copyWith({
     int tempo,
@@ -46,9 +45,9 @@ class MetronomeSettings extends PropertyValidable {
     int clicksPerBeat,
   }) {
     return MetronomeSettings(
-      tempo ?? this.tempo,
-      beatsPerBar ?? this.beatsPerBar,
-      clicksPerBeat ?? this.clicksPerBeat,
+      tempo: tempo ?? this.tempo,
+      beatsPerBar: beatsPerBar ?? this.beatsPerBar,
+      clicksPerBeat: clicksPerBeat ?? this.clicksPerBeat,
     );
   }
 
@@ -64,9 +63,9 @@ class MetronomeSettings extends PropertyValidable {
     if (map == null) return null;
 
     return MetronomeSettings(
-      map['tempo'],
-      map['beatsPerBar'],
-      map['clicksPerBeat'],
+      tempo: map['tempo'],
+      beatsPerBar: map['beatsPerBar'],
+      clicksPerBeat: map['clicksPerBeat'],
     );
   }
 

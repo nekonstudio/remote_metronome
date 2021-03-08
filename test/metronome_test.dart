@@ -66,7 +66,7 @@ void main() {
     test('isPlaying flag is set to true after start', () {
       final metronome = MockMetronomeImpl();
 
-      metronome.start(MetronomeSettings(120, 4, 1));
+      metronome.start(MetronomeSettings());
 
       expect(metronome.isPlaying, true);
     });
@@ -74,7 +74,7 @@ void main() {
     test('settings are correctly saved after start', () {
       final MetronomeBase metronome = MockMetronomeImpl();
 
-      final settings = MetronomeSettings(120, 4, 1);
+      final settings = MetronomeSettings();
       metronome.start(settings);
 
       expect(metronome.settings, settings);
@@ -83,7 +83,7 @@ void main() {
     test('isPlaying flag is set to false if change is called before start', () {
       final metronome = MockMetronomeImpl();
 
-      metronome.change(MetronomeSettings(120, 4, 1));
+      metronome.change(MetronomeSettings());
 
       expect(metronome.isPlaying, false);
     });
@@ -91,7 +91,7 @@ void main() {
     test('isPlaying flag is set to true if change is called after start', () {
       final MetronomeBase metronome = MockMetronomeImpl();
 
-      final settings = MetronomeSettings(120, 4, 1);
+      final settings = MetronomeSettings();
       metronome.start(settings);
       metronome.change(settings);
 
@@ -109,7 +109,7 @@ void main() {
     test('isPlaying flag is set to false when stop is called after start', () {
       final MetronomeBase metronome = MockMetronomeImpl();
 
-      metronome.start(MetronomeSettings(120, 4, 1));
+      metronome.start(MetronomeSettings());
       metronome.stop();
 
       expect(metronome.isPlaying, false);

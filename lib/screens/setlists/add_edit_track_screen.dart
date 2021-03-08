@@ -57,7 +57,7 @@ class _AddEditTrackScreenState extends State<AddEditTrackScreen> {
       if (_isComplexTrack) _sections = _track.sections;
     }
 
-    MetronomeSettings initialMetronomeSettings = MetronomeSettings(120, 4, 1);
+    MetronomeSettings initialMetronomeSettings = MetronomeSettings();
 
     if (_track != null && !_track.isComplex) {
       initialMetronomeSettings = _track.settings;
@@ -355,7 +355,7 @@ class _SectionForm extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final initialMetronomeSettings =
-        existingSection != null ? existingSection.settings : MetronomeSettings(120, 4, 1);
+        existingSection != null ? existingSection.settings : MetronomeSettings();
 
     _controller = MetronomeSettingsController(initialSettings: initialMetronomeSettings);
 
