@@ -8,7 +8,7 @@ abstract class RemoteSynchronizedMetronome extends WakelockMetronome {
 
   RemoteSynchronizedMetronome(this.synchronization);
 
-  void prepareToRun(MetronomeSettings settings) {
+  void prepareSynchronizedStart(MetronomeSettings settings) {
     Metronome.platformChannel.invokeMethod(
       'prepareSynchronizedStart',
       {
@@ -19,7 +19,7 @@ abstract class RemoteSynchronizedMetronome extends WakelockMetronome {
     );
   }
 
-  void run() {
+  void runSynchronizedStart() {
     Metronome.platformChannel.invokeMethod('synchronizedStart');
   }
 }

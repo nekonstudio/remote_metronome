@@ -8,10 +8,11 @@ import '../../setlists/logic/setlist_player/setlist_player_interface.dart';
 import '../../setlists/providers/setlist_player_provider.dart';
 import '../../setlists/widgets/animated_track_sections.dart';
 import '../logic/nearby_devices.dart';
-import '../logic/remote_metronome_screen_controller.dart';
 import '../providers/nearby_devices_provider.dart';
+import '../providers/remote_metronome_screen_controller_provider.dart';
 import '../providers/remote_screen_state_provider.dart';
 
+// TODO: REFACTOR
 class ClientPlayingScreen extends StatelessWidget {
   final String hostName;
 

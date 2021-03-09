@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
+import 'package:metronom/utils/helpers/enum_string_converter.dart';
+
 import '../../metronome/models/metronome_settings.dart';
 import '../../setlists/models/setlist.dart';
 
@@ -89,16 +91,12 @@ class RemoteCommand {
   static RemoteCommand fromRawData(Uint8List data) {
     final str = utf8.decode(data);
     print('Raw data: $str');
+
     final values = str.split(';');
-
-    final command = _enumFromString<RemoteCommandType>(values[0], RemoteCommandType.values);
-
+    final command =
+        EnumStringConverter.enumFromString<RemoteCommandType>(values[0], RemoteCommandType.values);
     final jsonParams = values[1];
-
-    print('jsonParams robienie: $jsonParams');
-
     final timestamp = int.parse(values[2]);
-
     final isValid = (command != null && jsonParams != null && timestamp != null);
 
     return isValid
@@ -108,7 +106,7 @@ class RemoteCommand {
 
   Uint8List get bytes {
     final buffer = StringBuffer();
-    buffer.write(_enumToString(type));
+    buffer.write(EnumStringConverter.enumToString(type));
     buffer.write(';');
     buffer.write(jsonParameters ?? '');
     buffer.write(';');
@@ -116,9 +114,4 @@ class RemoteCommand {
 
     return utf8.encode(buffer.toString());
   }
-
-  static String _enumToString(Object o) => o.toString().split('.').last;
-
-  static T _enumFromString<T>(String key, List<T> values) =>
-      values.firstWhere((v) => key == _enumToString(v), orElse: () => null);
 }

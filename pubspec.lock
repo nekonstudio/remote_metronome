@@ -352,13 +352,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.14.0+4"
-  http:
-    dependency: transitive
-    description:
-      name: http
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "0.12.2"
   http_multi_server:
     dependency: transitive
     description:
@@ -602,34 +595,6 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.99"
-  soundpool:
-    dependency: "direct main"
-    description:
-      name: soundpool
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "1.1.1"
-  soundpool_macos:
-    dependency: transitive
-    description:
-      name: soundpool_macos
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "0.2.4"
-  soundpool_platform_interface:
-    dependency: transitive
-    description:
-      name: soundpool_platform_interface
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "1.0.1"
-  soundpool_web:
-    dependency: transitive
-    description:
-      name: soundpool_web
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "1.0.3"
   source_gen:
     dependency: transitive
     description:
@@ -679,13 +644,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.1.0-nullsafety.1"
-  swipedetector:
-    dependency: "direct main"
-    description:
-      name: swipedetector
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "1.2.0"
   term_glyph:
     dependency: transitive
     description:

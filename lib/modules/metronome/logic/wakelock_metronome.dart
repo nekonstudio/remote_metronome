@@ -7,25 +7,25 @@ import 'metronome.dart';
 class WakelockMetronome extends Metronome {
   @override
   void onStart(MetronomeSettings settings) {
-    startImplementation(settings);
+    startMetronome(settings);
 
     _toggleScreenWakelock();
   }
 
   @override
   void onStop() {
-    stopImplementation();
+    stopMetronome();
 
     _toggleScreenWakelock();
   }
 
   @protected
-  void startImplementation(MetronomeSettings settings) {
+  void startMetronome(MetronomeSettings settings) {
     super.onStart(settings);
   }
 
   @protected
-  void stopImplementation() {
+  void stopMetronome() {
     super.onStop();
   }
 

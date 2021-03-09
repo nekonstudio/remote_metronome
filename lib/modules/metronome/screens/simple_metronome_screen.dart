@@ -19,6 +19,7 @@ class SimpleMetronomeScreen extends StatefulWidget {
   _SimpleMetronomeScreenState createState() => _SimpleMetronomeScreenState();
 }
 
+//TODO: REFACTOR!
 class _SimpleMetronomeScreenState extends State<SimpleMetronomeScreen> {
   final _tapTempoDetectorProvider = ChangeNotifierProvider(
     (ref) => NotifierTapTempoDetector(),

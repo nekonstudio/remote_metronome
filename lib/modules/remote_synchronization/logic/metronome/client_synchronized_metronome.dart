@@ -9,22 +9,23 @@ class ClientSynchronizedMetronome extends RemoteSynchronizedMetronome {
   ClientSynchronizedMetronome(RemoteSynchronization synchronization) : super(synchronization);
 
   @override
-  void startImplementation(MetronomeSettings settings) {
+  void startMetronome(MetronomeSettings settings) {
+    // TODO: figure out better way to update UI outside logic code
     synchronization.remoteActionNotifier.setActionState(true);
+
     synchronization.broadcastRemoteCommand(
-      onStartCommand(settings),
+      createStartCommand(settings),
     );
 
-    prepareToRun(settings);
+    prepareSynchronizedStart(settings);
 
     print('1. HOST START! time:\t' + DateTime.now().toString());
     Future.delayed(
       Duration(milliseconds: 500),
       () {
-        // _platformExecutionTimestamp = DateTime.now();
         print('2. HOST START! time:\t' + DateTime.now().toString());
 
-        run();
+        runSynchronizedStart();
 
         Future.delayed(
           Duration(milliseconds: 120),
@@ -35,21 +36,21 @@ class ClientSynchronizedMetronome extends RemoteSynchronizedMetronome {
   }
 
   @override
-  void stopImplementation() {
+  void stopMetronome() {
     synchronization.broadcastRemoteCommand(
-      onStopCommand(),
+      createStopCommand(),
     );
 
     invokePlatformMethod('stop');
   }
 
   @protected
-  RemoteCommand onStartCommand(dynamic parameters) {
+  RemoteCommand createStartCommand(dynamic parameters) {
     assert(parameters is MetronomeSettings);
 
     return RemoteCommand.startMetronome(parameters);
   }
 
   @protected
-  RemoteCommand onStopCommand() => RemoteCommand.stopMetronome();
+  RemoteCommand createStopCommand() => RemoteCommand.stopMetronome();
 }

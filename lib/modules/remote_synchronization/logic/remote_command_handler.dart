@@ -6,11 +6,12 @@ import '../../metronome/models/metronome_settings.dart';
 import '../../metronome/providers/metronome_provider.dart';
 import '../../setlists/models/setlist.dart';
 import '../../setlists/providers/setlist_player_provider.dart';
+import '../providers/remote_metronome_screen_controller_provider.dart';
 import '../providers/remote_screen_state_provider.dart';
 import '../providers/remote_synchronization_provider.dart';
 import 'remote_command.dart';
-import 'remote_metronome_screen_controller.dart';
 
+// TODO: REFACTOR!
 class RemoteCommandHandler {
   final Reader providerReader;
 

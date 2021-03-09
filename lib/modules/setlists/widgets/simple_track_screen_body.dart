@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:metronom/controllers/metronome_settings_controller.dart';
 
+import '../../../controllers/metronome_settings_controller.dart';
 import 'metronome_settings_panel.dart';
 
 class SimpleTrackScreenBody extends StatelessWidget {

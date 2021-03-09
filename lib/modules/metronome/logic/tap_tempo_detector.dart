@@ -27,30 +27,17 @@ class TapTempoDetector {
 }
 
 class NotifierTapTempoDetector extends TapTempoDetector with ChangeNotifier {
-  bool _previousIsActiveValue;
-
-  NotifierTapTempoDetector() {
-    _previousIsActiveValue = isActive;
-  }
-
   @override
   void registerTap() {
     super.registerTap();
 
-    _checkIfIsActiveValueChangedAndHandleIt();
+    notifyListeners();
   }
 
   @override
   void reset() {
     super.reset();
 
-    _checkIfIsActiveValueChangedAndHandleIt();
-  }
-
-  void _checkIfIsActiveValueChangedAndHandleIt() {
-    if (isActive != _previousIsActiveValue) {
-      _previousIsActiveValue = isActive;
-      notifyListeners();
-    }
+    notifyListeners();
   }
 }

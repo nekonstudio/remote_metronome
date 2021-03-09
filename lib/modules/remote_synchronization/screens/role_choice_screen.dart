@@ -6,6 +6,7 @@ import '../../metronome/providers/metronome_provider.dart';
 import 'client_connecting_screen.dart';
 import 'host_connecting_screen.dart';
 
+// TODO: REFACTOR
 class RoleChoiceScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {

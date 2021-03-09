@@ -125,11 +125,6 @@ class NearbyDevices with ChangeNotifier {
 
         _receivedDataHandler.handle(endpointId, RemoteCommand.fromRawData(payload.bytes));
       },
-      onPayloadTransferUpdate: (endpointId, payloadTransferUpdate) {
-        // print(payloadTransferUpdate.status);
-        // print('Transfered: ${payloadTransferUpdate.bytesTransferred}');
-        // print('Total: ${payloadTransferUpdate.totalBytes}');
-      },
     );
 
     if (isAccepted) {
@@ -149,8 +144,6 @@ class NearbyDevices with ChangeNotifier {
   }
 
   void _onDisconnected(String endpointId) async {
-    // await Nearby().disconnectFromEndpoint(endpointId);
-
     final lastDeviceIndex =
         _connectedDevices.indexWhere((element) => element.endpointId == endpointId);
 

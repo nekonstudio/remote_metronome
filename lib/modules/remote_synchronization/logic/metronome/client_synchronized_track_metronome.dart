@@ -6,8 +6,8 @@ class ClientSynchronizedTrackMetronome extends ClientSynchronizedMetronome {
   ClientSynchronizedTrackMetronome(RemoteSynchronization synchronization) : super(synchronization);
 
   @override
-  RemoteCommand onStartCommand(_) => RemoteCommand.playTrack();
+  RemoteCommand createStartCommand(_) => RemoteCommand.playTrack();
 
   @override
-  RemoteCommand onStopCommand() => RemoteCommand.stopTrack();
+  RemoteCommand createStopCommand() => RemoteCommand.stopTrack();
 }

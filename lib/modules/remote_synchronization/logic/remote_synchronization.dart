@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import '../../metronome/models/metronome_settings.dart';
 import '../providers/device_synchronization_mode_notifier_provider.dart';
 import '../providers/remote_action_notifier_provider.dart';
@@ -14,14 +12,12 @@ class RemoteSynchronization {
 
   final remoteActionNotifier = RemoteActionNotifier(false);
   MetronomeSettings Function() simpleMetronomeSettingsGetter;
+  DateTime hostStartTime;
 
   int _clockSyncLatency;
   int _hostTimeDifference;
   int _targetSynchronizedDevicesCount;
   int _synchronizedDevicesCount = 0;
-  Timer _keepConnectionAliveTimer;
-
-  DateTime hostStartTime;
 
   int get clockSyncLatency => _clockSyncLatency;
   int get hostTimeDifference => _hostTimeDifference;
@@ -41,8 +37,6 @@ class RemoteSynchronization {
   void end() {
     _synchronizedDevicesCount = 0;
     synchronizationMode.changeMode(DeviceSynchronizationMode.None);
-
-    _keepConnectionAliveTimer?.cancel();
   }
 
   void onClockSyncRequest(String hostEndpointId, int hostStartTime) {
@@ -89,11 +83,6 @@ class RemoteSynchronization {
 
       if (_synchronizedDevicesCount == _targetSynchronizedDevicesCount) {
         synchronizationMode.changeMode(DeviceSynchronizationMode.Host);
-
-        // _keepConnectionAliveTimer = Timer.periodic(Duration(seconds: 1), (timer) {
-        //   final command = RemoteCommand(RemoteCommandType.KeepConnectionAlive);
-        //   broadcastRemoteCommand(command);
-        // });
       }
     }
   }
