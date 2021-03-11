@@ -2,17 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:get/get.dart';
 
-import '../../../utils/mixins/list_item_long_press_popup_menu.dart';
+import '../../../widgets/popup_menu_list_item.dart';
 import '../../metronome/providers/metronome_provider.dart';
 import '../../remote_synchronization/widgets/remote_mode_screen.dart';
 import '../logic/setlists_manager.dart';
 import '../models/setlist.dart';
 import '../providers/setlist_manager_provider.dart';
+import '../widgets/setlist_form.dart';
 import 'setlist_screen.dart';
 
-class SavedSetlistsScreen extends ConsumerWidget with ListItemLongPressPopupMenu {
-  static const String routePath = '/savedSetlists';
-
+class SavedSetlistsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, ScopedReader watch) {
     final setlistManager = watch(setlistManagerProvider);
@@ -31,13 +30,10 @@ class SavedSetlistsScreen extends ConsumerWidget with ListItemLongPressPopupMenu
               itemCount: setlists.length,
               itemBuilder: (context, index) {
                 final setlist = setlists[index];
-                return InkWell(
-                  onTap: () {
-                    Get.to(SetlistScreen(setlist));
-                  },
-                  onTapDown: (details) => storeTapPosition(details),
-                  onLongPress: () => showPopupMenu(
-                      context, index, _buildPopupMenuItems(context, setlistManager, setlist)),
+                return PopupMenuListItem(
+                  index: index,
+                  popupMenuEntries: _buildPopupMenuItems(context, setlistManager, setlist),
+                  onPressed: () => Get.to(SetlistScreen(setlist)),
                   child: ListTile(
                     leading: Icon(Icons.menu),
                     title: Text('${setlist.name}'),
@@ -53,7 +49,7 @@ class SavedSetlistsScreen extends ConsumerWidget with ListItemLongPressPopupMenu
           showModalBottomSheet(
             isScrollControlled: true,
             context: context,
-            builder: (context) => _AddSetlistPanel(setlistManager),
+            builder: (context) => SetlistForm(setlistManager),
           );
         },
       ),
@@ -66,10 +62,11 @@ class SavedSetlistsScreen extends ConsumerWidget with ListItemLongPressPopupMenu
       PopupMenuItem(
         child: Text('Edytuj'),
         value: (index) {
+          print('hejka');
           showModalBottomSheet(
             isScrollControlled: true,
             context: context,
-            builder: (context) => _AddSetlistPanel(setlistManager, existingSetlist: setlist),
+            builder: (context) => SetlistForm(setlistManager, existingSetlist: setlist),
           );
         },
       ),
@@ -79,87 +76,5 @@ class SavedSetlistsScreen extends ConsumerWidget with ListItemLongPressPopupMenu
             setlistManager.deleteSetlist(index);
           }),
     ];
-  }
-}
-
-class _AddSetlistPanel extends StatelessWidget {
-  final SetlistManager setlistManager;
-  final Setlist existingSetlist;
-  _AddSetlistPanel(this.setlistManager, {this.existingSetlist});
-
-  static final _formKey = GlobalKey<FormState>();
-
-  String _validate(String value) {
-    if (value.isEmpty) {
-      return 'Wprowadź nazwę';
-    }
-
-    return null;
-  }
-
-  void _onSubmit() {
-    if (_formKey.currentState.validate()) {
-      _formKey.currentState.save();
-    }
-  }
-
-  void _save(BuildContext context, String name) {
-    if (existingSetlist == null) {
-      setlistManager.addSetlist(name);
-    } else {
-      setlistManager.editSetlist(existingSetlist, name);
-    }
-
-    Get.back();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Form(
-      key: _formKey,
-      child: Container(
-        height: MediaQuery.of(context).viewInsets.bottom + 230,
-        child: Column(
-          children: [
-            Container(
-              color: Colors.black26,
-              child: ListTile(
-                leading:
-                    Icon(existingSetlist == null ? Icons.playlist_add : Icons.playlist_add_check),
-                title: Text(existingSetlist == null ? 'Nowa setlista' : 'Edytuj setlistę'),
-                subtitle: existingSetlist == null ? null : Text(existingSetlist.name),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  TextFormField(
-                    initialValue: existingSetlist == null ? '' : existingSetlist.name,
-                    decoration: InputDecoration(labelText: 'Nazwa'),
-                    autofocus: true,
-                    validator: _validate,
-                    onFieldSubmitted: (_) {
-                      _onSubmit();
-                    },
-                    onSaved: (value) {
-                      _save(context, value);
-                    },
-                  ),
-                  SizedBox(
-                    height: 10,
-                  ),
-                  RaisedButton(
-                    child: Text(existingSetlist == null ? 'Dodaj' : 'Zmień'),
-                    onPressed: _onSubmit,
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
   }
 }
