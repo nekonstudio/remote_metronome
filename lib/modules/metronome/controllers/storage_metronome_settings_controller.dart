@@ -1,5 +1,5 @@
-import '../../../controllers/metronome_settings_controller.dart';
 import '../../local_storage/local_storage.dart';
+import 'metronome_settings_controller.dart';
 
 class StorageMetronomeSettingsController extends MetronomeSettingsController {
   final LocalStorage storage;

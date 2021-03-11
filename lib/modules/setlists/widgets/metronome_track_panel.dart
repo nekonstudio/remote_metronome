@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:metronom/modules/setlists/logic/setlist_player/setlist_player_interface.dart';
-import 'package:metronom/widgets/visualization.dart';
 
+import '../../metronome/widgets/metronome_visualization.dart';
+import '../logic/setlist_player/setlist_player_interface.dart';
 import 'animated_track_sections.dart';
 
 class MetronomeTrackPanel extends StatelessWidget {
@@ -20,7 +20,7 @@ class MetronomeTrackPanel extends StatelessWidget {
       children: [
         Expanded(
           flex: 3,
-          child: Visualization(metronomeSettings.beatsPerBar),
+          child: MetronomeVisualization(metronomeSettings.beatsPerBar),
         ),
         Expanded(
           flex: 3,

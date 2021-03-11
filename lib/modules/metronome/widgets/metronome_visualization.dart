@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../modules/metronome/providers/metronome_provider.dart';
+import '../providers/metronome_provider.dart';
 
-class Visualization extends ConsumerWidget {
+class MetronomeVisualization extends ConsumerWidget {
   final int beatsPerBar;
 
-  Visualization(this.beatsPerBar);
+  MetronomeVisualization(this.beatsPerBar);
 
   Color _calculateColor(int index, int currentBarBeat) {
     double opacity = (index + 1 == currentBarBeat) ? 1.0 : 0.2;

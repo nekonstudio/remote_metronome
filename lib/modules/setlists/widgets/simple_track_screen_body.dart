@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../../../controllers/metronome_settings_controller.dart';
-import 'metronome_settings_panel.dart';
+import '../../metronome/controllers/metronome_settings_controller.dart';
+import '../../metronome/widgets/metronome_settings_panel.dart';
 
 class SimpleTrackScreenBody extends StatelessWidget {
   final MetronomeSettingsController controller;
@@ -23,7 +23,11 @@ class SimpleTrackScreenBody extends StatelessWidget {
               title: Text('Wybierz tempo'),
             ),
           ),
-          MetronomeSettingsPanel(controller),
+          SizedBox(height: 20),
+          MetronomeSettingsPanel(
+            metronomeSettingsController: controller,
+            compactLayout: true,
+          ),
         ],
       ),
     );

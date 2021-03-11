@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:get/get.dart';
 
-import '../../../widgets/visualization.dart';
+import '../../metronome/widgets/metronome_visualization.dart';
 import '../../metronome/providers/metronome_provider.dart';
 import '../../setlists/logic/setlist_player/setlist_player_interface.dart';
 import '../../setlists/providers/setlist_player_provider.dart';
@@ -147,7 +147,7 @@ class _RemoteMetronomePanel extends ConsumerWidget {
               SizedBox(
                 height: 50,
               ),
-              Visualization(beatsPerBar),
+              MetronomeVisualization(beatsPerBar),
               SizedBox(
                 height: 30,
               ),

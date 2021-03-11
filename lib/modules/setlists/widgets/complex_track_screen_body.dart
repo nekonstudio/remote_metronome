@@ -3,9 +3,9 @@ import 'package:flutter/services.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:get/get.dart';
 
-import '../../../controllers/metronome_settings_controller.dart';
+import '../../metronome/controllers/metronome_settings_controller.dart';
+import '../../metronome/widgets/metronome_settings_panel.dart';
 import '../models/section.dart';
-import 'metronome_settings_panel.dart';
 
 class ComplexTrackScreenBody extends StatefulWidget {
   final List<Section> trackSections;
@@ -193,7 +193,13 @@ class __SectionFormState extends State<_SectionForm> {
               title: Text(widget.section == null ? 'Dodaj sekcję' : 'Edytuj sekcję'),
             ),
           ),
-          MetronomeSettingsPanel(widget.controller),
+          SizedBox(
+            height: 20,
+          ),
+          MetronomeSettingsPanel(
+            metronomeSettingsController: widget.controller,
+            compactLayout: true,
+          ),
           Form(
             key: _formKey,
             child: Container(

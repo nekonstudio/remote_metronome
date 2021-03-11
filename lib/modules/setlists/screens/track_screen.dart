@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:get/get.dart';
 import 'package:toggle_switch/toggle_switch.dart';
 
-import '../../../controllers/metronome_settings_controller.dart';
+import '../../metronome/controllers/metronome_settings_controller.dart';
 import '../../metronome/models/metronome_settings.dart';
 import '../../remote_synchronization/widgets/remote_mode_screen.dart';
 import '../models/section.dart';

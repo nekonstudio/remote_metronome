@@ -19,7 +19,7 @@ class MetronomeSettingsAdapter extends TypeAdapter<MetronomeSettings> {
     return MetronomeSettings(
       tempo: fields[0] as int,
       beatsPerBar: fields[1] as int,
-      clicksPerBeat: [2] as int,
+      clicksPerBeat: fields[2] as int,
     );
   }
 
