@@ -6,7 +6,6 @@ import '../../metronome/providers/metronome_provider.dart';
 import 'client_connecting_screen.dart';
 import 'host_connecting_screen.dart';
 
-// TODO: REFACTOR
 class RoleChoiceScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -18,58 +17,64 @@ class RoleChoiceScreen extends StatelessWidget {
       ),
       body: Column(
         children: [
-          Expanded(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Text('Utwórz nową sesję', style: Get.textTheme.headline5),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 14),
-                  child: Text(
-                    'Wybierz urządzenia, które zostaną zsynchronizowane z Twoim urządzeniem i zarządzaj sesją odtwarzania metronomu.',
-                    textAlign: TextAlign.center,
-                    style: Get.textTheme.caption,
-                  ),
-                ),
-                RaisedButton(
-                  child: Text('Utwórz'),
-                  onPressed: () {
-                    Get.to(
-                      HostConnectingScreen(),
-                    );
-                  },
-                ),
-              ],
+          _Option(
+            title: 'Utwórz nową sesję',
+            subtitle:
+                'Wybierz urządzenia, które zostaną zsynchronizowane z Twoim urządzeniem i zarządzaj sesją odtwarzania metronomu.',
+            buttonText: 'Utwórz',
+            nextScreen: HostConnectingScreen(),
+          ),
+          Divider(thickness: 2),
+          _Option(
+            title: 'Dołącz do sesji',
+            subtitle:
+                'Gospodarz sesji będzie zarządzał metronomem, który zostanie odtworzony na Twoim urządzeniu.',
+            buttonText: 'Dołącz',
+            nextScreen: ClientConnectingScreen(),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _Option extends StatelessWidget {
+  final String title;
+  final String subtitle;
+  final String buttonText;
+  final Widget nextScreen;
+
+  const _Option({
+    Key key,
+    @required this.title,
+    @required this.subtitle,
+    @required this.buttonText,
+    @required this.nextScreen,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Text(title, style: Get.textTheme.headline5),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 14),
+            child: Text(
+              subtitle,
+              textAlign: TextAlign.center,
+              style: Get.textTheme.caption,
             ),
           ),
-          Divider(
-            thickness: 2,
-          ),
-          Expanded(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Text('Dołącz do sesji', style: Get.textTheme.headline5),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 14),
-                  child: Text(
-                    'Gospodarz sesji będzie zarządzał metronomem, który zostanie odtworzony na Twoim urządzeniu.',
-                    textAlign: TextAlign.center,
-                    style: Get.textTheme.caption,
-                  ),
-                ),
-                RaisedButton(
-                  child: Text('Dołącz'),
-                  onPressed: () {
-                    Get.to(
-                      ClientConnectingScreen(),
-                    );
-                  },
-                ),
-              ],
-            ),
+          RaisedButton(
+            child: Text(buttonText),
+            onPressed: () {
+              Get.to(
+                nextScreen,
+              );
+            },
           ),
         ],
       ),
