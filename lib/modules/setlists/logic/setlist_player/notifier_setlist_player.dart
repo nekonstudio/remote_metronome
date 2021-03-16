@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 
 import '../../models/section.dart';
+import '../../models/setlist.dart';
 import '../../models/track.dart';
 import 'setlist_player.dart';
 import 'setlist_player_interface.dart';
@@ -30,6 +31,9 @@ class NotifierSetlistPlayer with ChangeNotifier implements SetlistPlayerInterfac
     _currentBarBeatSubscription.cancel();
     super.dispose();
   }
+
+  @override
+  Setlist get setlist => impl.setlist;
 
   @override
   Track get currentTrack => impl.currentTrack;

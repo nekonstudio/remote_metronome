@@ -1,4 +1,5 @@
 import '../../models/section.dart';
+import '../../models/setlist.dart';
 import '../../models/track.dart';
 
 abstract class SetlistPlayerInterface {
@@ -10,6 +11,8 @@ abstract class SetlistPlayerInterface {
   void selectPreviousSection();
   void stop();
   void update();
+
+  Setlist get setlist;
 
   bool get isPlaying;
 

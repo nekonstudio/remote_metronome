@@ -4,7 +4,7 @@ import 'package:get/get.dart';
 
 import '../providers/device_synchronization_mode_notifier_provider.dart';
 import '../providers/nearby_devices_provider.dart';
-import 'client_playing_screen.dart';
+import 'remote_metronome_client_screen.dart';
 
 class ClientConnectingScreen extends StatelessWidget {
   @override
@@ -15,7 +15,7 @@ class ClientConnectingScreen extends StatelessWidget {
       onChange: (context, deviceSynchronizationModeNotifier) {
         if (deviceSynchronizationModeNotifier.mode == DeviceSynchronizationMode.Client) {
           final hostName = context.read(nearbyDevicesProvider).connectedDevicesList.first;
-          Get.off(ClientPlayingScreen(hostName));
+          Get.off(RemoteMetronomeClientScreen(hostName));
         }
       },
       child: Scaffold(

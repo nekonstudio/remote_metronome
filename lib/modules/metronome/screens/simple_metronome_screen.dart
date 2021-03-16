@@ -6,6 +6,7 @@ import '../../../widgets/icon_circle_button.dart';
 import '../../local_storage/local_storage_provider.dart';
 import '../../remote_synchronization/controllers/remote_storage_metronome_settings_controller.dart';
 import '../../remote_synchronization/logic/remote_command.dart';
+import '../../remote_synchronization/providers/device_synchronization_mode_notifier_provider.dart';
 import '../../remote_synchronization/providers/nearby_devices_provider.dart';
 import '../../remote_synchronization/providers/remote_synchronization_provider.dart';
 import '../../remote_synchronization/widgets/remote_mode_screen.dart';
@@ -26,7 +27,7 @@ class SimpleMetronomeScreen extends ConsumerWidget {
   Widget build(BuildContext context, ScopedReader watch) {
     final remoteSynchronization = watch(synchronizationProvider);
     final storage = context.read(localStorageProvider);
-    final isSynchronized = remoteSynchronization.synchronizationMode.isSynchronized;
+    final isSynchronized = watch(deviceSynchronizationModeNotifierProvider).isSynchronized;
     final metronomeSettingsController = isSynchronized
         ? RemoteStorageMetronomeSettingsController(
             context.read(nearbyDevicesProvider),
