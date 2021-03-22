@@ -3,17 +3,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../widgets/app_drawer.dart';
 import '../../../widgets/icon_circle_button.dart';
-import '../../local_storage/local_storage_provider.dart';
-import '../../remote_synchronization/controllers/remote_storage_metronome_settings_controller.dart';
 import '../../remote_synchronization/logic/remote_commands/set_metronome_settings_command.dart';
 import '../../remote_synchronization/providers/device_synchronization_mode_notifier_provider.dart';
-import '../../remote_synchronization/providers/nearby_devices_provider.dart';
 import '../../remote_synchronization/providers/remote_synchronization_provider.dart';
 import '../../remote_synchronization/widgets/remote_mode_screen.dart';
 import '../controllers/metronome_settings_controller.dart';
-import '../controllers/storage_metronome_settings_controller.dart';
 import '../logic/tap_tempo_detector.dart';
 import '../providers/metronome_provider.dart';
+import '../providers/simple_metronome_settings_controller_provider.dart';
 import '../widgets/metronome_settings_panel.dart';
 import '../widgets/metronome_visualization.dart';
 import '../widgets/tap_tempo_detector_button.dart';
@@ -26,23 +23,15 @@ class SimpleMetronomeScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, ScopedReader watch) {
     final remoteSynchronization = watch(synchronizationProvider);
-    final storage = context.read(localStorageProvider);
-    final isSynchronized = watch(deviceSynchronizationModeNotifierProvider).isSynchronized;
-    final metronomeSettingsController = isSynchronized
-        ? RemoteStorageMetronomeSettingsController(
-            context.read(nearbyDevicesProvider),
-            storage,
-            context.read(metronomeProvider),
-          )
-        : StorageMetronomeSettingsController(storage);
 
+    final metronomeSettingsController = watch(simpleMetronomeSettingsControllerProvider);
     metronomeSettingsController.addListener(() {
       context.read(_tapTempoDetectorProvider).reset();
       context.read(metronomeProvider).change(metronomeSettingsController.value);
     });
 
+    final isSynchronized = watch(deviceSynchronizationModeNotifierProvider).isSynchronized;
     if (isSynchronized) {
-      remoteSynchronization.simpleMetronomeSettingsGetter = () => metronomeSettingsController.value;
       remoteSynchronization.broadcastRemoteCommand(
         SetMetronomeSettingsCommand(metronomeSettingsController.value),
       );

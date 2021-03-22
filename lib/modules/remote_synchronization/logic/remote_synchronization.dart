@@ -1,4 +1,3 @@
-import '../../metronome/models/metronome_settings.dart';
 import '../providers/device_synchronization_mode_notifier_provider.dart';
 import 'nearby_devices.dart';
 import 'remote_commands/clock_sync_request_command.dart';
@@ -12,7 +11,6 @@ class RemoteSynchronization {
 
   RemoteSynchronization(this.nearbyDevices, this.synchronizationMode);
 
-  MetronomeSettings Function() simpleMetronomeSettingsGetter;
   DateTime hostStartTime;
 
   int _clockSyncLatency;

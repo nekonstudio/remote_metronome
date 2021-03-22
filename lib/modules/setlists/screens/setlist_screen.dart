@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
 import '../../metronome/providers/metronome_provider.dart';
+import '../../metronome/providers/simple_metronome_settings_controller_provider.dart';
 import '../../remote_synchronization/logic/remote_commands/set_metronome_settings_command.dart';
 import '../../remote_synchronization/logic/remote_commands/set_setlist_command.dart';
 import '../../remote_synchronization/logic/remote_commands/stop_track_command.dart';
@@ -66,7 +67,7 @@ class SetlistScreen extends StatelessWidget {
           if (synchronization.synchronizationMode.isSynchronized) {
             synchronization.broadcastRemoteCommand(StopTrackCommand());
 
-            final metronomeSettings = synchronization.simpleMetronomeSettingsGetter();
+            final metronomeSettings = context.read(simpleMetronomeSettingsControllerProvider).value;
             synchronization.broadcastRemoteCommand(
               SetMetronomeSettingsCommand(metronomeSettings),
             );
