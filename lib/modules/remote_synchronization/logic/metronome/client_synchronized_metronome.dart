@@ -1,7 +1,9 @@
 import 'package:flutter/foundation.dart';
 
 import '../../../metronome/models/metronome_settings.dart';
-import '../remote_command.dart';
+import '../remote_commands/remote_command.dart';
+import '../remote_commands/start_metronome_command.dart';
+import '../remote_commands/stop_metronome_command.dart';
 import '../remote_synchronization.dart';
 import 'remote_synchronized_metronome.dart';
 
@@ -48,9 +50,9 @@ class ClientSynchronizedMetronome extends RemoteSynchronizedMetronome {
   RemoteCommand createStartCommand(dynamic parameters) {
     assert(parameters is MetronomeSettings);
 
-    return RemoteCommand.startMetronome(parameters);
+    return StartMetronomeCommand(parameters);
   }
 
   @protected
-  RemoteCommand createStopCommand() => RemoteCommand.stopMetronome();
+  RemoteCommand createStopCommand() => StopMetronomeCommand();
 }

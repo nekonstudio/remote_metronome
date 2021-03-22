@@ -3,8 +3,7 @@ import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:nearby_connections/nearby_connections.dart';
 
-import 'remote_command.dart';
-import 'remote_command_handler.dart';
+import 'remote_commands/remote_command.dart';
 
 class NearbyDeviceInfo {
   final String endpointId;
@@ -14,12 +13,11 @@ class NearbyDeviceInfo {
 }
 
 class NearbyDevices with ChangeNotifier {
+  final Reader providerReader;
+
+  NearbyDevices(this.providerReader);
+
   final List<NearbyDeviceInfo> _connectedDevices = [];
-  final RemoteCommandHandler _receivedDataHandler;
-
-  NearbyDevices(Reader providerReader)
-      : _receivedDataHandler = RemoteCommandHandler(providerReader);
-
   var _isAdvertising = false;
   var _isDiscovering = false;
   String _lastDisconnectedDeviceName;
@@ -123,7 +121,8 @@ class NearbyDevices with ChangeNotifier {
       onPayLoadRecieved: (endpointId, payload) {
         print('message recived');
 
-        _receivedDataHandler.handle(endpointId, RemoteCommand.fromRawData(payload.bytes));
+        final command = RemoteCommand.createFromBytes(endpointId, payload.bytes);
+        command.execute(providerReader);
       },
     );
 

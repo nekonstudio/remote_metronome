@@ -5,7 +5,7 @@ import '../../../widgets/app_drawer.dart';
 import '../../../widgets/icon_circle_button.dart';
 import '../../local_storage/local_storage_provider.dart';
 import '../../remote_synchronization/controllers/remote_storage_metronome_settings_controller.dart';
-import '../../remote_synchronization/logic/remote_command.dart';
+import '../../remote_synchronization/logic/remote_commands/set_metronome_settings_command.dart';
 import '../../remote_synchronization/providers/device_synchronization_mode_notifier_provider.dart';
 import '../../remote_synchronization/providers/nearby_devices_provider.dart';
 import '../../remote_synchronization/providers/remote_synchronization_provider.dart';
@@ -44,7 +44,7 @@ class SimpleMetronomeScreen extends ConsumerWidget {
     if (isSynchronized) {
       remoteSynchronization.simpleMetronomeSettingsGetter = () => metronomeSettingsController.value;
       remoteSynchronization.broadcastRemoteCommand(
-        RemoteCommand.setMetronomeSettings(metronomeSettingsController.value),
+        SetMetronomeSettingsCommand(metronomeSettingsController.value),
       );
     }
 

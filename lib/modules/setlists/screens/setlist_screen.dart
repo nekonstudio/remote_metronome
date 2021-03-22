@@ -4,7 +4,9 @@ import 'package:get/get.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
 import '../../metronome/providers/metronome_provider.dart';
-import '../../remote_synchronization/logic/remote_command.dart';
+import '../../remote_synchronization/logic/remote_commands/set_metronome_settings_command.dart';
+import '../../remote_synchronization/logic/remote_commands/set_setlist_command.dart';
+import '../../remote_synchronization/logic/remote_commands/stop_track_command.dart';
 import '../../remote_synchronization/providers/is_remote_setlist_screen_provider.dart';
 import '../../remote_synchronization/providers/remote_synchronization_provider.dart';
 import '../../remote_synchronization/widgets/remote_mode_screen.dart';
@@ -35,7 +37,7 @@ class SetlistScreen extends StatelessWidget {
       );
 
       synchronization.broadcastRemoteCommand(
-        RemoteCommand.setSetlist(setlist),
+        SetSetlistCommand(setlist),
       );
     }
 
@@ -62,13 +64,11 @@ class SetlistScreen extends StatelessWidget {
       body: WillPopScope(
         onWillPop: () {
           if (synchronization.synchronizationMode.isSynchronized) {
-            synchronization.broadcastRemoteCommand(
-              RemoteCommand.stopTrack(),
-            );
+            synchronization.broadcastRemoteCommand(StopTrackCommand());
 
             final metronomeSettings = synchronization.simpleMetronomeSettingsGetter();
             synchronization.broadcastRemoteCommand(
-              RemoteCommand.setMetronomeSettings(metronomeSettings),
+              SetMetronomeSettingsCommand(metronomeSettings),
             );
           }
 

@@ -2,7 +2,10 @@ import '../../metronome/models/metronome_settings.dart';
 import '../providers/device_synchronization_mode_notifier_provider.dart';
 import '../providers/remote_action_notifier_provider.dart';
 import 'nearby_devices.dart';
-import 'remote_command.dart';
+import 'remote_commands/clock_sync_request_command.dart';
+import 'remote_commands/clock_sync_response_command.dart';
+import 'remote_commands/clock_sync_success_command.dart';
+import 'remote_commands/remote_command.dart';
 
 class RemoteSynchronization {
   final NearbyDevices nearbyDevices;
@@ -26,7 +29,7 @@ class RemoteSynchronization {
     _targetSynchronizedDevicesCount = nearbyDevices.connectedDevicesCount;
 
     final timestamp = DateTime.now().millisecondsSinceEpoch;
-    final command = RemoteCommand.clockSyncRequest(timestamp);
+    final command = ClockSyncRequestCommand(timestamp);
     broadcastRemoteCommand(command);
   }
 
@@ -39,16 +42,20 @@ class RemoteSynchronization {
     synchronizationMode.changeMode(DeviceSynchronizationMode.None);
   }
 
-  void onClockSyncRequest(String hostEndpointId, int hostStartTime) {
-    print('Host start time: ${DateTime.fromMillisecondsSinceEpoch(hostStartTime)}');
+  // Sender:    Host
+  // Receiver:  Client
+  void onClockSyncRequest(String hostEndpointId, int hostStartTimestamp) {
+    print('Host start time: ${DateTime.fromMillisecondsSinceEpoch(hostStartTimestamp)}');
     print('Client start time: ${DateTime.now()}');
 
-    final timestamp = DateTime.now().millisecondsSinceEpoch;
-    final command = RemoteCommand.clockSyncResponse(hostStartTime, timestamp);
+    final currentTimestamp = DateTime.now().millisecondsSinceEpoch;
+    final command = ClockSyncResponseCommand(hostStartTimestamp, currentTimestamp);
 
     _sendRemoteCommand(hostEndpointId, command);
   }
 
+  // Sender:    Client
+  // Receiver:  Host
   void onClockSyncResponse(
     String clientEndpointId,
     DateTime startTime,
@@ -63,7 +70,7 @@ class RemoteSynchronization {
       print('To big latency, trying again');
 
       final timestamp = DateTime.now().millisecondsSinceEpoch;
-      final command = RemoteCommand.clockSyncRequest(timestamp);
+      final command = ClockSyncRequestCommand(timestamp);
       _sendRemoteCommand(clientEndpointId, command);
     } else {
       print('Start time: $startTime');
@@ -76,7 +83,7 @@ class RemoteSynchronization {
 
       print('Host clock sync success! Remote time difference: $timeDifference');
 
-      final command = RemoteCommand.clockSyncSuccess(-timeDifference, _clockSyncLatency);
+      final command = ClockSyncSuccessCommand(-timeDifference, _clockSyncLatency);
       _sendRemoteCommand(clientEndpointId, command);
 
       _synchronizedDevicesCount++;
@@ -87,6 +94,8 @@ class RemoteSynchronization {
     }
   }
 
+  // Sender:    Host
+  // Receiver:  Client
   void onClockSyncSuccess(int hostTimeDifference, int clockSyncLatency) {
     _hostTimeDifference = hostTimeDifference;
     _clockSyncLatency = clockSyncLatency;

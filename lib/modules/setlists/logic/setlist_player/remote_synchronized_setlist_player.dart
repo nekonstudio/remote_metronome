@@ -1,5 +1,8 @@
 import '../../../metronome/logic/metronome_base.dart';
-import '../../../remote_synchronization/logic/remote_command.dart';
+import '../../../remote_synchronization/logic/remote_commands/select_next_section_command.dart';
+import '../../../remote_synchronization/logic/remote_commands/select_previous_section_command.dart';
+import '../../../remote_synchronization/logic/remote_commands/select_track_command.dart';
+import '../../../remote_synchronization/logic/remote_commands/set_setlist_command.dart';
 import '../../../remote_synchronization/logic/remote_synchronization.dart';
 import '../../models/setlist.dart';
 import 'setlist_player.dart';
@@ -14,7 +17,7 @@ class RemoteSynchronizedSetlistPlayer extends SetlistPlayer {
   void selectTrack(int index) {
     if (currentTrackIndex != index) {
       synchronization.broadcastRemoteCommand(
-        RemoteCommand.selectTrack(index),
+        SelectTrackCommand(index),
       );
     }
     super.selectTrack(index);
@@ -24,7 +27,7 @@ class RemoteSynchronizedSetlistPlayer extends SetlistPlayer {
   void selectNextTrack() {
     super.selectNextTrack();
     synchronization.broadcastRemoteCommand(
-      RemoteCommand.selectTrack(currentTrackIndex),
+      SelectTrackCommand(currentTrackIndex),
     );
   }
 
@@ -32,7 +35,7 @@ class RemoteSynchronizedSetlistPlayer extends SetlistPlayer {
   void selectPreviousTrack() {
     super.selectPreviousTrack();
     synchronization.broadcastRemoteCommand(
-      RemoteCommand.selectTrack(currentTrackIndex),
+      SelectTrackCommand(currentTrackIndex),
     );
   }
 
@@ -40,7 +43,9 @@ class RemoteSynchronizedSetlistPlayer extends SetlistPlayer {
   void selectNextSection() {
     if (isPlaying || !currentTrack.isComplex) return;
 
-    synchronization.broadcastRemoteCommand(RemoteCommand.selectNextSection());
+    final command = SelectNextSectionCommand();
+    synchronization.broadcastRemoteCommand(command);
+
     super.selectNextSection();
   }
 
@@ -48,14 +53,17 @@ class RemoteSynchronizedSetlistPlayer extends SetlistPlayer {
   void selectPreviousSection() {
     if (isPlaying || !currentTrack.isComplex) return;
 
-    synchronization.broadcastRemoteCommand(RemoteCommand.selectPreviousSection());
+    final command = SelectPreviousSectionCommand();
+    synchronization.broadcastRemoteCommand(command);
+
     super.selectPreviousSection();
   }
 
   @override
   void update() {
-    synchronization.broadcastRemoteCommand(RemoteCommand.setSetlist(setlist));
-    // synchronization.broadcastRemoteCommand(RemoteCommand.selectTrack(currentTrackIndex));
+    final command = SetSetlistCommand(setlist);
+    synchronization.broadcastRemoteCommand(command);
+
     super.update();
   }
 }
