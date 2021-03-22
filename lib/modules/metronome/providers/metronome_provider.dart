@@ -5,6 +5,7 @@ import '../../remote_synchronization/logic/metronome/client_synchronized_track_m
 import '../../remote_synchronization/logic/metronome/host_synchronized_metronome.dart';
 import '../../remote_synchronization/providers/device_synchronization_mode_notifier_provider.dart';
 import '../../remote_synchronization/providers/is_remote_setlist_screen_provider.dart';
+import '../../remote_synchronization/providers/remote_launch_indicator_controller_provider.dart';
 import '../../remote_synchronization/providers/remote_synchronization_provider.dart';
 import '../logic/metronome_base.dart';
 import '../logic/notifier_metronome.dart';
@@ -17,9 +18,10 @@ final metronomeImplProvider = Provider<MetronomeBase>((ref) {
 
   switch (synchronization.synchronizationMode.mode) {
     case DeviceSynchronizationMode.Host:
+      final remoteLaunchIndicatorController = ref.read(remoteLaunchIndicatorControllerProvider);
       return isRemoteSetlistScreen
-          ? ClientSynchronizedTrackMetronome(synchronization)
-          : ClientSynchronizedMetronome(synchronization);
+          ? ClientSynchronizedTrackMetronome(synchronization, remoteLaunchIndicatorController)
+          : ClientSynchronizedMetronome(synchronization, remoteLaunchIndicatorController);
     case DeviceSynchronizationMode.Client:
       return HostSynchronizedMetronome(synchronization);
     case DeviceSynchronizationMode.None:

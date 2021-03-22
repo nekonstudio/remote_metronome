@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 
 import '../../../metronome/models/metronome_settings.dart';
+import '../../providers/remote_launch_indicator_controller_provider.dart';
 import '../remote_commands/remote_command.dart';
 import '../remote_commands/start_metronome_command.dart';
 import '../remote_commands/stop_metronome_command.dart';
@@ -8,12 +9,16 @@ import '../remote_synchronization.dart';
 import 'remote_synchronized_metronome.dart';
 
 class ClientSynchronizedMetronome extends RemoteSynchronizedMetronome {
-  ClientSynchronizedMetronome(RemoteSynchronization synchronization) : super(synchronization);
+  final RemoteLaunchIndicatorController remoteLaunchIndicatorController;
+
+  ClientSynchronizedMetronome(
+    RemoteSynchronization synchronization,
+    this.remoteLaunchIndicatorController,
+  ) : super(synchronization);
 
   @override
   void startMetronome(MetronomeSettings settings) {
-    // TODO: figure out better way to update UI outside logic code
-    synchronization.remoteActionNotifier.setActionState(true);
+    remoteLaunchIndicatorController.activate();
 
     synchronization.broadcastRemoteCommand(
       createStartCommand(settings),
@@ -28,11 +33,6 @@ class ClientSynchronizedMetronome extends RemoteSynchronizedMetronome {
         print('2. HOST START! time:\t' + DateTime.now().toString());
 
         runSynchronizedStart();
-
-        Future.delayed(
-          Duration(milliseconds: 120),
-          () => synchronization.remoteActionNotifier.setActionState(false),
-        );
       },
     );
   }

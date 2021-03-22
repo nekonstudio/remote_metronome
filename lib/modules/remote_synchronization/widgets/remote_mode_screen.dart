@@ -4,7 +4,7 @@ import 'package:get/get.dart';
 
 import '../logic/nearby_devices.dart';
 import '../providers/nearby_devices_provider.dart';
-import '../providers/remote_action_notifier_provider.dart';
+import '../providers/remote_launch_indicator_controller_provider.dart';
 import '../providers/remote_synchronization_provider.dart';
 import 'remote_connected_devices_panel.dart';
 
@@ -96,11 +96,11 @@ class RemoteModeScreen extends StatelessWidget {
 class _RemoteLaunchIndicator extends ConsumerWidget {
   @override
   Widget build(BuildContext context, ScopedReader watch) {
-    final useIndicator = watch(remoteActionNotifierProvider.state);
-    return useIndicator
+    final indicatorController = watch(remoteLaunchIndicatorControllerProvider);
+    return indicatorController.isActive
         ? TweenAnimationBuilder(
             tween: Tween<double>(begin: 0.0, end: 1.0),
-            duration: Duration(milliseconds: 500),
+            duration: RemoteLaunchIndicatorController.duration,
             builder: (context, value, child) => LinearProgressIndicator(
               value: value,
             ),
