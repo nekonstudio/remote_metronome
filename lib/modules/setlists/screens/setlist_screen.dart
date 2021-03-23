@@ -111,6 +111,9 @@ class SetlistScreen extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 20),
       child: Column(
         children: [
+          SizedBox(
+            height: 10,
+          ),
           Expanded(flex: 4, child: MetronomeTrackPanel(player)),
           PlayerControlPanel(player),
           Expanded(

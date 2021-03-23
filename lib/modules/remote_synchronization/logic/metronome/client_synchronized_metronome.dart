@@ -26,15 +26,7 @@ class ClientSynchronizedMetronome extends RemoteSynchronizedMetronome {
 
     prepareSynchronizedStart(settings);
 
-    print('1. HOST START! time:\t' + DateTime.now().toString());
-    Future.delayed(
-      Duration(milliseconds: 500),
-      () {
-        print('2. HOST START! time:\t' + DateTime.now().toString());
-
-        runSynchronizedStart();
-      },
-    );
+    Future.delayed(RemoteSynchronizedMetronome.commandExecutionDuration, runSynchronizedStart);
   }
 
   @override

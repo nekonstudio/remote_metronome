@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class RemoteLaunchIndicatorController with ChangeNotifier {
-  static const duration = Duration(milliseconds: 500);
+import '../logic/metronome/remote_synchronized_metronome.dart';
 
+class RemoteLaunchIndicatorController with ChangeNotifier {
   bool _isActive = false;
 
   bool get isActive => _isActive;
@@ -12,7 +12,7 @@ class RemoteLaunchIndicatorController with ChangeNotifier {
     _changeState(true);
 
     Future.delayed(
-      duration + Duration(milliseconds: 120),
+      RemoteSynchronizedMetronome.commandExecutionDuration + Duration(milliseconds: 120),
       () => _changeState(false),
     );
   }

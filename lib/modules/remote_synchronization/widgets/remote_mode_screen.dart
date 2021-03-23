@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:get/get.dart';
 
+import '../logic/metronome/remote_synchronized_metronome.dart';
 import '../logic/nearby_devices.dart';
 import '../providers/nearby_devices_provider.dart';
 import '../providers/remote_launch_indicator_controller_provider.dart';
@@ -100,7 +101,7 @@ class _RemoteLaunchIndicator extends ConsumerWidget {
     return indicatorController.isActive
         ? TweenAnimationBuilder(
             tween: Tween<double>(begin: 0.0, end: 1.0),
-            duration: RemoteLaunchIndicatorController.duration,
+            duration: RemoteSynchronizedMetronome.commandExecutionDuration,
             builder: (context, value, child) => LinearProgressIndicator(
               value: value,
             ),
