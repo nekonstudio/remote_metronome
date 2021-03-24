@@ -7,7 +7,7 @@ Metronome application written with Flutter for Android mobile devices.
 
 ## Basic metronome
 
-Play metronome sounds based on settings: tempo, beats pear bar and click per beat. 
+Play metronome sounds based on settings: tempo, beats per bar and clicks per beat. 
 
 ![Simple metronome screen](https://i.postimg.cc/wT2hjbbn/simlpe-metronome.gif)
 
@@ -23,8 +23,8 @@ Track can be:
 
 ## Remote synchronized playing
 
-In the application you use previously described features in remote synchronized mode. 
-In this mode you can create a session, where one device (host) can trigger playing metronome on another connected devices (clients). Host is synchronized with connected clients and every time he plays metronome on his device, other devices starts to play in synchronization with host device. The connection is made using [Nearby Connections API](https://developers.google.com/nearby/connections/overview).
+In the application you can use previously described features in remote synchronized mode. 
+In this mode you can create a session, where one device (host) can connect and synchronize with other devices running an instance of this application (clients). Once connection is established, if host starts to play metronome, this other devices start to play in synchronization with host's device. The connection between devices is made using [Nearby Connections API](https://developers.google.com/nearby/connections/overview).
 
 
 *Left screenshot - host, right screenshot - client*
