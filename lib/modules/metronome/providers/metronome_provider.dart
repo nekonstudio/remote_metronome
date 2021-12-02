@@ -14,14 +14,17 @@ import '../logic/wakelock_metronome.dart';
 final metronomeImplProvider = Provider<MetronomeBase>((ref) {
   ref.watch(deviceSynchronizationModeNotifierProvider);
   final synchronization = ref.read(synchronizationProvider);
-  final isRemoteSetlistScreen = ref.watch(isRemoteSetlistScreenProvider.state);
+  final isRemoteSetlistScreen = ref.watch(isRemoteSetlistScreenProvider);
 
   switch (synchronization.synchronizationMode.mode) {
     case DeviceSynchronizationMode.Host:
-      final remoteLaunchIndicatorController = ref.read(remoteLaunchIndicatorControllerProvider);
+      final remoteLaunchIndicatorController =
+          ref.read(remoteLaunchIndicatorControllerProvider);
       return isRemoteSetlistScreen
-          ? ClientSynchronizedTrackMetronome(synchronization, remoteLaunchIndicatorController)
-          : ClientSynchronizedMetronome(synchronization, remoteLaunchIndicatorController);
+          ? ClientSynchronizedTrackMetronome(
+              synchronization, remoteLaunchIndicatorController)
+          : ClientSynchronizedMetronome(
+              synchronization, remoteLaunchIndicatorController);
     case DeviceSynchronizationMode.Client:
       return HostSynchronizedMetronome(synchronization);
     case DeviceSynchronizationMode.None:
@@ -51,4 +54,5 @@ final metronomeProvider = ChangeNotifierProvider<NotifierMetronome>(
 final isMetronomePlayingProvider =
     Provider((ref) => ref.watch(metronomeProvider).isPlaying ? true : false);
 
-final currentBeatBarProvider = Provider((ref) => ref.watch(metronomeProvider).currentBarBeat);
+final currentBeatBarProvider =
+    Provider((ref) => ref.watch(metronomeProvider).currentBarBeat);

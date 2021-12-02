@@ -18,4 +18,5 @@ class _ScreenStateNotifier extends StateNotifier<ScreenState> {
 }
 
 final remoteScreenStateProvider =
-    StateNotifierProvider((ref) => _ScreenStateNotifier(ScreenState.SimpleMetronome));
+    StateNotifierProvider<_ScreenStateNotifier, ScreenState>(
+        (ref) => _ScreenStateNotifier(ScreenState.SimpleMetronome));

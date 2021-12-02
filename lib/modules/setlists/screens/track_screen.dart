@@ -17,7 +17,8 @@ class TrackScreen extends StatefulWidget {
   final String setlistId;
   final Track track;
 
-  const TrackScreen({Key key, @required this.setlistId, this.track}) : super(key: key);
+  const TrackScreen({Key key, @required this.setlistId, this.track})
+      : super(key: key);
 
   @override
   _TrackScreenState createState() => _TrackScreenState();
@@ -39,7 +40,8 @@ class _TrackScreenState extends State<TrackScreen> {
     _screenModeSwitchIndex = _isComplexTrack ? 1 : 0;
     _trackSections = widget.track?.sections ?? [];
     final initialSettings = widget.track?.settings ?? MetronomeSettings();
-    _settingsController = MetronomeSettingsController(initialSettings: initialSettings);
+    _settingsController =
+        MetronomeSettingsController(initialSettings: initialSettings);
   }
 
   @override
@@ -56,19 +58,26 @@ class _TrackScreenState extends State<TrackScreen> {
                 onToggle: _toggleMode,
                 labels: ['Prosty', 'Złożony'],
                 minWidth: 150,
-                activeBgColor: Theme.of(context).accentColor,
+                activeBgColor: [Theme.of(context).colorScheme.secondary],
+                totalSwitches: 2,
               ),
               Form(
                 key: _formKey,
                 child: Column(
                   children: [
-                    TextFormField(
-                      decoration: InputDecoration(labelText: 'Nazwa'),
-                      initialValue: widget.track?.name ?? '',
-                      autofocus: true,
-                      validator: (value) => value.isEmpty ? 'To pole nie może być puste' : null,
-                      onFieldSubmitted: (_) => _submitForm(),
-                      onSaved: (value) => _saveForm(value),
+                    Consumer(
+                      builder: (context, ref, child) {
+                        return TextFormField(
+                          decoration: InputDecoration(labelText: 'Nazwa'),
+                          initialValue: widget.track?.name ?? '',
+                          autofocus: true,
+                          validator: (value) => value.isEmpty
+                              ? 'To pole nie może być puste'
+                              : null,
+                          onFieldSubmitted: (_) => _submitForm(),
+                          onSaved: (value) => _saveForm(ref, value),
+                        );
+                      },
                     ),
                     SizedBox(
                       height: 20,
@@ -112,11 +121,11 @@ class _TrackScreenState extends State<TrackScreen> {
     }
   }
 
-  void _saveForm(String newTrackTitle) {
+  void _saveForm(WidgetRef ref, String newTrackTitle) {
     final setlistId = widget.setlistId;
-    final setlistManager = context.read(setlistManagerProvider);
+    final setlistManager = ref.read(setlistManagerProvider);
     final setlist = setlistManager.getSetlist(setlistId);
-    final setlistPlayer = context.read(setlistPlayerProvider(setlist));
+    final setlistPlayer = ref.read(setlistPlayerProvider(setlist));
     final newTrack = _isComplexTrack
         ? Track.complex(newTrackTitle, _trackSections)
         : Track.simple(newTrackTitle, _settingsController.value);

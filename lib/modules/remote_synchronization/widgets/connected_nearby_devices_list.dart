@@ -5,8 +5,8 @@ import '../providers/nearby_devices_provider.dart';
 
 class ConnectedNearbyDevicesList extends ConsumerWidget {
   @override
-  Widget build(BuildContext context, ScopedReader watch) {
-    final devicesList = watch(nearbyDevicesProvider).connectedDevicesList;
+  Widget build(BuildContext context, WidgetRef ref) {
+    final devicesList = ref.watch(nearbyDevicesProvider).connectedDevicesList;
 
     if (devicesList.isEmpty) {
       return Center(child: Text('Brak połączonych urządzeń'));

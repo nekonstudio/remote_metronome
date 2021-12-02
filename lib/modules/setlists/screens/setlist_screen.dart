@@ -20,7 +20,7 @@ import '../widgets/player_control_panel.dart';
 import '../widgets/track_list.dart';
 import 'track_screen.dart';
 
-class SetlistScreen extends StatelessWidget {
+class SetlistScreen extends ConsumerWidget {
   final Setlist setlist;
 
   SetlistScreen(this.setlist);
@@ -28,13 +28,14 @@ class SetlistScreen extends StatelessWidget {
   final _scrollController = ItemScrollController();
 
   @override
-  Widget build(BuildContext context) {
-    final synchronization = context.read(synchronizationProvider);
+  Widget build(BuildContext context, WidgetRef ref) {
+    final synchronization = ref.read(synchronizationProvider);
 
     if (synchronization.synchronizationMode.isSynchronized) {
       Future.delayed(
         Duration(milliseconds: 50),
-        () => context.read(isRemoteSetlistScreenProvider).changeState(true),
+        () =>
+            ref.read(isRemoteSetlistScreenProvider.notifier).changeState(true),
       );
 
       synchronization.broadcastRemoteCommand(
@@ -44,8 +45,8 @@ class SetlistScreen extends StatelessWidget {
 
     return RemoteModeScreen(
       title: Consumer(
-        builder: (context, watch, child) {
-          final player = watch(setlistPlayerProvider(setlist));
+        builder: (context, ref, child) {
+          final player = ref.watch(setlistPlayerProvider(setlist));
           final selectedTrack = player.currentTrack;
 
           if (!setlist.hasTracks || selectedTrack == null) {
@@ -67,37 +68,42 @@ class SetlistScreen extends StatelessWidget {
           if (synchronization.synchronizationMode.isSynchronized) {
             synchronization.broadcastRemoteCommand(StopTrackCommand());
 
-            final metronomeSettings = context.read(simpleMetronomeSettingsControllerProvider).value;
+            final metronomeSettings =
+                ref.read(simpleMetronomeSettingsControllerProvider).value;
             synchronization.broadcastRemoteCommand(
               SetMetronomeSettingsCommand(metronomeSettings),
             );
           }
 
-          context.read(setlistPlayerProvider(setlist)).stop();
-          context.read(isRemoteSetlistScreenProvider).changeState(false);
+          ref.read(setlistPlayerProvider(setlist)).stop();
+          ref.read(isRemoteSetlistScreenProvider.notifier).changeState(false);
 
           return Future.value(true);
         },
         child: Consumer(
-          builder: (context, watch, child) {
-            watch(setlistManagerProvider);
+          builder: (context, ref, child) {
+            ref.watch(setlistManagerProvider);
 
-            final player = watch(setlistPlayerProvider(setlist));
+            final player = ref.watch(setlistPlayerProvider(setlist));
             player.onTrackChanged = _onTrackChanged;
 
-            return setlist.hasTracks ? _buildSetlist(player) : _buildEmptySetlist();
+            return setlist.hasTracks
+                ? _buildSetlist(player)
+                : _buildEmptySetlist();
           },
         ),
       ),
       floatingActionButton: Consumer(
-        builder: (context, watch, child) {
-          final isPlaying = watch(metronomeProvider).isPlaying;
+        builder: (context, ref, child) {
+          final isPlaying = ref.watch(metronomeProvider).isPlaying;
           return FloatingActionButton(
-            backgroundColor: isPlaying ? Colors.grey : Theme.of(context).accentColor,
+            backgroundColor: isPlaying
+                ? Colors.grey
+                : Theme.of(context).colorScheme.secondary,
             child: Icon(Icons.add),
             onPressed: () {
               if (!isPlaying) {
-                Get.to(TrackScreen(setlistId: setlist.id));
+                Get.to(() => TrackScreen(setlistId: setlist.id));
               }
             },
           );
@@ -118,7 +124,8 @@ class SetlistScreen extends StatelessWidget {
           PlayerControlPanel(player),
           Expanded(
             flex: 6,
-            child: TrackList(setlist, player, scrollController: _scrollController),
+            child:
+                TrackList(setlist, player, scrollController: _scrollController),
           ),
         ],
       ),

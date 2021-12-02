@@ -8,6 +8,7 @@ class IsRemoteSetlistScreenNotifier extends StateNotifier<bool> {
   }
 }
 
-final isRemoteSetlistScreenProvider = StateNotifierProvider(
+final isRemoteSetlistScreenProvider =
+    StateNotifierProvider<IsRemoteSetlistScreenNotifier, bool>(
   (ref) => IsRemoteSetlistScreenNotifier(false),
 );

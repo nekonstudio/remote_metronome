@@ -13,11 +13,11 @@ import 'setlist_screen.dart';
 
 class SavedSetlistsScreen extends ConsumerWidget {
   @override
-  Widget build(BuildContext context, ScopedReader watch) {
-    final setlistManager = watch(setlistManagerProvider);
+  Widget build(BuildContext context, WidgetRef ref) {
+    final setlistManager = ref.watch(setlistManagerProvider);
     final setlists = setlistManager.setlists;
 
-    context.read(metronomeProvider).stop();
+    ref.read(metronomeProvider).stop();
 
     return RemoteModeScreen(
       title: Text('Setlisty'),
@@ -32,8 +32,9 @@ class SavedSetlistsScreen extends ConsumerWidget {
                 final setlist = setlists[index];
                 return PopupMenuListItem(
                   index: index,
-                  popupMenuEntries: _buildPopupMenuItems(context, setlistManager, setlist),
-                  onPressed: () => Get.to(SetlistScreen(setlist)),
+                  popupMenuEntries:
+                      _buildPopupMenuItems(context, setlistManager, setlist),
+                  onPressed: () => Get.to(() => SetlistScreen(setlist)),
                   child: ListTile(
                     leading: Icon(Icons.menu),
                     title: Text('${setlist.name}'),
@@ -66,7 +67,8 @@ class SavedSetlistsScreen extends ConsumerWidget {
           showModalBottomSheet(
             isScrollControlled: true,
             context: context,
-            builder: (context) => SetlistForm(setlistManager, existingSetlist: setlist),
+            builder: (context) =>
+                SetlistForm(setlistManager, existingSetlist: setlist),
           );
         },
       ),

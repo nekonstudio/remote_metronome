@@ -9,7 +9,7 @@ import '../providers/remote_launch_indicator_controller_provider.dart';
 import '../providers/remote_synchronization_provider.dart';
 import 'remote_connected_devices_panel.dart';
 
-class RemoteModeScreen extends StatelessWidget {
+class RemoteModeScreen extends ConsumerWidget {
   final Widget title;
   final Widget body;
   final Widget subtitle;
@@ -26,25 +26,57 @@ class RemoteModeScreen extends StatelessWidget {
   }) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    ref.listen<NearbyDevices>(nearbyDevicesProvider, (_, nearbyDevices) {
+      if (!ModalRoute.of(context).isCurrent) return;
+
+      if (nearbyDevices.hasConnections) {
+        final disconnectedDeviceName = nearbyDevices.lastDisconnectedDeviceName;
+        if (disconnectedDeviceName != null) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content:
+                  Text('Urządzenie $disconnectedDeviceName rozłączyło się'),
+            ),
+          );
+        }
+      } else {
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: Text('Zakończono tryb wspólnego odtwarzania'),
+            content: Text('Rozłączono ze wszystkimi urządzniami'),
+            actions: [
+              TextButton(onPressed: Get.back, child: Text('OK')),
+            ],
+          ),
+        );
+
+        ref.read(synchronizationProvider).end();
+      }
+    });
+
     return Scaffold(
       appBar: AppBar(
         title: title,
         actions: [
           Consumer(
-            builder: (context, watch, child) {
-              final nearbyDevices = watch(nearbyDevicesProvider);
+            builder: (context, ref, child) {
+              final nearbyDevices = ref.watch(nearbyDevicesProvider);
               final hasConnections = nearbyDevices.hasConnections;
-              final connectionsCount = nearbyDevices.connectedDevicesList.length;
+              final connectionsCount =
+                  nearbyDevices.connectedDevicesList.length;
 
               return hasConnections
                   ? _BadgeIconButton(
                       icon: Icon(Icons.wifi),
                       number: connectionsCount,
-                      color: Get.theme.accentColor,
+                      color: Get.theme.colorScheme.secondary,
                       onPressed: () {
                         showModalBottomSheet(
-                            context: context, builder: (context) => RemoteConnectedDevicesPanel());
+                            context: context,
+                            builder: (context) =>
+                                RemoteConnectedDevicesPanel());
                       },
                     )
                   : Container();
@@ -53,41 +85,11 @@ class RemoteModeScreen extends StatelessWidget {
         ],
       ),
       drawer: drawer,
-      body: ProviderListener<NearbyDevices>(
-        provider: nearbyDevicesProvider,
-        onChange: (context, nearbyDevices) {
-          if (!ModalRoute.of(context).isCurrent) return;
-
-          if (nearbyDevices.hasConnections) {
-            final disconnectedDeviceName = nearbyDevices.lastDisconnectedDeviceName;
-            if (disconnectedDeviceName != null) {
-              Scaffold.of(context).showSnackBar(
-                SnackBar(
-                  content: Text('Urządzenie $disconnectedDeviceName rozłączyło się'),
-                ),
-              );
-            }
-          } else {
-            showDialog(
-              context: context,
-              builder: (context) => AlertDialog(
-                title: Text('Zakończono tryb wspólnego odtwarzania'),
-                content: Text('Rozłączono ze wszystkimi urządzniami'),
-                actions: [
-                  FlatButton(onPressed: Get.back, child: Text('OK')),
-                ],
-              ),
-            );
-
-            context.read(synchronizationProvider).end();
-          }
-        },
-        child: Stack(
-          children: [
-            body,
-            _RemoteLaunchIndicator(),
-          ],
-        ),
+      body: Stack(
+        children: [
+          body,
+          _RemoteLaunchIndicator(),
+        ],
       ),
       floatingActionButton: floatingActionButton,
     );
@@ -96,8 +98,9 @@ class RemoteModeScreen extends StatelessWidget {
 
 class _RemoteLaunchIndicator extends ConsumerWidget {
   @override
-  Widget build(BuildContext context, ScopedReader watch) {
-    final indicatorController = watch(remoteLaunchIndicatorControllerProvider);
+  Widget build(BuildContext context, WidgetRef ref) {
+    final indicatorController =
+        ref.watch(remoteLaunchIndicatorControllerProvider);
     return indicatorController.isActive
         ? TweenAnimationBuilder(
             tween: Tween<double>(begin: 0.0, end: 1.0),

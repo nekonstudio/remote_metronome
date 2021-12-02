@@ -18,6 +18,20 @@ allprojects {
     }
 }
 
+ext {
+    compileSdkVersion = 29
+}
+
+subprojects { subproject ->
+    afterEvaluate{
+        if((subproject.plugins.hasPlugin('android') || subproject.plugins.hasPlugin('android-library'))) {
+            android {
+                compileSdkVersion rootProject.ext.compileSdkVersion
+            }
+        }
+    }
+}
+
 rootProject.buildDir = '../build'
 subprojects {
     project.buildDir = "${rootProject.buildDir}/${project.name}"

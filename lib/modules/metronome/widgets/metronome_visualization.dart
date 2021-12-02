@@ -14,8 +14,8 @@ class MetronomeVisualization extends ConsumerWidget {
   }
 
   @override
-  Widget build(BuildContext context, ScopedReader watch) {
-    final currentBarBeat = watch(currentBeatBarProvider);
+  Widget build(BuildContext context, WidgetRef ref) {
+    final currentBarBeat = ref.watch(currentBeatBarProvider);
     return Column(
       children: [
         Row(

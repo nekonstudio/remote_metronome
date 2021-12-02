@@ -11,7 +11,7 @@ import '../models/track.dart';
 import '../providers/setlist_manager_provider.dart';
 import '../screens/track_screen.dart';
 
-class TrackList extends StatelessWidget {
+class TrackList extends ConsumerWidget {
   final Setlist setlist;
   final NotifierSetlistPlayer player;
   final ItemScrollController scrollController;
@@ -22,7 +22,7 @@ class TrackList extends StatelessWidget {
     this.scrollController,
   });
 
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return NotificationListener<OverscrollIndicatorNotification>(
       onNotification: (OverscrollIndicatorNotification overscroll) {
         overscroll.disallowGlow();
@@ -36,7 +36,8 @@ class TrackList extends StatelessWidget {
           final track = setlist.tracks[index];
           return PopupMenuListItem(
             index: index,
-            popupMenuEntries: _buildPopupMenuItems(context, setlist.id, setlist.tracks, player),
+            popupMenuEntries:
+                _buildPopupMenuItems(ref, setlist.id, setlist.tracks, player),
             onPressed: () => player.selectTrack(index),
             child: ListTile(
               leading: CircleAvatar(
@@ -47,13 +48,15 @@ class TrackList extends StatelessWidget {
                 '${track.name}',
                 style: TextStyle(
                   color: player.currentTrackIndex == index
-                      ? Theme.of(context).accentColor
+                      ? Theme.of(context).colorScheme.secondary
                       : Colors.white,
-                  fontWeight:
-                      player.currentTrackIndex == index ? FontWeight.bold : FontWeight.normal,
+                  fontWeight: player.currentTrackIndex == index
+                      ? FontWeight.bold
+                      : FontWeight.normal,
                 ),
               ),
-              subtitle: Text(track.isComplex ? 'Złożony' : '${track.settings.tempo} BPM'),
+              subtitle: Text(
+                  track.isComplex ? 'Złożony' : '${track.settings.tempo} BPM'),
             ),
           );
         },
@@ -61,32 +64,33 @@ class TrackList extends StatelessWidget {
     );
   }
 
-  dynamic _buildPopupMenuItems(
-      BuildContext context, String setlistId, List<Track> tracks, SetlistPlayerInterface player) {
+  dynamic _buildPopupMenuItems(WidgetRef ref, String setlistId,
+      List<Track> tracks, SetlistPlayerInterface player) {
     return [
       PopupMenuItem(
         child: Text('Edytuj'),
         value: (index) {
           player.stop();
-          Get.to(TrackScreen(setlistId: setlistId, track: tracks[index]));
+          Get.to(() => TrackScreen(setlistId: setlistId, track: tracks[index]));
         },
       ),
       PopupMenuItem(
-          child: Text('Usuń'),
-          value: (index) {
-            player.stop();
+        child: Text('Usuń'),
+        value: (index) {
+          player.stop();
 
-            final setlistManager = context.read(setlistManagerProvider);
-            setlistManager.deleteTrack(setlistId, index);
+          final setlistManager = ref.read(setlistManagerProvider);
+          setlistManager.deleteTrack(setlistId, index);
 
-            final tracksCount = setlistManager.getSetlist(setlistId).tracksCount;
-            final nextTrackIndex = tracksCount - 1;
-            if (tracksCount == player.currentTrackIndex && nextTrackIndex >= 0) {
-              player.selectTrack(nextTrackIndex);
-            } else {
-              player.update();
-            }
-          }),
+          final tracksCount = setlistManager.getSetlist(setlistId).tracksCount;
+          final nextTrackIndex = tracksCount - 1;
+          if (tracksCount == player.currentTrackIndex && nextTrackIndex >= 0) {
+            player.selectTrack(nextTrackIndex);
+          } else {
+            player.update();
+          }
+        },
+      ),
     ];
   }
 }

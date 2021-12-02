@@ -22,7 +22,8 @@ class SetSetlistCommand extends RemoteCommand {
 
   @override
   void execute(Reader providerReader) {
-    final remoteScreenState = providerReader(remoteScreenStateProvider);
+    final remoteScreenState =
+        providerReader(remoteScreenStateProvider.notifier);
 
     if (setlist.tracksCount > 0) {
       remoteScreenState.setSetlistState(setlist);

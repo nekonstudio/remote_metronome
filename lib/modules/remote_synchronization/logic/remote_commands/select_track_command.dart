@@ -23,7 +23,8 @@ class SelectTrackCommand extends RemoteCommand {
 
   @override
   void execute(Reader providerReader) {
-    final remoteScreenState = providerReader(remoteScreenStateProvider);
+    final remoteScreenState =
+        providerReader(remoteScreenStateProvider.notifier);
     final setlist = remoteScreenState.setlist;
 
     if (setlist != null) {

@@ -3,13 +3,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../logic/setlist_player/setlist_player_interface.dart';
 
-class PlayerControlPanel extends ConsumerWidget {
+class PlayerControlPanel extends StatelessWidget {
   final SetlistPlayerInterface player;
 
   PlayerControlPanel(this.player);
 
   @override
-  Widget build(BuildContext context, ScopedReader watch) {
+  Widget build(BuildContext context) {
     final Map<IconData, Function> options = {
       Icons.skip_previous: player.selectPreviousTrack,
       Icons.fast_rewind: player.selectPreviousSection,

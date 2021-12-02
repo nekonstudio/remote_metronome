@@ -25,10 +25,12 @@ class SetMetronomeSettingsCommand extends RemoteCommand {
 
   @override
   void execute(Reader providerReader) {
-    final remoteMetronomeScreenController = providerReader(remoteMetronomeScreenControllerProvider);
+    final remoteMetronomeScreenController =
+        providerReader(remoteMetronomeScreenControllerProvider);
     remoteMetronomeScreenController.setMetronomeSettings(metronomeSettings);
 
-    final remoteScreenState = providerReader(remoteScreenStateProvider);
+    final remoteScreenState =
+        providerReader(remoteScreenStateProvider.notifier);
     remoteScreenState.setSimpleMetronomeState();
   }
 

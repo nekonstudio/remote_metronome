@@ -33,15 +33,18 @@ class AppDrawer extends StatelessWidget {
           ),
           ListTile(
             onTap: () {
-              Get.to(SavedSetlistsScreen());
+              Get.to(() => SavedSetlistsScreen());
             },
             title: Text('Setlisty'),
             leading: Icon(Icons.format_list_numbered),
           ),
           Consumer(
-            builder: (context, watch, child) {
-              final hasConnections = watch(nearbyDevicesProvider).hasConnections;
-              final color = hasConnections ? Get.theme.accentColor : Colors.white;
+            builder: (context, ref, child) {
+              final hasConnections =
+                  ref.watch(nearbyDevicesProvider).hasConnections;
+              final color = hasConnections
+                  ? Get.theme.colorScheme.secondary
+                  : Colors.white;
 
               return ListTile(
                 onTap: () {
@@ -52,7 +55,7 @@ class AppDrawer extends StatelessWidget {
                       builder: (context) => RemoteConnectedDevicesPanel(),
                     );
                   } else {
-                    Get.to(RoleChoiceScreen());
+                    Get.to(() => RoleChoiceScreen());
                   }
                 },
                 title: Text(
