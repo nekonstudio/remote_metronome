@@ -9,7 +9,7 @@ import 'remote_command.dart';
 import 'remote_command_type.dart';
 
 class SetMetronomeSettingsCommand extends RemoteCommand {
-  final MetronomeSettings metronomeSettings;
+  final MetronomeSettings? metronomeSettings;
 
   SetMetronomeSettingsCommand(this.metronomeSettings)
       : super(RemoteCommandType.SetMetronomeSettings);
@@ -39,7 +39,7 @@ class SetMetronomeSettingsCommand extends RemoteCommand {
 
   Map<String, dynamic> toMap() {
     return {
-      'metronomeSettings': metronomeSettings.toMap(),
+      'metronomeSettings': metronomeSettings!.toMap(),
     };
   }
 }

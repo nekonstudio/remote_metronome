@@ -7,12 +7,12 @@ import '../lib/modules/metronome/models/metronome_settings.dart';
 
 class MockMetronomeImpl extends MetronomeBase {
   @override
-  void onStart(MetronomeSettings settings) {
+  void onStart(MetronomeSettings? settings) {
     // Do nothing
   }
 
   @override
-  void onChange(MetronomeSettings settings) {
+  void onChange(MetronomeSettings? settings) {
     // Do nothing
   }
 
@@ -23,8 +23,8 @@ class MockMetronomeImpl extends MetronomeBase {
 
   @override
   Stream<int> getCurrentBarBeatStream() {
-    StreamController<int> controller;
-    Timer timer;
+    late StreamController<int> controller;
+    Timer? timer;
     int counter = 1;
 
     void tick(_) {
@@ -41,7 +41,7 @@ class MockMetronomeImpl extends MetronomeBase {
 
     void stopTimer() {
       if (timer != null) {
-        timer.cancel();
+        timer!.cancel();
         timer = null;
         controller.close();
       }

@@ -3,7 +3,7 @@ import '../../models/track.dart';
 import 'track_player.dart';
 
 class NoTrackPlayer extends TrackPlayer {
-  NoTrackPlayer(Track track, MetronomeBase metronome) : super(track, metronome) {
+  NoTrackPlayer(Track? track, MetronomeBase metronome) : super(track, metronome) {
     print('NoTrackPlayer');
   }
 

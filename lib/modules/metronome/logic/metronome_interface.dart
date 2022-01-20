@@ -6,5 +6,5 @@ abstract class MetronomeInterface {
   void stop();
 
   bool get isPlaying;
-  int get currentBarBeat;
+  int? get currentBarBeat;
 }

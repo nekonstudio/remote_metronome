@@ -14,7 +14,7 @@ class RemoteSynchronizedSetlistPlayer extends SetlistPlayer {
       : super(setlist, metronome);
 
   @override
-  void selectTrack(int index) {
+  void selectTrack(int? index) {
     if (currentTrackIndex != index) {
       synchronization.broadcastRemoteCommand(
         SelectTrackCommand(index),
@@ -41,7 +41,7 @@ class RemoteSynchronizedSetlistPlayer extends SetlistPlayer {
 
   @override
   void selectNextSection() {
-    if (isPlaying || !currentTrack.isComplex) return;
+    if (isPlaying || !currentTrack!.isComplex!) return;
 
     final command = SelectNextSectionCommand();
     synchronization.broadcastRemoteCommand(command);
@@ -51,7 +51,7 @@ class RemoteSynchronizedSetlistPlayer extends SetlistPlayer {
 
   @override
   void selectPreviousSection() {
-    if (isPlaying || !currentTrack.isComplex) return;
+    if (isPlaying || !currentTrack!.isComplex!) return;
 
     final command = SelectPreviousSectionCommand();
     synchronization.broadcastRemoteCommand(command);

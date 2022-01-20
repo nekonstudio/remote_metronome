@@ -3,13 +3,13 @@ import 'package:flutter/material.dart';
 class PopupMenuListItem extends StatefulWidget {
   final int index;
   final List<PopupMenuEntry<Null Function(int)>> popupMenuEntries;
-  final Widget child;
-  final void Function() onPressed;
+  final Widget? child;
+  final void Function()? onPressed;
 
   const PopupMenuListItem({
-    Key key,
-    @required this.index,
-    @required this.popupMenuEntries,
+    Key? key,
+    required this.index,
+    required this.popupMenuEntries,
     this.child,
     this.onPressed,
   }) : super(key: key);
@@ -19,7 +19,7 @@ class PopupMenuListItem extends StatefulWidget {
 }
 
 class _PopupMenuListItemState extends State<PopupMenuListItem> {
-  Offset _tapPosition;
+  late Offset _tapPosition;
 
   @override
   Widget build(BuildContext context) {
@@ -28,7 +28,7 @@ class _PopupMenuListItemState extends State<PopupMenuListItem> {
       onTap: widget.onPressed,
       onTapDown: (details) => _tapPosition = details.globalPosition,
       onLongPress: () async {
-        final RenderBox overlay = Overlay.of(context).context.findRenderObject();
+        final RenderBox overlay = Overlay.of(context)!.context.findRenderObject() as RenderBox;
         final handleSelectedOption = await showMenu(
           context: context,
           items: widget.popupMenuEntries,

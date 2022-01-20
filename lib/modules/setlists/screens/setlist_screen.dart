@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:get/get.dart';
+import 'package:metronom/modules/metronome/models/metronome_settings.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
 import '../../metronome/providers/metronome_provider.dart';
@@ -46,20 +47,20 @@ class SetlistScreen extends ConsumerWidget {
     return RemoteModeScreen(
       title: Consumer(
         builder: (context, ref, child) {
-          final player = ref.watch(setlistPlayerProvider(setlist));
+          final player = ref.watch(setlistPlayerProvider!(setlist));
           final selectedTrack = player.currentTrack;
 
           if (!setlist.hasTracks || selectedTrack == null) {
-            return Text(setlist.name);
+            return Text(setlist.name!);
           }
 
           return ListTile(
             contentPadding: EdgeInsets.zero,
             title: Text(
-              selectedTrack.name,
+              selectedTrack.name!,
               style: TextStyle(fontWeight: FontWeight.bold),
             ),
-            subtitle: Text(setlist.name),
+            subtitle: Text(setlist.name!),
           );
         },
       ),
@@ -75,7 +76,7 @@ class SetlistScreen extends ConsumerWidget {
             );
           }
 
-          ref.read(setlistPlayerProvider(setlist)).stop();
+          ref.read(setlistPlayerProvider!(setlist)).stop();
           ref.read(isRemoteSetlistScreenProvider.notifier).changeState(false);
 
           return Future.value(true);
@@ -84,7 +85,7 @@ class SetlistScreen extends ConsumerWidget {
           builder: (context, ref, child) {
             ref.watch(setlistManagerProvider);
 
-            final player = ref.watch(setlistPlayerProvider(setlist));
+            final player = ref.watch(setlistPlayerProvider!(setlist));
             player.onTrackChanged = _onTrackChanged;
 
             return setlist.hasTracks
@@ -138,9 +139,9 @@ class SetlistScreen extends ConsumerWidget {
     );
   }
 
-  void _onTrackChanged(int currentIndex) {
+  void _onTrackChanged(int? currentIndex) {
     _scrollController.scrollTo(
-      index: currentIndex,
+      index: currentIndex!,
       duration: Duration(milliseconds: 300),
     );
   }

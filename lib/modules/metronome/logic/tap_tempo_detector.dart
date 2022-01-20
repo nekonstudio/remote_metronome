@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 class TapTempoDetector {
   final _stopwatch = Stopwatch();
 
-  int _calculatedTempo;
+  int? _calculatedTempo;
 
-  int get calculatedTempo => _calculatedTempo;
+  int? get calculatedTempo => _calculatedTempo;
   bool get isActive => _stopwatch.isRunning;
 
   void registerTap() {

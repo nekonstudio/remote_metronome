@@ -15,7 +15,7 @@ class SelectNextSectionCommand extends RemoteCommand {
     final setlist = remoteScreenState.setlist;
 
     if (setlist != null) {
-      final setlistPlayer = providerReader(setlistPlayerProvider(setlist));
+      final setlistPlayer = providerReader(setlistPlayerProvider!(setlist));
       setlistPlayer.selectNextSection();
     }
   }

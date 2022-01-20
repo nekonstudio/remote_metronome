@@ -11,11 +11,11 @@ import 'setlist_player_interface.dart';
 class NotifierSetlistPlayer with ChangeNotifier implements SetlistPlayerInterface {
   final SetlistPlayer impl;
 
-  bool _previousIsPlayingValue;
-  int _previousCurrentTrackIndexValue;
-  int _previousCurrentSectionIndexValue;
+  bool? _previousIsPlayingValue;
+  int? _previousCurrentTrackIndexValue;
+  int? _previousCurrentSectionIndexValue;
 
-  StreamSubscription<dynamic> _currentBarBeatSubscription;
+  late StreamSubscription<dynamic> _currentBarBeatSubscription;
 
   NotifierSetlistPlayer(this.impl) {
     _previousIsPlayingValue = impl.isPlaying;
@@ -36,19 +36,19 @@ class NotifierSetlistPlayer with ChangeNotifier implements SetlistPlayerInterfac
   Setlist get setlist => impl.setlist;
 
   @override
-  Track get currentTrack => impl.currentTrack;
+  Track? get currentTrack => impl.currentTrack;
 
   @override
-  int get currentTrackIndex => impl.currentTrackIndex;
+  int? get currentTrackIndex => impl.currentTrackIndex;
 
   @override
-  Section get currentSection => impl.currentSection;
+  Section? get currentSection => impl.currentSection;
 
   @override
-  int get currentSectionBar => impl.currentSectionBar;
+  int? get currentSectionBar => impl.currentSectionBar;
 
   @override
-  int get currentSectionIndex => impl.currentSectionIndex;
+  int? get currentSectionIndex => impl.currentSectionIndex;
 
   @override
   void play() {
@@ -84,7 +84,7 @@ class NotifierSetlistPlayer with ChangeNotifier implements SetlistPlayerInterfac
   }
 
   @override
-  void selectTrack(int index) {
+  void selectTrack(int? index) {
     impl.selectTrack(index);
 
     if (currentTrackIndex != _previousCurrentTrackIndexValue) {
@@ -133,7 +133,7 @@ class NotifierSetlistPlayer with ChangeNotifier implements SetlistPlayerInterfac
   void _onCurrentBarBeatChanged() => notifyListeners();
 
   @override
-  set onTrackChanged(void Function(int trackIndex) callback) => impl.onTrackChanged = callback;
+  set onTrackChanged(void Function(int? trackIndex) callback) => impl.onTrackChanged = callback;
 
   @override
   void update() {

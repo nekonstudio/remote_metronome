@@ -9,13 +9,13 @@ class HostSynchronizedMetronome extends RemoteSynchronizedMetronome {
   void startMetronome(MetronomeSettings settings) async {
     assert(synchronization.hostStartTime != null, 'synchronization.hostStartTime must be provided');
 
-    final hostStartTime = synchronization.hostStartTime;
-    final hostTimeDifference = synchronization.hostTimeDifference;
+    final hostStartTime = synchronization.hostStartTime!;
+    final hostTimeDifference = synchronization.hostTimeDifference!;
     final waitTime = hostStartTime.add(
       Duration(
         milliseconds: -hostTimeDifference +
             RemoteSynchronizedMetronome.commandExecutionDuration.inMilliseconds +
-            (synchronization.clockSyncLatency ~/ 2),
+            (synchronization.clockSyncLatency! ~/ 2),
       ),
     );
 

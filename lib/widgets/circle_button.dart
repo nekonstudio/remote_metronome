@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 
 class CircleButton extends StatelessWidget {
-  final Widget child;
-  final double size;
-  final Color color;
-  final void Function() onPressed;
+  final Widget? child;
+  final double? size;
+  final Color? color;
+  final void Function()? onPressed;
 
   const CircleButton({
-    Key key,
+    Key? key,
     this.child,
     this.size,
     this.color,

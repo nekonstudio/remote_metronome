@@ -29,7 +29,7 @@ class SavedSetlistsScreen extends ConsumerWidget {
               separatorBuilder: (context, index) => Divider(),
               itemCount: setlists.length,
               itemBuilder: (context, index) {
-                final setlist = setlists[index];
+                final setlist = setlists[index]!;
                 return PopupMenuListItem(
                   index: index,
                   popupMenuEntries:

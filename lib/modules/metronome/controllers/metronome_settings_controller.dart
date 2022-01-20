@@ -3,7 +3,8 @@ import 'package:flutter/foundation.dart';
 import '../models/metronome_settings.dart';
 
 class MetronomeSettingsController extends ValueNotifier<MetronomeSettings> {
-  MetronomeSettingsController({MetronomeSettings initialSettings = const MetronomeSettings()})
+  MetronomeSettingsController(
+      {MetronomeSettings initialSettings = const MetronomeSettings()})
       : super(initialSettings);
 
   static const HalfTimeTempoMultipler = 0.5;
@@ -13,7 +14,7 @@ class MetronomeSettingsController extends ValueNotifier<MetronomeSettings> {
   void decreaseTempoBy1() => changeTempoBy(-1);
   void increaseTempoBy5() => changeTempoBy(5);
   void decreaseTempoBy5() => changeTempoBy(-5);
-  void changeTempoBy(int value) => setTempo(this.value.tempo + value);
+  void changeTempoBy(int value) => setTempo(this.value.tempo! + value);
   void setTempo(int newTempo) => changeParameter(tempo: newTempo);
   void increaseBeatsPerBarBy1() => _changeBeatsPerBarBy(1);
   void decreaseBeatsPerBarBy1() => _changeBeatsPerBarBy(-1);
@@ -23,17 +24,17 @@ class MetronomeSettingsController extends ValueNotifier<MetronomeSettings> {
   void doubleTempo() => _applyTempoMultiplier(DoubleTimeTempoMultipler);
 
   void _changeBeatsPerBarBy(int value) =>
-      changeParameter(beatsPerBar: this.value.beatsPerBar + value);
+      changeParameter(beatsPerBar: this.value.beatsPerBar! + value);
 
   void _changeClicksPerBeatBy(int value) =>
-      changeParameter(clicksPerBeat: this.value.clicksPerBeat + value);
+      changeParameter(clicksPerBeat: this.value.clicksPerBeat! + value);
 
   void _applyTempoMultiplier(double multiplier) => changeParameter(
-        tempo: (value.tempo * multiplier).round(),
+        tempo: (value.tempo! * multiplier).round(),
       );
 
   @protected
-  void changeParameter({int tempo, int beatsPerBar, int clicksPerBeat}) {
+  void changeParameter({int? tempo, int? beatsPerBar, int? clicksPerBeat}) {
     final newSettings = value
         .copyWith(
           tempo: tempo,

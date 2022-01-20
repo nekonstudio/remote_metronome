@@ -5,22 +5,22 @@ import 'no_track_player.dart';
 import 'simple_track_player.dart';
 
 abstract class TrackPlayer {
-  final Track track;
+  final Track? track;
   final MetronomeBase metronome;
 
   TrackPlayer(this.track, this.metronome);
 
-  factory TrackPlayer.createPlayerForTrack(Track track, MetronomeBase metronome) {
+  factory TrackPlayer.createPlayerForTrack(Track? track, MetronomeBase metronome) {
     if (track == null) return NoTrackPlayer(track, metronome);
 
-    return track.isComplex
+    return track.isComplex!
         ? ComplexTrackPlayer(track, metronome)
         : SimpleTrackPlayer(track, metronome);
   }
 
   bool get isPlaying => metronome.isPlaying;
-  int get currentSectionIndex => null;
-  int get currentSectionBar => null;
+  int? get currentSectionIndex => null;
+  int? get currentSectionBar => null;
 
   void play();
   void selectNextSection();
@@ -30,5 +30,5 @@ abstract class TrackPlayer {
     metronome.stop();
   }
 
-  void copy(TrackPlayer other) {}
+  void copy(TrackPlayer? other) {}
 }

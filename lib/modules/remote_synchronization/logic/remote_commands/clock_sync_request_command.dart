@@ -7,8 +7,8 @@ import 'remote_command.dart';
 import 'remote_command_type.dart';
 
 class ClockSyncRequestCommand extends RemoteCommand {
-  final int hostStartTimestamp;
-  final String senderId;
+  final int? hostStartTimestamp;
+  final String? senderId;
 
   ClockSyncRequestCommand(this.hostStartTimestamp, {this.senderId})
       : super(RemoteCommandType.ClockSyncRequest);
@@ -25,7 +25,7 @@ class ClockSyncRequestCommand extends RemoteCommand {
   @override
   void execute(Reader providerReader) {
     final synchronization = providerReader(synchronizationProvider);
-    synchronization.onClockSyncRequest(senderId, hostStartTimestamp);
+    synchronization.onClockSyncRequest(senderId!, hostStartTimestamp!);
   }
 
   @override

@@ -7,8 +7,8 @@ import 'remote_command.dart';
 import 'remote_command_type.dart';
 
 class ClockSyncSuccessCommand extends RemoteCommand {
-  final int hostTimeDifference;
-  final int clockSyncLatency;
+  final int? hostTimeDifference;
+  final int? clockSyncLatency;
 
   ClockSyncSuccessCommand(this.hostTimeDifference, this.clockSyncLatency)
       : super(RemoteCommandType.ClockSyncSuccess);

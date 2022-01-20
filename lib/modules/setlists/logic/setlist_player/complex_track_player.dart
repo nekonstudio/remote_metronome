@@ -16,10 +16,10 @@ class ComplexTrackPlayer extends TrackPlayer {
   int _currentSectionBar = 1;
   int _currentClickPerBeat = 1;
   int _previousBarBeat = 1;
-  StreamSubscription<dynamic> _sub;
+  StreamSubscription<dynamic>? _sub;
 
   @override
-  void copy(TrackPlayer other) {
+  void copy(TrackPlayer? other) {
     final complexTrackPlayer = other as ComplexTrackPlayer;
     _currentSectionIndex = complexTrackPlayer.currentSectionIndex;
     _currentSectionBar = complexTrackPlayer.currentSectionBar;
@@ -27,12 +27,12 @@ class ComplexTrackPlayer extends TrackPlayer {
 
     if (isPlaying) {
       _sub = metronome.getCurrentBarBeatStream().listen((currentBarBeat) {
-        _handleCurrentBarBeatChange(currentBarBeat as int);
+        _handleCurrentBarBeatChange(currentBarBeat as int?);
       });
     }
   }
 
-  Section get _currentSection => track.sections[_currentSectionIndex];
+  Section get _currentSection => track!.sections![_currentSectionIndex];
 
   @override
   int get currentSectionIndex => _currentSectionIndex;
@@ -43,7 +43,7 @@ class ComplexTrackPlayer extends TrackPlayer {
   @override
   void play() {
     _sub = metronome.getCurrentBarBeatStream().listen((currentBarBeat) {
-      _handleCurrentBarBeatChange(currentBarBeat as int);
+      _handleCurrentBarBeatChange(currentBarBeat as int?);
     });
 
     metronome.start(_currentSection.settings);
@@ -51,7 +51,7 @@ class ComplexTrackPlayer extends TrackPlayer {
 
   @override
   void selectNextSection() {
-    if (_currentSectionIndex < track.sections.length - 1) {
+    if (_currentSectionIndex < track!.sections!.length - 1) {
       _currentSectionIndex++;
 
       _onSectionChange();
@@ -75,25 +75,25 @@ class ComplexTrackPlayer extends TrackPlayer {
     _resetSectionDataToDefaults();
   }
 
-  void _handleCurrentBarBeatChange(int currentBarBeat) {
+  void _handleCurrentBarBeatChange(int? currentBarBeat) {
     if (currentBarBeat == 0) return;
 
     _changeToNextSectionOnLastBarBeat(currentBarBeat);
-    _updateSectionControlData(currentBarBeat);
+    _updateSectionControlData(currentBarBeat!);
     _stopIfEndOfSections();
   }
 
-  void _changeToNextSectionOnLastBarBeat(int currentBarBeat) {
-    final isNotLastSection = _currentSectionIndex < track.sections.length - 1;
+  void _changeToNextSectionOnLastBarBeat(int? currentBarBeat) {
+    final isNotLastSection = _currentSectionIndex < track!.sections!.length - 1;
     final isLastSectionBar = _currentSectionBar == _currentSection.barsCount;
-    final isLastBarBeat = currentBarBeat == _currentSection.settings.beatsPerBar;
+    final isLastBarBeat = currentBarBeat == _currentSection.settings!.beatsPerBar;
 
-    final sectionClicksPerBeat = _currentSection.settings.clicksPerBeat;
+    final sectionClicksPerBeat = _currentSection.settings!.clicksPerBeat;
     final isPenultimateClickPerBeat =
         sectionClicksPerBeat == 1 || _currentClickPerBeat == sectionClicksPerBeat;
 
     if (isNotLastSection && isLastSectionBar && isLastBarBeat && isPenultimateClickPerBeat) {
-      final nextSection = track.sections[_currentSectionIndex + 1];
+      final nextSection = track!.sections![_currentSectionIndex + 1];
       metronome.change(nextSection.settings);
     }
   }
@@ -102,16 +102,16 @@ class ComplexTrackPlayer extends TrackPlayer {
     if (_previousBarBeat > currentBarBeat) {
       _currentSectionBar++;
 
-      if (_currentSectionBar > _currentSection.barsCount) {
+      if (_currentSectionBar > _currentSection.barsCount!) {
         _currentSectionBar = 1;
 
         _currentSectionIndex++;
       }
     }
 
-    if (_currentSectionIndex < track.sections.length) {
+    if (_currentSectionIndex < track!.sections!.length) {
       _currentClickPerBeat++;
-      if (_currentClickPerBeat > _currentSection.settings.clicksPerBeat) {
+      if (_currentClickPerBeat > _currentSection.settings!.clicksPerBeat!) {
         _currentClickPerBeat = 1;
       }
     }
@@ -120,7 +120,7 @@ class ComplexTrackPlayer extends TrackPlayer {
   }
 
   void _stopIfEndOfSections() {
-    if (_currentSectionIndex >= track.sections.length) {
+    if (_currentSectionIndex >= track!.sections!.length) {
       stop();
     }
   }

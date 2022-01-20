@@ -14,11 +14,11 @@ class Metronome extends MetronomeBase {
       const EventChannel('com.example.metronom/barBeatChannel').receiveBroadcastStream();
 
   @override
-  void onStart(MetronomeSettings settings) {
+  void onStart(MetronomeSettings? settings) {
     invokePlatformMethod(
       'start',
       {
-        'tempo': settings.tempo,
+        'tempo': settings!.tempo,
         'beatsPerBar': settings.beatsPerBar,
         'clicksPerBeat': settings.clicksPerBeat,
       },
@@ -26,11 +26,11 @@ class Metronome extends MetronomeBase {
   }
 
   @override
-  void onChange(MetronomeSettings settings) {
+  void onChange(MetronomeSettings? settings) {
     invokePlatformMethod(
       'change',
       {
-        'tempo': settings.tempo,
+        'tempo': settings!.tempo,
         'beatsPerBar': settings.beatsPerBar,
         'clicksPerBeat': settings.clicksPerBeat,
       },
@@ -48,7 +48,7 @@ class Metronome extends MetronomeBase {
   }
 
   @protected
-  void invokePlatformMethod(String methodName, [Map<String, dynamic> parameters]) {
+  void invokePlatformMethod(String methodName, [Map<String, dynamic>? parameters]) {
     platformChannel.invokeMethod(methodName, parameters);
   }
 }

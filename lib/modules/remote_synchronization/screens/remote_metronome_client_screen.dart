@@ -88,8 +88,8 @@ class _RemoteMetronomeClientScreenState
       if (state == ScreenState.Setlist) {
         ref
             .read(
-              setlistPlayerProvider(
-                  ref.read(remoteScreenStateProvider.notifier).setlist),
+              setlistPlayerProvider!(
+                  ref.read(remoteScreenStateProvider.notifier).setlist!),
             )
             .stop();
       } else {

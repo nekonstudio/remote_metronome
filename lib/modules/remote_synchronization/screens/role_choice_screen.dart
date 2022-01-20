@@ -45,11 +45,11 @@ class _Option extends StatelessWidget {
   final Widget nextScreen;
 
   const _Option({
-    Key key,
-    @required this.title,
-    @required this.subtitle,
-    @required this.buttonText,
-    @required this.nextScreen,
+    Key? key,
+    required this.title,
+    required this.subtitle,
+    required this.buttonText,
+    required this.nextScreen,
   }) : super(key: key);
 
   @override

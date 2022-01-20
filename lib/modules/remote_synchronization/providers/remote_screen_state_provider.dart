@@ -7,8 +7,8 @@ enum ScreenState { SimpleMetronome, Setlist }
 class _ScreenStateNotifier extends StateNotifier<ScreenState> {
   _ScreenStateNotifier(ScreenState state) : super(state);
 
-  Setlist _setlist;
-  Setlist get setlist => _setlist;
+  Setlist? _setlist;
+  Setlist? get setlist => _setlist;
 
   void setSimpleMetronomeState() => state = ScreenState.SimpleMetronome;
   void setSetlistState(Setlist setlist) {

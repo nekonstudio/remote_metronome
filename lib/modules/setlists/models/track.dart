@@ -7,10 +7,10 @@ import 'section.dart';
 
 class Track {
   String id = DateTime.now().toString();
-  String name;
-  MetronomeSettings settings;
-  bool isComplex;
-  List<Section> sections;
+  String? name;
+  MetronomeSettings? settings;
+  bool? isComplex;
+  List<Section>? sections;
 
   Track.simple(this.name, this.settings) : isComplex = false;
 
@@ -24,10 +24,10 @@ class Track {
   });
 
   Track copyWith({
-    String name,
-    MetronomeSettings settings,
-    bool isComplex,
-    List<Section> sections,
+    String? name,
+    MetronomeSettings? settings,
+    bool? isComplex,
+    List<Section>? sections,
   }) {
     return Track(
       name: name ?? this.name,
@@ -42,16 +42,16 @@ class Track {
       'name': name,
       'settings': settings?.toMap(),
       'isComplex': isComplex,
-      'sections': sections?.map((x) => x?.toMap())?.toList(),
+      'sections': sections?.map((x) => x.toMap()).toList(),
     };
   }
 
   factory Track.fromMap(Map<String, dynamic> map) {
-    if (map == null) return null;
-
     return Track(
       name: map['name'],
-      settings: MetronomeSettings.fromMap(map['settings']),
+      settings: map['settings'] != null
+          ? MetronomeSettings.fromMap(map['settings'])
+          : null,
       isComplex: map['isComplex'],
       sections: map['sections'] == null
           ? null
@@ -81,6 +81,9 @@ class Track {
 
   @override
   int get hashCode {
-    return name.hashCode ^ settings.hashCode ^ isComplex.hashCode ^ sections.hashCode;
+    return name.hashCode ^
+        settings.hashCode ^
+        isComplex.hashCode ^
+        sections.hashCode;
   }
 }

@@ -13,6 +13,14 @@ class HostConnectingScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     ref.read(nearbyDevicesProvider).advertise();
 
+    ref.listen<DeviceSynchronizationModeNotifier>(
+        deviceSynchronizationModeNotifierProvider,
+        (_, deviceSynchronizationModeNotifier) {
+      if (deviceSynchronizationModeNotifier.isSynchronized) {
+        Get.back();
+      }
+    });
+
     return Scaffold(
       appBar: AppBar(
         title: Text('Lista połączonych urządzeń'),
@@ -51,14 +59,6 @@ class HostConnectingScreen extends ConsumerWidget {
                         context: context,
                         barrierDismissible: false,
                         builder: (context) {
-                          ref.listen<DeviceSynchronizationModeNotifier>(
-                              deviceSynchronizationModeNotifierProvider,
-                              (_, deviceSynchronizationModeNotifier) {
-                            if (deviceSynchronizationModeNotifier
-                                .isSynchronized) {
-                              Get.back();
-                            }
-                          });
                           return AlertDialog(
                             title: Text('Proszę czekać...'),
                             content: ListTile(

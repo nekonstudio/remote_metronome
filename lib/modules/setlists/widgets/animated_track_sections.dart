@@ -8,7 +8,7 @@ class AnimatedTrackSections extends StatefulWidget {
   static const ScrollDuration = 300;
 
   final SetlistPlayerInterface player;
-  final List<Section> sections;
+  final List<Section>? sections;
 
   AnimatedTrackSections(this.player, this.sections);
 
@@ -22,23 +22,25 @@ class _AnimatedTrackSectionsState extends State<AnimatedTrackSections> {
   @override
   Widget build(BuildContext context) {
     final animateToCurrentSection = () => carouselController.animateToPage(
-          widget.player.currentSectionIndex,
-          duration: Duration(milliseconds: AnimatedTrackSections.ScrollDuration),
+          widget.player.currentSectionIndex!,
+          duration:
+              Duration(milliseconds: AnimatedTrackSections.ScrollDuration),
           curve: Curves.linear,
         );
 
     if (carouselController.ready) {
       animateToCurrentSection();
     } else {
-      carouselController.onReady.then((value) => animateToCurrentSection());
+      carouselController.onReady.then(((value) => animateToCurrentSection()));
     }
 
     return CarouselSlider(
-      items: widget.sections.asMap().entries.map((sectionEntry) {
+      items: widget.sections!.asMap().entries.map((sectionEntry) {
         final isCurrent = sectionEntry.key == widget.player.currentSectionIndex;
         final section = sectionEntry.value;
         return AnimatedDefaultTextStyle(
-          duration: Duration(milliseconds: AnimatedTrackSections.ScrollDuration),
+          duration:
+              Duration(milliseconds: AnimatedTrackSections.ScrollDuration),
           style: TextStyle(
             color: isCurrent ? Colors.white : Colors.white70,
             fontWeight: isCurrent ? FontWeight.bold : FontWeight.normal,

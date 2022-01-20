@@ -34,7 +34,7 @@ abstract class RemoteCommand {
       throw Exception('Invalid remote command');
     }
 
-    RemoteCommand command;
+    late RemoteCommand command;
 
     switch (commandType) {
       case RemoteCommandType.ClockSyncRequest:
@@ -87,7 +87,7 @@ abstract class RemoteCommand {
     buffer.write(';');
     buffer.write(toJson());
 
-    return utf8.encode(buffer.toString());
+    return utf8.encode(buffer.toString()) as Uint8List;
   }
 
   static String _injectSenderIdToParameters(String parameters, String senderId) {

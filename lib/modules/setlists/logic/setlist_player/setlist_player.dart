@@ -9,9 +9,9 @@ class SetlistPlayer implements SetlistPlayerInterface {
   final Setlist setlist;
   final MetronomeBase metronome;
 
-  TrackPlayer _trackPlayer;
-  int _currentTrackIndex;
-  void Function(int) _onTrackChanged;
+  TrackPlayer? _trackPlayer;
+  int? _currentTrackIndex;
+  void Function(int?)? _onTrackChanged;
 
   SetlistPlayer(this.setlist, this.metronome) {
     if (setlist.hasTracks) {
@@ -26,26 +26,29 @@ class SetlistPlayer implements SetlistPlayerInterface {
     _currentTrackIndex = other.currentTrackIndex;
     metronome.copy(other.metronome);
     createTrackPlayer(currentTrack);
-    _trackPlayer.copy(other._trackPlayer);
+    _trackPlayer!.copy(other._trackPlayer);
   }
 
-  void createTrackPlayer(Track track) {
+  void createTrackPlayer(Track? track) {
     _trackPlayer = TrackPlayer.createPlayerForTrack(track, metronome);
   }
 
-  set onTrackChanged(void Function(int) callback) => _onTrackChanged = callback;
+  set onTrackChanged(void Function(int?) callback) =>
+      _onTrackChanged = callback;
 
-  int get currentTrackIndex => _currentTrackIndex;
-  int get currentSectionIndex => _trackPlayer.currentSectionIndex;
-  int get currentSectionBar => _trackPlayer.currentSectionBar;
+  int? get currentTrackIndex => _currentTrackIndex;
+  int? get currentSectionIndex => _trackPlayer!.currentSectionIndex;
+  int? get currentSectionBar => _trackPlayer!.currentSectionBar;
 
-  Track get currentTrack => setlist.tracksCount > 0 ? setlist.tracks[_currentTrackIndex] : null;
-  Section get currentSection => currentTrack?.sections?.elementAt(currentSectionIndex);
+  Track? get currentTrack =>
+      setlist.tracksCount > 0 ? setlist.tracks[_currentTrackIndex!] : null;
+  Section? get currentSection =>
+      currentTrack?.sections?.elementAt(currentSectionIndex!);
 
-  bool get isPlaying => _trackPlayer.isPlaying;
+  bool get isPlaying => _trackPlayer!.isPlaying;
 
   void play() {
-    _trackPlayer.play();
+    _trackPlayer!.play();
   }
 
   void selectNextTrack() {
@@ -56,24 +59,24 @@ class SetlistPlayer implements SetlistPlayerInterface {
     _handleTrackChange(_setPreviousTrackIndex);
   }
 
-  void selectTrack(int index) {
+  void selectTrack(int? index) {
     if (index != _currentTrackIndex) {
-      if (index >= 0) {
+      if (index! >= 0) {
         _handleTrackChange(() => _currentTrackIndex = index);
       }
     }
   }
 
   void selectNextSection() {
-    _trackPlayer.selectNextSection();
+    _trackPlayer!.selectNextSection();
   }
 
   void selectPreviousSection() {
-    _trackPlayer.selectPreviousSection();
+    _trackPlayer!.selectPreviousSection();
   }
 
   void stop() {
-    _trackPlayer.stop();
+    _trackPlayer!.stop();
   }
 
   void update() {
@@ -98,16 +101,16 @@ class SetlistPlayer implements SetlistPlayerInterface {
   }
 
   void _setNextTrackIndex() {
-    if (_currentTrackIndex < setlist.tracks.length - 1) {
-      _currentTrackIndex++;
+    if (_currentTrackIndex! < setlist.tracks.length - 1) {
+      _currentTrackIndex = _currentTrackIndex! + 1;
     } else {
       _currentTrackIndex = 0;
     }
   }
 
   void _setPreviousTrackIndex() {
-    if (_currentTrackIndex > 0) {
-      _currentTrackIndex--;
+    if (_currentTrackIndex! > 0) {
+      _currentTrackIndex = _currentTrackIndex! - 1;
     } else {
       _currentTrackIndex = setlist.tracks.length - 1;
     }

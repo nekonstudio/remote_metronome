@@ -6,26 +6,26 @@ import '../models/metronome_settings.dart';
 import 'metronome_interface.dart';
 
 abstract class MetronomeBase implements MetronomeInterface {
-  MetronomeSettings _settings;
-  int _currentBarBeat;
+  MetronomeSettings? _settings;
+  int? _currentBarBeat;
   bool _isPlaying = false;
-  StreamSubscription<dynamic> _currentBarBeatSubscription;
+  late StreamSubscription<dynamic> _currentBarBeatSubscription;
 
-  MetronomeSettings get settings => _settings;
+  MetronomeSettings? get settings => _settings;
 
   @override
   bool get isPlaying => _isPlaying;
 
   @override
-  int get currentBarBeat => _currentBarBeat;
+  int? get currentBarBeat => _currentBarBeat;
 
   @override
-  void start(MetronomeSettings settings) {
+  void start(MetronomeSettings? settings) {
     _performIfIsPlayingEquals(false, () => _setupAndStart(settings));
   }
 
   @override
-  void change(MetronomeSettings newSettings) {
+  void change(MetronomeSettings? newSettings) {
     _performIfIsPlayingEquals(true, () => _change(newSettings));
   }
 
@@ -49,9 +49,9 @@ abstract class MetronomeBase implements MetronomeInterface {
   Stream<dynamic> getCurrentBarBeatStream();
 
   @protected
-  void onStart(MetronomeSettings settings);
+  void onStart(MetronomeSettings? settings);
   @protected
-  void onChange(MetronomeSettings settings);
+  void onChange(MetronomeSettings? settings);
   @protected
   void onStop();
 
@@ -61,7 +61,7 @@ abstract class MetronomeBase implements MetronomeInterface {
     }
   }
 
-  void _setupAndStart(MetronomeSettings settings) {
+  void _setupAndStart(MetronomeSettings? settings) {
     _settings = settings;
     _isPlaying = true;
 
@@ -72,7 +72,7 @@ abstract class MetronomeBase implements MetronomeInterface {
     onStart(_settings);
   }
 
-  void _change(MetronomeSettings newSettings) {
+  void _change(MetronomeSettings? newSettings) {
     _settings = newSettings;
 
     onChange(_settings);

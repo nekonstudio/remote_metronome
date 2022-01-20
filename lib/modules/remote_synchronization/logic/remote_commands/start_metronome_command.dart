@@ -11,12 +11,12 @@ import 'remote_command_type.dart';
 class StartMetronomeCommand extends RemoteCommand {
   final MetronomeSettings metronomeSettings;
 
-  StartMetronomeCommand(this.metronomeSettings, {DateTime hostStartTime})
+  StartMetronomeCommand(this.metronomeSettings, {DateTime? hostStartTime})
       : super(RemoteCommandType.StartMetronome) {
     _hostStartTime = hostStartTime ?? DateTime.now();
   }
 
-  DateTime _hostStartTime;
+  DateTime? _hostStartTime;
 
   @override
   void execute(Reader providerReader) {
@@ -43,7 +43,7 @@ class StartMetronomeCommand extends RemoteCommand {
   Map<String, dynamic> toMap() {
     return {
       'metronomeSettings': metronomeSettings.toMap(),
-      'hostStartTime': _hostStartTime.millisecondsSinceEpoch,
+      'hostStartTime': _hostStartTime!.millisecondsSinceEpoch,
     };
   }
 }

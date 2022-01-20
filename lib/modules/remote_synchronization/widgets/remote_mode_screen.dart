@@ -12,14 +12,14 @@ import 'remote_connected_devices_panel.dart';
 class RemoteModeScreen extends ConsumerWidget {
   final Widget title;
   final Widget body;
-  final Widget subtitle;
-  final Widget drawer;
-  final Widget floatingActionButton;
+  final Widget? subtitle;
+  final Widget? drawer;
+  final Widget? floatingActionButton;
 
   const RemoteModeScreen({
-    Key key,
-    @required this.title,
-    @required this.body,
+    Key? key,
+    required this.title,
+    required this.body,
     this.subtitle,
     this.drawer,
     this.floatingActionButton,
@@ -28,7 +28,7 @@ class RemoteModeScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     ref.listen<NearbyDevices>(nearbyDevicesProvider, (_, nearbyDevices) {
-      if (!ModalRoute.of(context).isCurrent) return;
+      if (!ModalRoute.of(context)!.isCurrent) return;
 
       if (nearbyDevices.hasConnections) {
         final disconnectedDeviceName = nearbyDevices.lastDisconnectedDeviceName;
@@ -105,7 +105,7 @@ class _RemoteLaunchIndicator extends ConsumerWidget {
         ? TweenAnimationBuilder(
             tween: Tween<double>(begin: 0.0, end: 1.0),
             duration: RemoteSynchronizedMetronome.commandExecutionDuration,
-            builder: (context, value, child) => LinearProgressIndicator(
+            builder: (context, dynamic value, child) => LinearProgressIndicator(
               value: value,
             ),
           )
@@ -114,13 +114,13 @@ class _RemoteLaunchIndicator extends ConsumerWidget {
 }
 
 class _BadgeIconButton extends StatelessWidget {
-  final Icon icon;
-  final Function onPressed;
-  final Color color;
-  final int number;
+  final Icon? icon;
+  final Function? onPressed;
+  final Color? color;
+  final int? number;
 
   const _BadgeIconButton({
-    Key key,
+    Key? key,
     this.icon,
     this.onPressed,
     this.color,
@@ -132,8 +132,8 @@ class _BadgeIconButton extends StatelessWidget {
     return Stack(
       children: [
         IconButton(
-          icon: icon,
-          onPressed: onPressed,
+          icon: icon!,
+          onPressed: onPressed as void Function()?,
           color: color,
         ),
         Positioned(

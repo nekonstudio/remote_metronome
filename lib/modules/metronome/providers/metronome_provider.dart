@@ -36,14 +36,14 @@ final metronomeImplProvider = Provider<MetronomeBase>((ref) {
 
 // copy of metronome is used to allow change metronome type from remote to normal without
 // stopping playing it and resetting its settings
-MetronomeBase _metronomeCopy;
+MetronomeBase? _metronomeCopy;
 
 final metronomeProvider = ChangeNotifierProvider<NotifierMetronome>(
   (ref) {
     final metronomeImpl = ref.watch(metronomeImplProvider);
 
     if (_metronomeCopy != null) {
-      metronomeImpl.copy(_metronomeCopy);
+      metronomeImpl.copy(_metronomeCopy!);
     }
     _metronomeCopy = metronomeImpl;
 

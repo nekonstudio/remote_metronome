@@ -11,10 +11,10 @@ class MetronomeTrackPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final track = player.currentTrack;
+    final track = player.currentTrack!;
     final currentSection = player.currentSection;
-    final isTrackComplex = track.isComplex;
-    final metronomeSettings = isTrackComplex ? currentSection.settings : track.settings;
+    final isTrackComplex = track.isComplex!;
+    final metronomeSettings = isTrackComplex ? currentSection!.settings! : track.settings!;
 
     return Column(
       children: [

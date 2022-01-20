@@ -2,4 +2,4 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../logic/nearby_devices.dart';
 
-final nearbyDevicesProvider = ChangeNotifierProvider((ref) => NearbyDevices(ref.read));
+final nearbyDevicesProvider = ChangeNotifierProvider((ref) => NearbyDevices(ref.read as T Function<T>(ProviderBase<T>)));

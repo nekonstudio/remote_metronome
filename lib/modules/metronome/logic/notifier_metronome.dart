@@ -8,7 +8,7 @@ import 'metronome_interface.dart';
 
 class NotifierMetronome with ChangeNotifier implements MetronomeInterface {
   final MetronomeBase impl;
-  StreamSubscription<dynamic> _currentBarBeatStreamSubscription;
+  late StreamSubscription<dynamic> _currentBarBeatStreamSubscription;
 
   NotifierMetronome(this.impl) {
     print('NotifierMetronome()');
@@ -27,15 +27,15 @@ class NotifierMetronome with ChangeNotifier implements MetronomeInterface {
   bool get isPlaying => impl.isPlaying;
 
   @override
-  int get currentBarBeat => impl.currentBarBeat;
+  int? get currentBarBeat => impl.currentBarBeat;
 
   @override
-  void start(MetronomeSettings settings) {
+  void start(MetronomeSettings? settings) {
     impl.start(settings);
   }
 
   @override
-  void change(MetronomeSettings newSettings) {
+  void change(MetronomeSettings? newSettings) {
     impl.change(newSettings);
   }
 

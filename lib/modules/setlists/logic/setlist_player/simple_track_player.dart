@@ -10,7 +10,7 @@ class SimpleTrackPlayer extends TrackPlayer {
 
   @override
   void play() {
-    metronome.start(track.settings);
+    metronome.start(track!.settings);
   }
 
   @override

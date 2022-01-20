@@ -29,8 +29,8 @@ class RemoteMetronomePanel extends ConsumerWidget {
             metronomeSettings: controller.metronomeSettings)
         : RemoteMetronomeTrackPanelWidgetList(
             setlistPlayer: ref.watch(
-              setlistPlayerProvider(
-                  ref.read(remoteScreenStateProvider.notifier).setlist),
+              setlistPlayerProvider!(
+                  ref.read(remoteScreenStateProvider.notifier).setlist!),
             ),
           );
 

@@ -32,7 +32,7 @@ class PlayerControlPanel extends StatelessWidget {
                     option.key,
                     size: 32,
                   ),
-                  onPressed: option.value),
+                  onPressed: option.value as void Function()?),
             )
             .toList(),
       ),

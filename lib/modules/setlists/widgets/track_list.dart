@@ -14,7 +14,7 @@ import '../screens/track_screen.dart';
 class TrackList extends ConsumerWidget {
   final Setlist setlist;
   final NotifierSetlistPlayer player;
-  final ItemScrollController scrollController;
+  final ItemScrollController? scrollController;
 
   TrackList(
     this.setlist,
@@ -56,7 +56,7 @@ class TrackList extends ConsumerWidget {
                 ),
               ),
               subtitle: Text(
-                  track.isComplex ? 'Złożony' : '${track.settings.tempo} BPM'),
+                  track.isComplex! ? 'Złożony' : '${track.settings!.tempo} BPM'),
             ),
           );
         },
@@ -82,7 +82,7 @@ class TrackList extends ConsumerWidget {
           final setlistManager = ref.read(setlistManagerProvider);
           setlistManager.deleteTrack(setlistId, index);
 
-          final tracksCount = setlistManager.getSetlist(setlistId).tracksCount;
+          final tracksCount = setlistManager.getSetlist(setlistId)!.tracksCount;
           final nextTrackIndex = tracksCount - 1;
           if (tracksCount == player.currentTrackIndex && nextTrackIndex >= 0) {
             player.selectTrack(nextTrackIndex);

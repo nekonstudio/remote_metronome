@@ -16,12 +16,12 @@ abstract class SetlistPlayerInterface {
 
   bool get isPlaying;
 
-  int get currentTrackIndex;
-  int get currentSectionIndex;
-  int get currentSectionBar;
+  int? get currentTrackIndex;
+  int? get currentSectionIndex;
+  int? get currentSectionBar;
 
-  Track get currentTrack;
-  Section get currentSection;
+  Track? get currentTrack;
+  Section? get currentSection;
 
-  set onTrackChanged(void Function(int trackIndex) callback);
+  set onTrackChanged(void Function(int? trackIndex) callback);
 }

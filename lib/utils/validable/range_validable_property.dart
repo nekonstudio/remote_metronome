@@ -8,9 +8,9 @@ class RangeValidableProperty implements Validable {
   final dynamic maxValue;
 
   RangeValidableProperty(this.name,
-      {@required this.propertyValue,
-      @required this.minValue,
-      @required this.maxValue});
+      {required this.propertyValue,
+      required this.minValue,
+      required this.maxValue});
 
   @override
   bool isValid() {

@@ -1,6 +1,8 @@
-class EnumStringConverter {
-  static String enumToString(Object o) => o.toString().split('.').last;
+import 'package:collection/collection.dart' show IterableExtension;
 
-  static T enumFromString<T>(String key, List<T> values) =>
-      values.firstWhere((v) => key == enumToString(v), orElse: () => null);
+class EnumStringConverter {
+  static String enumToString(Object? o) => o.toString().split('.').last;
+
+  static T? enumFromString<T>(String key, List<T> values) =>
+      values.firstWhereOrNull((v) => key == enumToString(v));
 }

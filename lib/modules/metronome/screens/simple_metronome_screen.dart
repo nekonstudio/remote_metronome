@@ -56,7 +56,7 @@ class SimpleMetronomeScreen extends ConsumerWidget {
                 padding: const EdgeInsets.only(top: 20.0),
                 child: ValueListenableBuilder(
                   valueListenable: metronomeSettingsController,
-                  builder: (context, metronomeSettings, child) =>
+                  builder: (context, dynamic metronomeSettings, child) =>
                       MetronomeVisualization(metronomeSettings.beatsPerBar),
                 ),
               ),

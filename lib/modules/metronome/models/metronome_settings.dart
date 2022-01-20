@@ -11,22 +11,24 @@ part 'metronome_settings.g.dart';
 @HiveType(typeId: 0)
 class MetronomeSettings extends PropertyValidable {
   @HiveField(0)
-  final int tempo;
+  final int? tempo;
 
   @HiveField(1)
-  final int beatsPerBar;
+  final int? beatsPerBar;
 
   @HiveField(2)
-  final int clicksPerBeat;
+  final int? clicksPerBeat;
 
-  const MetronomeSettings({this.tempo = 120, this.beatsPerBar = 4, this.clicksPerBeat = 1});
+  const MetronomeSettings(
+      {this.tempo = 120, this.beatsPerBar = 4, this.clicksPerBeat = 1});
 
-  int get minTempo => getProperty<RangeValidableProperty>('tempo').minValue;
-  int get maxTempo => getProperty<RangeValidableProperty>('tempo').maxValue;
+  int get minTempo => getProperty<RangeValidableProperty>('tempo')!.minValue;
+  int get maxTempo => getProperty<RangeValidableProperty>('tempo')!.maxValue;
 
   @override
   List<Validable> get validableProperties => [
-        RangeValidableProperty('tempo', propertyValue: tempo, minValue: 10, maxValue: 300),
+        RangeValidableProperty('tempo',
+            propertyValue: tempo, minValue: 10, maxValue: 300),
         RangeValidableProperty('beatsPerBar',
             propertyValue: beatsPerBar, minValue: 1, maxValue: 16),
         RangeValidableProperty('clicksPerBeat',
@@ -34,15 +36,15 @@ class MetronomeSettings extends PropertyValidable {
       ];
 
   MetronomeSettings clampToValidTempo() => MetronomeSettings(
-        tempo: tempo.clamp(minTempo, maxTempo),
+        tempo: tempo!.clamp(minTempo, maxTempo),
         beatsPerBar: beatsPerBar,
         clicksPerBeat: clicksPerBeat,
       );
 
   MetronomeSettings copyWith({
-    int tempo,
-    int beatsPerBar,
-    int clicksPerBeat,
+    int? tempo,
+    int? beatsPerBar,
+    int? clicksPerBeat,
   }) {
     return MetronomeSettings(
       tempo: tempo ?? this.tempo,
@@ -60,8 +62,6 @@ class MetronomeSettings extends PropertyValidable {
   }
 
   factory MetronomeSettings.fromMap(Map<String, dynamic> map) {
-    if (map == null) return null;
-
     return MetronomeSettings(
       tempo: map['tempo'],
       beatsPerBar: map['beatsPerBar'],
@@ -89,5 +89,6 @@ class MetronomeSettings extends PropertyValidable {
   }
 
   @override
-  int get hashCode => tempo.hashCode ^ beatsPerBar.hashCode ^ clicksPerBeat.hashCode;
+  int get hashCode =>
+      tempo.hashCode ^ beatsPerBar.hashCode ^ clicksPerBeat.hashCode;
 }
