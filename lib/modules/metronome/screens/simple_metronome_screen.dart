@@ -15,21 +15,42 @@ import '../widgets/metronome_settings_panel.dart';
 import '../widgets/metronome_visualization.dart';
 import '../widgets/tap_tempo_detector_button.dart';
 
-class SimpleMetronomeScreen extends ConsumerWidget {
+class SimpleMetronomeScreen extends ConsumerStatefulWidget {
+  @override
+  ConsumerState<ConsumerStatefulWidget> createState() =>
+      _SimpleMetronmeScreenState();
+}
+
+class _SimpleMetronmeScreenState extends ConsumerState<SimpleMetronomeScreen> {
   final _tapTempoDetectorProvider = ChangeNotifierProvider(
     (ref) => NotifierTapTempoDetector(),
   );
 
+  late final MetronomeSettingsController metronomeSettingsControllerReadonly;
+
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  void initState() {
+    super.initState();
+
+    metronomeSettingsControllerReadonly = ref
+        .read(simpleMetronomeSettingsControllerProvider)
+      ..addListener(_onMetronomeSettingsChanged);
+  }
+
+  @override
+  void dispose() {
+    metronomeSettingsControllerReadonly
+        .removeListener(_onMetronomeSettingsChanged);
+
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final remoteSynchronization = ref.watch(synchronizationProvider);
 
     final metronomeSettingsController =
         ref.watch(simpleMetronomeSettingsControllerProvider);
-    metronomeSettingsController.addListener(() {
-      ref.read(_tapTempoDetectorProvider).reset();
-      ref.read(metronomeProvider).change(metronomeSettingsController.value);
-    });
 
     final isSynchronized =
         ref.watch(deviceSynchronizationModeNotifierProvider).isSynchronized;
@@ -110,6 +131,13 @@ class SimpleMetronomeScreen extends ConsumerWidget {
         ),
       ),
     );
+  }
+
+  void _onMetronomeSettingsChanged() {
+    ref.read(_tapTempoDetectorProvider).reset();
+    ref
+        .read(metronomeProvider)
+        .change(ref.read(simpleMetronomeSettingsControllerProvider).value);
   }
 
   void _onTapTempoDetectorButtonPress(
