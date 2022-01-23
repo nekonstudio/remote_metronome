@@ -14,6 +14,7 @@ public class MainActivity extends FlutterActivity {
     private static final String TAG = "MetronomePlugin";
 
     private Metronome _metronome;
+    private SoundPlayer testSoundPlayer = new SoundPlayer();
 
     @Override
     public void configureFlutterEngine(@NonNull FlutterEngine flutterEngine) {
@@ -41,6 +42,7 @@ public class MainActivity extends FlutterActivity {
 
                     switch (call.method) {
                         case "start":
+//                            testSoundPlayer.start();
                             _metronome.start(MetronomeSettings.fromMethodCall(call));
                             break;
 
@@ -53,6 +55,7 @@ public class MainActivity extends FlutterActivity {
                             break;
 
                         case "stop":
+//                            testSoundPlayer.stop();
                             _metronome.stop();
                             break;
 
@@ -66,11 +69,11 @@ public class MainActivity extends FlutterActivity {
                             break;
                     }
 
-                    if (isSuccess) {
-                        result.success(null);
-                    } else {
-                        result.notImplemented();
-                    }
+                     if (isSuccess) {
+                         result.success(null);
+                     } else {
+                         result.notImplemented();
+                     }
                 }
             );
     }

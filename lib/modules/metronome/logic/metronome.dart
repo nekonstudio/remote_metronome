@@ -8,10 +8,12 @@ import 'metronome_base.dart';
 
 class Metronome extends MetronomeBase {
   @protected
-  static const platformChannel = const MethodChannel('com.example.metronom/metronom');
+  static const platformChannel =
+      const MethodChannel('com.example.metronom/metronom');
 
   static Stream<dynamic> currentBarBeatStream =
-      const EventChannel('com.example.metronom/barBeatChannel').receiveBroadcastStream();
+      const EventChannel('com.example.metronom/barBeatChannel')
+          .receiveBroadcastStream();
 
   @override
   void onStart(MetronomeSettings? settings) {
@@ -48,7 +50,8 @@ class Metronome extends MetronomeBase {
   }
 
   @protected
-  void invokePlatformMethod(String methodName, [Map<String, dynamic>? parameters]) {
+  void invokePlatformMethod(String methodName,
+      [Map<String, dynamic>? parameters]) {
     platformChannel.invokeMethod(methodName, parameters);
   }
 }
