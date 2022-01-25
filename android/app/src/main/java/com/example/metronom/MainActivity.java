@@ -1,8 +1,10 @@
 package com.example.metronom;
 
+import android.os.Bundle;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import io.flutter.embedding.android.FlutterActivity;
 import io.flutter.embedding.engine.FlutterEngine;
@@ -14,7 +16,21 @@ public class MainActivity extends FlutterActivity {
     private static final String TAG = "MetronomePlugin";
 
     private Metronome _metronome;
-    private SoundPlayer testSoundPlayer = new SoundPlayer();
+//    private SoundPlayer testSoundPlayer = new SoundPlayer();
+
+    @Override
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+//        testSoundPlayer.start();
+    }
+
+    @Override
+    protected void onDestroy() {
+//        testSoundPlayer.stop();
+
+        super.onDestroy();
+    }
 
     @Override
     public void configureFlutterEngine(@NonNull FlutterEngine flutterEngine) {
@@ -30,8 +46,11 @@ public class MainActivity extends FlutterActivity {
                 "com.example.metronom/barBeatChannel");
         final MetronomeSoundPlayer metronomeSoundPlayer = new MetronomeSoundPlayer();
         metronomeSoundPlayer.loadSoundsFromAssets(getAssets());
+        metronomeSoundPlayer.load();
 
         _metronome = new Metronome(metronomeSoundPlayer, barBeatChannel);
+        final byte[] buffer = metronomeSoundPlayer._soundBuffers.get(MetronomeSoundPlayer.SoundId.HIGH_SOUND);
+        _metronome.setSoundBuffer(buffer, buffer.length);
     }
 
     private void handleMethodCall(@NonNull FlutterEngine flutterEngine) {

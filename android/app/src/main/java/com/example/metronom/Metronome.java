@@ -3,6 +3,7 @@ package com.example.metronom;
 
 import android.os.Handler;
 import android.os.Looper;
+import android.util.Log;
 
 import io.flutter.plugin.common.EventChannel;
 
@@ -37,6 +38,10 @@ class Metronome {
                 _barBeatEventStream = null;
             }
         });
+    }
+
+    void setSoundBuffer(byte[] buffer, int bufferSize) {
+        _soundPlayer.setSoundBuffer(buffer, bufferSize);
     }
 
     void start(MetronomeSettings metronomeSettings) {
@@ -92,7 +97,7 @@ class Metronome {
             while(_isPlaying)
             {
                 streamCurrentBeatsPerBar(handler);
-                _soundPlayer.generateCurrentSound(_currentBeatPerBar, _currentClickPerBeat);
+//                _soundPlayer.generateCurrentSound(_currentBeatPerBar, _currentClickPerBeat);
 
                 if (_isSynchronizedMetronome) {
                     while (!_playSynchronizedMetronome) {
@@ -100,7 +105,12 @@ class Metronome {
                     }
                 }
 
-                _soundPlayer.playCurrentSound();
+                while (!_soundPlayer.canProceed()) {
+//                    Log.d(TAG, "gowno");
+                }
+
+//                _soundPlayer.playCurrentSound();
+                _soundPlayer.setToDefault();
                 handleMetronomeControlData();
             }
         }
@@ -116,6 +126,7 @@ class Metronome {
         }
 
         private void handleMetronomeControlData() {
+            Log.d(TAG, "_currentClickPerBeat: " + _currentClickPerBeat);
             _currentClickPerBeat++;
 
             // switch to next beat when clicksPerBeat setting changed to higher value while playing
@@ -130,6 +141,7 @@ class Metronome {
         }
 
         private void nextBeatPerBar() {
+            Log.d(TAG, "nextBeatPerBar");
             _currentClickPerBeat = 1;
             _currentBeatPerBar++;
             if (_currentBeatPerBar > _settings.beatsPerBar) {
