@@ -14,7 +14,7 @@ public class MainActivity extends FlutterActivity {
     private static final String TAG = "MetronomePlugin";
 
     private Metronome _metronome;
-    private SoundPlayer testSoundPlayer = new SoundPlayer();
+//    private SoundPlayer testSoundPlayer = new SoundPlayer();
 
     @Override
     public void configureFlutterEngine(@NonNull FlutterEngine flutterEngine) {
