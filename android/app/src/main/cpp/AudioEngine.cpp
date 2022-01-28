@@ -15,8 +15,6 @@ constexpr int64_t convertFramesToMillis(const int64_t frames, const int sampleRa
 
 AudioEngine::AudioEngine(/* args */)
 {
-    _oscillator.setWaveOn(true);
-
     AudioStreamBuilder builder;
     builder.setSampleRate(44100);
     builder.setFormat(AudioFormat::Float);
@@ -31,9 +29,6 @@ AudioEngine::AudioEngine(/* args */)
         LOGE("Nie można otworzyć streamu");
     }
 
-    _oscillator.setSampleRate(_stream->getSampleRate());
-    LOGD("sampleRate: %d", _stream->getSampleRate());
-
     _stream->setBufferSizeInFrames(_stream->getFramesPerBurst() * kBufferSizeInBursts);
 
     LOGD("Buffer size in frames: %d", _stream->getBufferSizeInFrames());
@@ -42,7 +37,6 @@ AudioEngine::AudioEngine(/* args */)
 AudioEngine::~AudioEngine()
 {
     _stream->close();
-
     _stream.reset();
 
     delete _dataSource;
@@ -52,8 +46,6 @@ AudioEngine::~AudioEngine()
 
 void AudioEngine::start()
 {
-
-
     Result result = _stream->requestStart();
 
     if (result != Result::OK) {
@@ -63,30 +55,12 @@ void AudioEngine::start()
 
 void AudioEngine::stop()
 {
-    _currentClickPerBar = 0;
     _framesWritten = 0;
     _shouldGoToNextBeat = true;
 
     if (_stream) {
         _stream->requestStop();
-//        _stream->close();
-
-//        _stream.reset();
     }
-}
-
-void AudioEngine::restart() {
-    static std::mutex restartingLock;
-    if (restartingLock.try_lock()) {
-        stop();
-        start();
-
-        restartingLock.unlock();
-    }
-}
-
-void AudioEngine::setToneOn(bool isToneOn) {
-    _oscillator.setWaveOn(isToneOn);
 }
 
 DataCallbackResult
@@ -94,56 +68,22 @@ AudioEngine::onAudioReady(AudioStream *audioStream, void *audioData, int32_t num
     auto* outputBuffer = static_cast<float*>(audioData);
 
     auto sampleRate = audioStream->getSampleRate();
-//    auto sampleRate = 44100;
     int framesToPlay = static_cast<int>( sampleRate * ( 1 / ( static_cast<float>(_tempo) / 60 ) / _clicksPerBeat ) );
-//    LOGD("framesToPlay: %d", framesToPlay);
-
 
     auto* readSoundBuffer = _dataSource->getData();
     auto bufferSize = _dataSource->getSize();
 
     for (int i = 0; i < numFrames; ++i) {
-
-//        outputBuffer[_framesWritten] = _framesWritten < bufferSize ? readSoundBuffer[_framesWritten] : 0.0f;
         if (_framesWritten < bufferSize) {
-            outputBuffer[i] =  readSoundBuffer[_framesWritten];
-            if (_framesWritten == 0) {
-                LOGD("First sound data written: %.3f, Index: %d", outputBuffer[i], _framesWritten);
-            }
-            else if (_framesWritten == bufferSize - 1) {
-                LOGD("Last sound data written: %.3f, Index: %d", outputBuffer[i], _framesWritten);
-            }
-
-
-
-//        }
+            outputBuffer[i] = readSoundBuffer[_framesWritten];
         } else {
             outputBuffer[i] = 0.0f;
-            if (_framesWritten == bufferSize) {
-                LOGD("First silence data: %.3f, index: %d", outputBuffer[i], _framesWritten);
-            }
-            else if (_framesWritten == framesToPlay) {
-                LOGD("Last silence data: %.3f, index: %d", outputBuffer[i], _framesWritten);
-            }
-
-//            return DataCallbackResult::Stop;
         }
 
-//        LOGD("Data written: %.3f, Index: %d", outputBuffer[_framesWritten], _framesWritten);
-
         _framesWritten++;
-
         if (_framesWritten >= framesToPlay) {
-
-//        for (int i = 0; i < 1500; ++i) {
-//            LOGD("written data: %.3f, index: %d", outputBuffer[i], i);
-//        }
-
             _framesWritten = 0;
             _shouldGoToNextBeat = true;
-
-            LOGD("DALEJ DALEJ METRONOMIE GADŻETA");
-//        return DataCallbackResult::Stop;
         }
     }
 
@@ -169,11 +109,6 @@ void AudioEngine::resetShouldGoToNextBeat() {
 void AudioEngine::setMetronomeSettings(int32_t tempo, int32_t clicksPerBeat) {
     _tempo = tempo;
     _clicksPerBeat = clicksPerBeat;
-}
-
-void AudioEngine::setSoundBuffer(int8_t *buffer, int bufferSize) {
-//    _soundBuffer = buffer;
-//    _bufferSize = bufferSize;
 }
 
 void AudioEngine::setupAudioSources(AAssetManager &assetManager) {

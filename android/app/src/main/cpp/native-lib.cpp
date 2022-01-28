@@ -12,16 +12,6 @@ extern "C" {
         audioEngine.start();
     }
 
-    JNIEXPORT void JNICALL Java_com_example_metronom_SoundPlayer_play(JNIEnv *pEnv, jobject thiz)
-    {
-        audioEngine.setToneOn(true);
-    }
-
-    JNIEXPORT void JNICALL Java_com_example_metronom_SoundPlayer_pause(JNIEnv *pEnv, jobject thiz)
-    {
-        audioEngine.setToneOn(false);
-    }
-
     JNIEXPORT void JNICALL Java_com_example_metronom_SoundPlayer_stop(JNIEnv *pEnv, jobject thiz)
     {
         audioEngine.stop();
@@ -41,21 +31,6 @@ extern "C" {
     Java_com_example_metronom_SoundPlayer_setMetronomeSettings(JNIEnv *env, jobject thiz, jint tempo,
                                                                jint clicks_per_beat) {
         audioEngine.setMetronomeSettings(tempo, clicks_per_beat);
-    }
-
-//    JNIEXPORT void JNICALL
-//    Java_com_example_metronom_SoundPlayer_setSoundBuffer(JNIEnv *env, jobject thiz, jbyteArray buffer) {
-//        jbyte* bufferPtr = env->GetByteArrayElements(buffer, NULL);
-//
-//        audioEngine.setSoundBuffer(bufferPtr);
-//    }
-
-    JNIEXPORT void JNICALL
-    Java_com_example_metronom_SoundPlayer_setSoundBuffer(JNIEnv *env, jobject thiz, jbyteArray buffer,
-                                                         jint buffer_size) {
-        jbyte* bufferPtr = env->GetByteArrayElements(buffer, NULL);
-
-        audioEngine.setSoundBuffer(bufferPtr, buffer_size);
     }
 
     JNIEXPORT void JNICALL

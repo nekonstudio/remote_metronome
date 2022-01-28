@@ -10,7 +10,7 @@ import io.flutter.plugin.common.EventChannel;
 class Metronome {
     private static final String TAG = "Metronome";
 
-    private MetronomeSoundPlayer _soundPlayer;
+    private SoundPlayer _soundPlayer;
     private EventChannel.EventSink _barBeatEventStream;
 
     private boolean _isPlaying;
@@ -23,7 +23,7 @@ class Metronome {
     private Integer _currentBeatPerBar = 1;
     private int _currentClickPerBeat = 1;
 
-    Metronome(MetronomeSoundPlayer soundPlayer, EventChannel barBeatChannel) {
+    Metronome(SoundPlayer soundPlayer, EventChannel barBeatChannel) {
         _soundPlayer = soundPlayer;
 
         barBeatChannel.setStreamHandler(new EventChannel.StreamHandler() {
@@ -40,16 +40,12 @@ class Metronome {
         });
     }
 
-    void setSoundBuffer(byte[] buffer, int bufferSize) {
-        _soundPlayer.setSoundBuffer(buffer, bufferSize);
-    }
-
     void start(MetronomeSettings metronomeSettings) {
         _isPlaying = true;
         _settings = metronomeSettings;
         _previousClicksPerBeat = metronomeSettings.clicksPerBeat;
 
-        _soundPlayer.configure(metronomeSettings);
+        _soundPlayer.setMetronomeSettings(metronomeSettings.tempo, metronomeSettings.clicksPerBeat);
         _soundPlayer.start();
 
         new MetronomePlayerThread().start();
@@ -70,7 +66,7 @@ class Metronome {
         _previousClicksPerBeat = _settings.clicksPerBeat;
         _settings = metronomeSettings;
 
-        _soundPlayer.configure(metronomeSettings);
+        _soundPlayer.setMetronomeSettings(metronomeSettings.tempo, metronomeSettings.clicksPerBeat);
     }
 
     void stop() {
@@ -97,7 +93,6 @@ class Metronome {
             while(_isPlaying)
             {
                 streamCurrentBeatsPerBar(handler);
-//                _soundPlayer.generateCurrentSound(_currentBeatPerBar, _currentClickPerBeat);
 
                 if (_isSynchronizedMetronome) {
                     while (!_playSynchronizedMetronome) {
@@ -105,12 +100,10 @@ class Metronome {
                     }
                 }
 
-                while (!_soundPlayer.canProceed()) {
-//                    Log.d(TAG, "gowno");
+                while (!_soundPlayer.shouldGoToNextBeat()) {
                 }
 
-//                _soundPlayer.playCurrentSound();
-                _soundPlayer.setToDefault();
+                _soundPlayer.resetShouldGoToNextBeat();
                 handleMetronomeControlData();
             }
         }
