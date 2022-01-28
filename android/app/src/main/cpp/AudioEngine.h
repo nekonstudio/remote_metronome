@@ -1,22 +1,15 @@
 #include <oboe/Oboe.h>
 
 #include <android/log.h>
+#include <android/asset_manager.h>
 #include "Oscillator.h"
-
-#define TAG "AudioEngine"
-#define  LOGV(...)  __android_log_print(ANDROID_LOG_VERBOSE,    TAG, __VA_ARGS__)
-#define  LOGW(...)  __android_log_print(ANDROID_LOG_WARN,       TAG, __VA_ARGS__)
-#define  LOGD(...)  __android_log_print(ANDROID_LOG_DEBUG,      TAG, __VA_ARGS__)
-#define  LOGI(...)  __android_log_print(ANDROID_LOG_INFO,       TAG, __VA_ARGS__)
-#define  LOGE(...)  __android_log_print(ANDROID_LOG_ERROR,      TAG, __VA_ARGS__)
+#include "AAssetDataSource.h"
 
 class AudioEngine : public oboe::AudioStreamDataCallback, public oboe::AudioStreamErrorCallback
 {
 public:
     AudioEngine(/* args */);
     ~AudioEngine();
-
-    void load();
 
     void start();
     void stop();
@@ -28,6 +21,8 @@ public:
     void setMetronomeSettings(int32_t tempo, int32_t clicksPerBeat);
 
     void setSoundBuffer(int8_t* buffer, int bufferSize);
+
+    void setupAudioSources(AAssetManager &assetManager);
 
     oboe::DataCallbackResult
     onAudioReady(oboe::AudioStream *audioStream, void *audioData, int32_t numFrames) override;
@@ -47,6 +42,8 @@ private:
 
     int _currentClickPerBar = 0;
 
-    int8_t* _soundBuffer;
+    AAssetDataSource* _dataSource = nullptr;
+
+//    float* _soundBuffer;
     int _bufferSize;
 };

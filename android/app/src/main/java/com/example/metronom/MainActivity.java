@@ -45,12 +45,12 @@ public class MainActivity extends FlutterActivity {
                 flutterEngine.getDartExecutor().getBinaryMessenger(),
                 "com.example.metronom/barBeatChannel");
         final MetronomeSoundPlayer metronomeSoundPlayer = new MetronomeSoundPlayer();
-        metronomeSoundPlayer.loadSoundsFromAssets(getAssets());
-        metronomeSoundPlayer.load();
+//        metronomeSoundPlayer.loadSoundsFromAssets(getAssets());
+        metronomeSoundPlayer.setupAudioSources(getAssets());
 
         _metronome = new Metronome(metronomeSoundPlayer, barBeatChannel);
-        final byte[] buffer = metronomeSoundPlayer._soundBuffers.get(MetronomeSoundPlayer.SoundId.HIGH_SOUND);
-        _metronome.setSoundBuffer(buffer, buffer.length);
+//        final byte[] buffer = metronomeSoundPlayer._soundBuffers.get(MetronomeSoundPlayer.SoundId.HIGH_SOUND);
+//        _metronome.setSoundBuffer(buffer, buffer.length);
     }
 
     private void handleMethodCall(@NonNull FlutterEngine flutterEngine) {

@@ -46,8 +46,8 @@ class MetronomeSoundPlayer {
     private byte[] _currentSoundData;
     private int _currentSoundDataLength;
 
-    void load() {
-        _testSoundPlayer.load();
+    void setupAudioSources(AssetManager assets) {
+        _testSoundPlayer.setupAudioSources(assets);
     }
 
     void loadSoundsFromAssets(AssetManager assets) {

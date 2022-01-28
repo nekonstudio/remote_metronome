@@ -1,6 +1,7 @@
 #include <jni.h>
+#include <android/asset_manager_jni.h>
 #include "AudioEngine.h"
-
+#include "LogUtils.h"
 
 
 static AudioEngine audioEngine;
@@ -58,8 +59,13 @@ extern "C" {
     }
 
     JNIEXPORT void JNICALL
-    Java_com_example_metronom_SoundPlayer_load(JNIEnv *env, jobject thiz) {
-        audioEngine.load();
+    Java_com_example_metronom_SoundPlayer_setupAudioSources(JNIEnv *env, jobject thiz, jobject jAssetManager) {
+        AAssetManager *assetManager = AAssetManager_fromJava(env, jAssetManager);
+        if (assetManager == nullptr) {
+            LOGE("Could not obtain the AAssetManager");
+            return;
+        }
+
+        audioEngine.setupAudioSources(*assetManager);
     }
 }
-

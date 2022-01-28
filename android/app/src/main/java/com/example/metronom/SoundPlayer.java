@@ -1,5 +1,7 @@
 package com.example.metronom;
 
+import android.content.res.AssetManager;
+
 public class SoundPlayer {
     static {
         System.loadLibrary("native-lib");
@@ -17,5 +19,5 @@ public class SoundPlayer {
 
     public native void setSoundBuffer(byte[] buffer, int bufferSize);
 
-    public native void load();
+    public native void setupAudioSources(AssetManager assetManager);
 }
