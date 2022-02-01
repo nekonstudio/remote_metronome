@@ -54,4 +54,11 @@ extern "C" {
                                                                        jboolean value) {
         audioEngine.setPlaySynchronizedMetronome(value);
     }
+
+    JNIEXPORT void JNICALL
+    Java_com_example_metronom_SoundPlayer_setCurrentBeatPerBar(JNIEnv *env, jobject thiz,
+                                                               jint current_beat_per_bar,
+                                                               jint current_click_per_beat) {
+        audioEngine.setCurrentMetronomeValues(current_beat_per_bar, current_click_per_beat);
+    }
 }

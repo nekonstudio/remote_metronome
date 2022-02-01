@@ -27,6 +27,10 @@ public:
 
     void setIsSynchronizedMetronome(bool value) { _isSynchronizedMetronome = value; }
     void setPlaySynchronizedMetronome(bool value) { _playSynchronizedMetronome = value; }
+    void setCurrentMetronomeValues(int currentBeatPerBar, int currentClickPerBeat) {
+        _currentBeatPerBar = currentBeatPerBar;
+        _currentClickPerBeat = currentClickPerBeat;
+    };
 
 
 private:
@@ -36,9 +40,13 @@ private:
     std::atomic<bool> _shouldGoToNextBeat {false};
     std::atomic<bool> _isSynchronizedMetronome {false};
     std::atomic<bool> _playSynchronizedMetronome {false};
+    std::atomic<int> _currentBeatPerBar { 0 };
+    std::atomic<int> _currentClickPerBeat { 0 };
 
     int32_t _tempo;
     int32_t _clicksPerBeat;
 
-    AAssetDataSource* _dataSource = nullptr;
+    AAssetDataSource* _highSoundSource = nullptr;
+    AAssetDataSource* _mediumSoundSource = nullptr;
+    AAssetDataSource* _lowSoundSource = nullptr;
 };

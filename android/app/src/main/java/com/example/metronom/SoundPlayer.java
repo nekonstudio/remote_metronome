@@ -20,5 +20,5 @@ public class SoundPlayer {
     public native void setPlaySynchronizedMetronome(boolean value);
 
 
-
+    public native void setCurrentBeatPerBar(int currentBeatPerBar, int currentClickPerBeat);
 }

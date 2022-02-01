@@ -39,7 +39,9 @@ AudioEngine::~AudioEngine()
     _stream->close();
     _stream.reset();
 
-    delete _dataSource;
+    delete _highSoundSource;
+    delete _mediumSoundSource;
+    delete _lowSoundSource;
 }
 
 
@@ -60,6 +62,9 @@ void AudioEngine::stop()
     _isSynchronizedMetronome = false;
     _playSynchronizedMetronome = false;
 
+    _currentBeatPerBar = 0;
+    _currentClickPerBeat = 0;
+
     if (_stream) {
         _stream->requestStop();
     }
@@ -72,8 +77,18 @@ AudioEngine::onAudioReady(AudioStream *audioStream, void *audioData, int32_t num
     auto sampleRate = audioStream->getSampleRate();
     int framesToPlay = static_cast<int>( sampleRate * ( 1 / ( static_cast<float>(_tempo) / 60 ) / _clicksPerBeat ) );
 
-    auto* readSoundBuffer = _dataSource->getData();
-    auto bufferSize = _dataSource->getSize();
+//    SoundId soundId = currentBeatsPerBar == 1
+//                      ? currentClickPerBeat == 1 ? SoundId.HIGH_SOUND : SoundId.LOW_SOUND
+//                      : currentClickPerBeat == 1 ? SoundId.MEDIUM_SOUND : SoundId.LOW_SOUND;
+
+    auto soundSource = _currentBeatPerBar == 1
+            ? _currentClickPerBeat == 1 ? _highSoundSource : _lowSoundSource
+            : _currentClickPerBeat == 1 ? _mediumSoundSource : _lowSoundSource;
+
+
+
+    auto* readSoundBuffer = soundSource->getData();
+    auto bufferSize = soundSource->getSize();
 
     for (int i = 0; i < numFrames; ++i) {
         if (_isSynchronizedMetronome) {
@@ -141,23 +156,25 @@ void AudioEngine::setupAudioSources(AAssetManager &assetManager) {
     };
 
     // Create a data source and player for the clap sound
-//    _dataSource = std::shared_ptr<AAssetDataSource>{
+//    _highSoundSource = std::shared_ptr<AAssetDataSource>{
 //            AAssetDataSource::newFromCompressedAsset(assetManager, "click_high.wav", targetProperties)
 //    };
 
-    _dataSource = AAssetDataSource::newFromCompressedAsset(assetManager, "click_high.wav", targetProperties);
+    _highSoundSource = AAssetDataSource::newFromCompressedAsset(assetManager, "click_high.wav", targetProperties);
+    _mediumSoundSource = AAssetDataSource::newFromCompressedAsset(assetManager, "click_medium.wav", targetProperties);
+    _lowSoundSource = AAssetDataSource::newFromCompressedAsset(assetManager, "click_low.wav", targetProperties);
 
 
-    LOGD("Data source size: %d", _dataSource->getSize());
+    LOGD("Data source size: %d", _highSoundSource->getSize());
 
-    auto* data = _dataSource->getData();
+//    auto* data = _highSoundSource->getData();
 
-//    for (int i = 0; i < _dataSource->getSize(); ++i) {
+//    for (int i = 0; i < _highSoundSource->getSize(); ++i) {
 //        LOGD("Data: %.3f, Index: %d", data[i], i);
 //    }
 
 
-//    _dataSource = std::make_shared<AAssetDataSource>(AAssetDataSource::newFromCompressedAsset(assetManager, "click_high.wav", targetProperties));
+//    _highSoundSource = std::make_shared<AAssetDataSource>(AAssetDataSource::newFromCompressedAsset(assetManager, "click_high.wav", targetProperties));
 
 //    mClap = std::make_unique<Player>(mClapSource);
 }

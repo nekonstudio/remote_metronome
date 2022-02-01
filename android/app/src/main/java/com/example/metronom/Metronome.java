@@ -89,6 +89,8 @@ class Metronome {
             {
                 streamCurrentBeatsPerBar(handler);
 
+                _soundPlayer.setCurrentBeatPerBar(_currentBeatPerBar, _currentClickPerBeat);
+
                 while (!_soundPlayer.shouldGoToNextBeat()) {
                 }
 
