@@ -57,6 +57,8 @@ void AudioEngine::stop()
 {
     _framesWritten = 0;
     _shouldGoToNextBeat = true;
+    _isSynchronizedMetronome = false;
+    _playSynchronizedMetronome = false;
 
     if (_stream) {
         _stream->requestStop();
@@ -74,16 +76,34 @@ AudioEngine::onAudioReady(AudioStream *audioStream, void *audioData, int32_t num
     auto bufferSize = _dataSource->getSize();
 
     for (int i = 0; i < numFrames; ++i) {
-        if (_framesWritten < bufferSize) {
-            outputBuffer[i] = readSoundBuffer[_framesWritten];
-        } else {
-            outputBuffer[i] = 0.0f;
-        }
+        if (_isSynchronizedMetronome) {
+            if (_playSynchronizedMetronome) {
+                if (_framesWritten < bufferSize) {
+                    outputBuffer[i] = readSoundBuffer[_framesWritten];
+                } else {
+                    outputBuffer[i] = 0.0f;
+                }
 
-        _framesWritten++;
-        if (_framesWritten >= framesToPlay) {
-            _framesWritten = 0;
-            _shouldGoToNextBeat = true;
+                _framesWritten++;
+                if (_framesWritten >= framesToPlay) {
+                    _framesWritten = 0;
+                    _shouldGoToNextBeat = true;
+                }
+            } else {
+                outputBuffer[i] = 0.0f;
+            }
+        } else {
+            if (_framesWritten < bufferSize) {
+                outputBuffer[i] = readSoundBuffer[_framesWritten];
+            } else {
+                outputBuffer[i] = 0.0f;
+            }
+
+            _framesWritten++;
+            if (_framesWritten >= framesToPlay) {
+                _framesWritten = 0;
+                _shouldGoToNextBeat = true;
+            }
         }
     }
 

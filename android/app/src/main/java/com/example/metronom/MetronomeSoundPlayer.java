@@ -139,10 +139,6 @@ class MetronomeSoundPlayer {
         }
     }
 
-    void setSoundBuffer(byte[] buffer, int bufferSize) {
-        _testSoundPlayer.setSoundBuffer(buffer, bufferSize);
-    }
-
     byte[] getSoundBuffer(int currentBeatsPerBar, int currentClickPerBeat) {
         SoundId soundId = currentBeatsPerBar == 1
                 ? currentClickPerBeat == 1 ? SoundId.HIGH_SOUND : SoundId.LOW_SOUND

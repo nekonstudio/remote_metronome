@@ -43,4 +43,15 @@ extern "C" {
 
         audioEngine.setupAudioSources(*assetManager);
     }
+
+    JNIEXPORT void JNICALL
+    Java_com_example_metronom_SoundPlayer_setIsSynchronizedMetronome(JNIEnv *env, jobject thiz,
+                                                                     jboolean value) {
+        audioEngine.setIsSynchronizedMetronome(value);
+    }
+    JNIEXPORT void JNICALL
+    Java_com_example_metronom_SoundPlayer_setPlaySynchronizedMetronome(JNIEnv *env, jobject thiz,
+                                                                       jboolean value) {
+        audioEngine.setPlaySynchronizedMetronome(value);
+    }
 }

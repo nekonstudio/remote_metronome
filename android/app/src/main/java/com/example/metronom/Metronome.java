@@ -18,8 +18,6 @@ class Metronome {
     private MetronomeSettings _settings;
 
     private int _previousClicksPerBeat;
-    private boolean _isSynchronizedMetronome;
-    private boolean _playSynchronizedMetronome;
     private Integer _currentBeatPerBar = 1;
     private int _currentClickPerBeat = 1;
 
@@ -52,14 +50,14 @@ class Metronome {
     }
 
     void prepareSynchronizedStart(MetronomeSettings metronomeSettings) {
-        _isSynchronizedMetronome = true;
-        _playSynchronizedMetronome = false;
+        _soundPlayer.setIsSynchronizedMetronome(true);
+        _soundPlayer.setPlaySynchronizedMetronome(false);
 
         start(metronomeSettings);
     }
 
     void synchronizedStart() {
-        _playSynchronizedMetronome = true;
+        _soundPlayer.setPlaySynchronizedMetronome(true);
     }
 
     void change(MetronomeSettings metronomeSettings) {
@@ -78,9 +76,6 @@ class Metronome {
         _currentClickPerBeat = 1;
         _previousClicksPerBeat = 1;
 
-        _isSynchronizedMetronome = false;
-        _playSynchronizedMetronome = false;
-
         _barBeatEventStream.success(0);
     }
 
@@ -93,12 +88,6 @@ class Metronome {
             while(_isPlaying)
             {
                 streamCurrentBeatsPerBar(handler);
-
-                if (_isSynchronizedMetronome) {
-                    while (!_playSynchronizedMetronome) {
-                        android.os.SystemClock.sleep(1);
-                    }
-                }
 
                 while (!_soundPlayer.shouldGoToNextBeat()) {
                 }

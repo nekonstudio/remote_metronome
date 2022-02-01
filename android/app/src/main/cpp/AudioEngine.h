@@ -25,12 +25,17 @@ public:
 
     bool onError(oboe::AudioStream *audioStream, oboe::Result result) override;
 
+    void setIsSynchronizedMetronome(bool value) { _isSynchronizedMetronome = value; }
+    void setPlaySynchronizedMetronome(bool value) { _playSynchronizedMetronome = value; }
+
 
 private:
     std::shared_ptr<oboe::AudioStream> _stream;
 
     int32_t _framesWritten = 0;
     std::atomic<bool> _shouldGoToNextBeat {false};
+    std::atomic<bool> _isSynchronizedMetronome {false};
+    std::atomic<bool> _playSynchronizedMetronome {false};
 
     int32_t _tempo;
     int32_t _clicksPerBeat;
