@@ -43,34 +43,34 @@ class Metronome {
         _settings = metronomeSettings;
         _previousClicksPerBeat = metronomeSettings.clicksPerBeat;
 
-        _soundPlayer.setMetronomeSettings(metronomeSettings.tempo, metronomeSettings.clicksPerBeat);
-        _soundPlayer.start();
+//        _soundPlayer.setMetronomeSettings(metronomeSettings.tempo, metronomeSettings.clicksPerBeat);
+//        _soundPlayer.start();
 
         new MetronomePlayerThread().start();
     }
 
     void prepareSynchronizedStart(MetronomeSettings metronomeSettings) {
-        _soundPlayer.setIsSynchronizedMetronome(true);
-        _soundPlayer.setPlaySynchronizedMetronome(false);
+//        _soundPlayer.setIsSynchronizedMetronome(true);
+//        _soundPlayer.setPlaySynchronizedMetronome(false);
 
         start(metronomeSettings);
     }
 
     void synchronizedStart() {
-        _soundPlayer.setPlaySynchronizedMetronome(true);
+//        _soundPlayer.setPlaySynchronizedMetronome(true);
     }
 
     void change(MetronomeSettings metronomeSettings) {
         _previousClicksPerBeat = _settings.clicksPerBeat;
         _settings = metronomeSettings;
 
-        _soundPlayer.setMetronomeSettings(metronomeSettings.tempo, metronomeSettings.clicksPerBeat);
+//        _soundPlayer.setMetronomeSettings(metronomeSettings.tempo, metronomeSettings.clicksPerBeat);
     }
 
     void stop() {
         _isPlaying = false;
 
-        _soundPlayer.stop();
+//        _soundPlayer.stop();
 
         _currentBeatPerBar = 1;
         _currentClickPerBeat = 1;
@@ -89,12 +89,12 @@ class Metronome {
             {
                 streamCurrentBeatsPerBar(handler);
 
-                _soundPlayer.setCurrentBeatPerBar(_currentBeatPerBar, _currentClickPerBeat);
-
-                while (!_soundPlayer.shouldGoToNextBeat()) {
-                }
-
-                _soundPlayer.resetShouldGoToNextBeat();
+//                _soundPlayer.setCurrentBeatPerBar(_currentBeatPerBar, _currentClickPerBeat);
+//
+//                while (!_soundPlayer.shouldGoToNextBeat()) {
+//                }
+//
+//                _soundPlayer.resetShouldGoToNextBeat();
                 handleMetronomeControlData();
             }
         }

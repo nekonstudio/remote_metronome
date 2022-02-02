@@ -31,7 +31,7 @@ public class MainActivity extends FlutterActivity {
                 "com.example.metronom/barBeatChannel");
 
         final SoundPlayer soundPlayer = new SoundPlayer();
-        soundPlayer.setupAudioSources(getAssets());
+//        soundPlayer.setupAudioSources(getAssets());
 
         _metronome = new Metronome(soundPlayer, barBeatChannel);
     }

@@ -46,9 +46,9 @@ class MetronomeSoundPlayer {
     private byte[] _currentSoundData;
     private int _currentSoundDataLength;
 
-    void setupAudioSources(AssetManager assets) {
-        _testSoundPlayer.setupAudioSources(assets);
-    }
+//    void setupAudioSources(AssetManager assets) {
+//        _testSoundPlayer.setupAudioSources(assets);
+//    }
 
     void loadSoundsFromAssets(AssetManager assets) {
         final Map<SoundId, String> soundFileNames = new HashMap<SoundId, String>() {{
@@ -98,27 +98,27 @@ class MetronomeSoundPlayer {
 //
 //        Log.d(TAG, "configure: _currentSoundDataLength - " + _currentSoundDataLength);
 
-        _testSoundPlayer.setMetronomeSettings(metronomeSettings.tempo, metronomeSettings.clicksPerBeat);
+//        _testSoundPlayer.setMetronomeSettings(metronomeSettings.tempo, metronomeSettings.clicksPerBeat);
     }
 
     void start() {
 //        _audioTrack.play();
-        _testSoundPlayer.start();
+//        _testSoundPlayer.start();
     }
 
     void stop() {
 //        _audioTrack.pause();
 //        _audioTrack.flush();
-        _testSoundPlayer.stop();
+//        _testSoundPlayer.stop();
     }
 
-    boolean canProceed() {
-        return _testSoundPlayer.shouldGoToNextBeat();
-    }
-
-    void setToDefault() {
-        _testSoundPlayer.resetShouldGoToNextBeat();
-    }
+//    boolean canProceed() {
+//        return _testSoundPlayer.shouldGoToNextBeat();
+//    }
+//
+//    void setToDefault() {
+//        _testSoundPlayer.resetShouldGoToNextBeat();
+//    }
 
     void generateCurrentSound(int currentBeatsPerBar, int currentClickPerBeat) {
         SoundId soundId = currentBeatsPerBar == 1
