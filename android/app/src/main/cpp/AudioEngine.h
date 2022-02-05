@@ -8,15 +8,11 @@
 class AudioEngine : public oboe::AudioStreamDataCallback, public oboe::AudioStreamErrorCallback
 {
 public:
-    AudioEngine(/* args */);
+    AudioEngine();
     ~AudioEngine();
 
-    void start();
+    void start(int tempo, int clicksPerBeat, int beatsPerBar);
     void stop();
-    bool shouldGoToNextBeat();
-    void resetShouldGoToNextBeat();
-
-    void setMetronomeSettings(int32_t tempo, int32_t clicksPerBeat);
 
     void setupAudioSources(AAssetManager &assetManager);
 
@@ -25,26 +21,24 @@ public:
 
     bool onError(oboe::AudioStream *audioStream, oboe::Result result) override;
 
-    void setIsSynchronizedMetronome(bool value) { _isSynchronizedMetronome = value; }
-    void setPlaySynchronizedMetronome(bool value) { _playSynchronizedMetronome = value; }
-    void setCurrentMetronomeValues(int currentBeatPerBar, int currentClickPerBeat) {
-        _currentBeatPerBar = currentBeatPerBar;
-        _currentClickPerBeat = currentClickPerBeat;
-    };
-
-
 private:
+    void handleMetronomeControlData();
+    void nextBeatPerBar();
+
     std::shared_ptr<oboe::AudioStream> _stream;
 
     int32_t _framesWritten = 0;
-    std::atomic<bool> _shouldGoToNextBeat {false};
     std::atomic<bool> _isSynchronizedMetronome {false};
     std::atomic<bool> _playSynchronizedMetronome {false};
     std::atomic<int> _currentBeatPerBar { 0 };
-    std::atomic<int> _currentClickPerBeat { 0 };
+    std::atomic<int> _currentClickPerBeat { 1 };
+    std::atomic<int> _previousClicksPerBeat { 1};
 
-    int32_t _tempo;
-    int32_t _clicksPerBeat;
+    int _tempo;
+    int _clicksPerBeat;
+    int _beatsPerBar;
+
+    AAssetDataSource* _currentSoundSource = nullptr;
 
     AAssetDataSource* _highSoundSource = nullptr;
     AAssetDataSource* _mediumSoundSource = nullptr;

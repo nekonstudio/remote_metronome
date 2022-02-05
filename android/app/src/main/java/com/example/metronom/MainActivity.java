@@ -1,5 +1,6 @@
 package com.example.metronom;
 
+import android.content.res.AssetManager;
 import android.os.Bundle;
 import android.util.Log;
 
@@ -17,13 +18,18 @@ public class MainActivity extends FlutterActivity {
 
     private Metronome _metronome;
 
+    static {
+        System.loadLibrary("native-android-metronome");
+    }
+
     @Override
     public void configureFlutterEngine(@NonNull FlutterEngine flutterEngine) {
         super.configureFlutterEngine(flutterEngine);
 
-        initializeMetronome(flutterEngine);
-        handleMethodCall(flutterEngine);
+        setupAssetManager(getAssets());
     }
+
+    private native void setupAssetManager(AssetManager assetManager);
 
     private void initializeMetronome(@NonNull FlutterEngine flutterEngine) {
         final EventChannel barBeatChannel = new EventChannel(

@@ -67,6 +67,8 @@ abstract class MetronomeBase implements MetronomeInterface {
 
     _currentBarBeatSubscription = getCurrentBarBeatStream().listen((barBeat) {
       _currentBarBeat = barBeat;
+
+      print('_currentBarBeat: $_currentBarBeat');
     });
 
     onStart(_settings);

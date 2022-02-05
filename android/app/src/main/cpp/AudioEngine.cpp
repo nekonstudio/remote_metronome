@@ -3,6 +3,8 @@
 #include "AAssetDataSource.h"
 #include "LogUtils.h"
 
+#include "NativeAndroidMetronome.h"
+
 using namespace  oboe;
 
 // Double-buffering offers a good tradeoff between latency and protection against glitches.
@@ -44,10 +46,15 @@ AudioEngine::~AudioEngine()
     delete _lowSoundSource;
 }
 
-
-
-void AudioEngine::start()
+void AudioEngine::start(int tempo, int clicksPerBeat, int beatsPerBar)
 {
+    _tempo = tempo;
+    _clicksPerBeat = clicksPerBeat;
+    _beatsPerBar = beatsPerBar;
+
+    _currentBeatPerBar = 1;
+    sendMsgToFlutter(_currentBeatPerBar);
+
     Result result = _stream->requestStart();
 
     if (result != Result::OK) {
@@ -58,12 +65,16 @@ void AudioEngine::start()
 void AudioEngine::stop()
 {
     _framesWritten = 0;
-    _shouldGoToNextBeat = true;
     _isSynchronizedMetronome = false;
     _playSynchronizedMetronome = false;
 
     _currentBeatPerBar = 0;
-    _currentClickPerBeat = 0;
+    _currentClickPerBeat = 1;
+    _previousClicksPerBeat = 1;
+
+    _currentSoundSource = _highSoundSource;
+
+    sendMsgToFlutter(_currentBeatPerBar);
 
     if (_stream) {
         _stream->requestStop();
@@ -77,18 +88,8 @@ AudioEngine::onAudioReady(AudioStream *audioStream, void *audioData, int32_t num
     auto sampleRate = audioStream->getSampleRate();
     int framesToPlay = static_cast<int>( sampleRate * ( 1 / ( static_cast<float>(_tempo) / 60 ) / _clicksPerBeat ) );
 
-//    SoundId soundId = currentBeatsPerBar == 1
-//                      ? currentClickPerBeat == 1 ? SoundId.HIGH_SOUND : SoundId.LOW_SOUND
-//                      : currentClickPerBeat == 1 ? SoundId.MEDIUM_SOUND : SoundId.LOW_SOUND;
-
-    auto soundSource = _currentBeatPerBar == 1
-            ? _currentClickPerBeat == 1 ? _highSoundSource : _lowSoundSource
-            : _currentClickPerBeat == 1 ? _mediumSoundSource : _lowSoundSource;
-
-
-
-    auto* readSoundBuffer = soundSource->getData();
-    auto bufferSize = soundSource->getSize();
+    auto* readSoundBuffer = _currentSoundSource->getData();
+    auto bufferSize = _currentSoundSource->getSize();
 
     for (int i = 0; i < numFrames; ++i) {
         if (_isSynchronizedMetronome) {
@@ -102,7 +103,12 @@ AudioEngine::onAudioReady(AudioStream *audioStream, void *audioData, int32_t num
                 _framesWritten++;
                 if (_framesWritten >= framesToPlay) {
                     _framesWritten = 0;
-                    _shouldGoToNextBeat = true;
+
+                    handleMetronomeControlData();
+
+                    _currentSoundSource = _currentBeatPerBar == 1
+                    ? _currentClickPerBeat == 1 ? _highSoundSource : _lowSoundSource
+                    : _currentClickPerBeat == 1 ? _mediumSoundSource : _lowSoundSource;
                 }
             } else {
                 outputBuffer[i] = 0.0f;
@@ -117,7 +123,12 @@ AudioEngine::onAudioReady(AudioStream *audioStream, void *audioData, int32_t num
             _framesWritten++;
             if (_framesWritten >= framesToPlay) {
                 _framesWritten = 0;
-                _shouldGoToNextBeat = true;
+
+                handleMetronomeControlData();
+
+                _currentSoundSource = _currentBeatPerBar == 1
+                    ? _currentClickPerBeat == 1 ? _highSoundSource : _lowSoundSource
+                    : _currentClickPerBeat == 1 ? _mediumSoundSource : _lowSoundSource;
             }
         }
     }
@@ -133,48 +144,45 @@ bool AudioEngine::onError(oboe::AudioStream *audioStream, oboe::Result result) {
     return AudioStreamErrorCallback::onError(audioStream, result);
 }
 
-bool AudioEngine::shouldGoToNextBeat() {
-    return _shouldGoToNextBeat;
-}
-
-void AudioEngine::resetShouldGoToNextBeat() {
-    _shouldGoToNextBeat = false;
-}
-
-void AudioEngine::setMetronomeSettings(int32_t tempo, int32_t clicksPerBeat) {
-    _tempo = tempo;
-    _clicksPerBeat = clicksPerBeat;
-}
-
 void AudioEngine::setupAudioSources(AAssetManager &assetManager) {
-    // Set the properties of our audio source(s) to match that of our audio stream
     AudioProperties targetProperties {
             .channelCount = _stream->getChannelCount(),
-//            .channelCount = 1,
             .sampleRate = _stream->getSampleRate()
-//            .sampleRate = 44100
     };
-
-    // Create a data source and player for the clap sound
-//    _highSoundSource = std::shared_ptr<AAssetDataSource>{
-//            AAssetDataSource::newFromCompressedAsset(assetManager, "click_high.wav", targetProperties)
-//    };
 
     _highSoundSource = AAssetDataSource::newFromCompressedAsset(assetManager, "click_high.wav", targetProperties);
     _mediumSoundSource = AAssetDataSource::newFromCompressedAsset(assetManager, "click_medium.wav", targetProperties);
     _lowSoundSource = AAssetDataSource::newFromCompressedAsset(assetManager, "click_low.wav", targetProperties);
 
+    _currentSoundSource = _highSoundSource;
+
 
     LOGD("Data source size: %d", _highSoundSource->getSize());
+}
 
-//    auto* data = _highSoundSource->getData();
+void AudioEngine::handleMetronomeControlData() {
+//    LOGD("_currentClickPerBeat przed: %d", _currentClickPerBeat.load());
+    _currentClickPerBeat++;
+//    LOGD("_currentClickPerBeat po: %d", _currentClickPerBeat.load());
 
-//    for (int i = 0; i < _highSoundSource->getSize(); ++i) {
-//        LOGD("Data: %.3f, Index: %d", data[i], i);
+//    // switch to next beat when clicksPerBeat setting changed to higher value while playing
+//    if (_previousClicksPerBeat < _clicksPerBeat) {
+//        nextBeatPerBar();
+//
+//        _previousClicksPerBeat = _clicksPerBeat;
 //    }
+//    else
+        if (_currentClickPerBeat > _clicksPerBeat) {
+        nextBeatPerBar();
+    }
+}
 
+void AudioEngine::nextBeatPerBar() {
+    _currentClickPerBeat = 1;
+    _currentBeatPerBar++;
+    if (_currentBeatPerBar > _beatsPerBar) {
+        _currentBeatPerBar = 1;
+    }
 
-//    _highSoundSource = std::make_shared<AAssetDataSource>(AAssetDataSource::newFromCompressedAsset(assetManager, "click_high.wav", targetProperties));
-
-//    mClap = std::make_unique<Player>(mClapSource);
+    sendMsgToFlutter(_currentBeatPerBar);
 }

@@ -20,40 +20,23 @@ class Metronome extends MetronomeBase {
 
   @override
   void onStart(MetronomeSettings? settings) {
-    // invokePlatformMethod(
-    //   'start',
-    //   {
-    //     'tempo': settings!.tempo,
-    //     'beatsPerBar': settings.beatsPerBar,
-    //     'clicksPerBeat': settings.clicksPerBeat,
-    //   },
-    // );
-
-    _metronomeLib.start();
+    _metronomeLib.start(
+        settings!.tempo!, settings.clicksPerBeat!, settings.beatsPerBar!);
   }
 
   @override
   void onChange(MetronomeSettings? settings) {
-    invokePlatformMethod(
-      'change',
-      {
-        'tempo': settings!.tempo,
-        'beatsPerBar': settings.beatsPerBar,
-        'clicksPerBeat': settings.clicksPerBeat,
-      },
-    );
+    //TODO: implement change()
   }
 
   @override
   void onStop() {
-    // invokePlatformMethod('stop');
-
     _metronomeLib.stop();
   }
 
   @override
   Stream<dynamic> getCurrentBarBeatStream() {
-    return currentBarBeatStream;
+    return _metronomeLib.currentBarBeatStream();
   }
 
   @protected
