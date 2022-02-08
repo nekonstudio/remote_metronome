@@ -92,27 +92,8 @@ AudioEngine::onAudioReady(AudioStream *audioStream, void *audioData, int32_t num
     auto bufferSize = _currentSoundSource->getSize();
 
     for (int i = 0; i < numFrames; ++i) {
-        if (_isSynchronizedMetronome) {
-            if (_playSynchronizedMetronome) {
-                if (_framesWritten < bufferSize) {
-                    outputBuffer[i] = readSoundBuffer[_framesWritten];
-                } else {
-                    outputBuffer[i] = 0.0f;
-                }
-
-                _framesWritten++;
-                if (_framesWritten >= framesToPlay) {
-                    _framesWritten = 0;
-
-                    handleMetronomeControlData();
-
-                    _currentSoundSource = _currentBeatPerBar == 1
-                    ? _currentClickPerBeat == 1 ? _highSoundSource : _lowSoundSource
-                    : _currentClickPerBeat == 1 ? _mediumSoundSource : _lowSoundSource;
-                }
-            } else {
-                outputBuffer[i] = 0.0f;
-            }
+        if (_isSynchronizedMetronome && !_playSynchronizedMetronome) {
+            outputBuffer[i] = 0.0f;
         } else {
             if (_framesWritten < bufferSize) {
                 outputBuffer[i] = readSoundBuffer[_framesWritten];
@@ -127,8 +108,11 @@ AudioEngine::onAudioReady(AudioStream *audioStream, void *audioData, int32_t num
                 handleMetronomeControlData();
 
                 _currentSoundSource = _currentBeatPerBar == 1
-                    ? _currentClickPerBeat == 1 ? _highSoundSource : _lowSoundSource
-                    : _currentClickPerBeat == 1 ? _mediumSoundSource : _lowSoundSource;
+                                      ? _currentClickPerBeat == 1 ? _highSoundSource : _lowSoundSource
+                                      : _currentClickPerBeat == 1 ? _mediumSoundSource : _lowSoundSource;
+
+                readSoundBuffer = _currentSoundSource->getData();
+                bufferSize = _currentSoundSource->getSize();
             }
         }
     }
@@ -161,9 +145,7 @@ void AudioEngine::setupAudioSources(AAssetManager &assetManager) {
 }
 
 void AudioEngine::handleMetronomeControlData() {
-//    LOGD("_currentClickPerBeat przed: %d", _currentClickPerBeat.load());
     _currentClickPerBeat++;
-//    LOGD("_currentClickPerBeat po: %d", _currentClickPerBeat.load());
 
 //    // switch to next beat when clicksPerBeat setting changed to higher value while playing
 //    if (_previousClicksPerBeat < _clicksPerBeat) {
