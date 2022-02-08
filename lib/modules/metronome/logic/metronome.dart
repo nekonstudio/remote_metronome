@@ -19,14 +19,14 @@ class Metronome extends MetronomeBase {
           .receiveBroadcastStream();
 
   @override
-  void onStart(MetronomeSettings? settings) {
+  void onStart(MetronomeSettings settings) {
     _metronomeLib.start(
-        settings!.tempo!, settings.clicksPerBeat!, settings.beatsPerBar!);
+        settings.tempo, settings.clicksPerBeat, settings.beatsPerBar);
   }
 
   @override
-  void onChange(MetronomeSettings? settings) {
-    _metronomeLib.change(settings!.tempo!, settings.clicksPerBeat!);
+  void onChange(MetronomeSettings settings) {
+    _metronomeLib.change(settings.tempo, settings.clicksPerBeat);
   }
 
   @override

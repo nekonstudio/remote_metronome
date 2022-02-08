@@ -30,12 +30,12 @@ class NotifierMetronome with ChangeNotifier implements MetronomeInterface {
   int? get currentBarBeat => impl.currentBarBeat;
 
   @override
-  void start(MetronomeSettings? settings) {
+  void start(MetronomeSettings settings) {
     impl.start(settings);
   }
 
   @override
-  void change(MetronomeSettings? newSettings) {
+  void change(MetronomeSettings newSettings) {
     impl.change(newSettings);
   }
 

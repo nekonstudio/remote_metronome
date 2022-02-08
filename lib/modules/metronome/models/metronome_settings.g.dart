@@ -17,9 +17,9 @@ class MetronomeSettingsAdapter extends TypeAdapter<MetronomeSettings> {
       for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
     };
     return MetronomeSettings(
-      tempo: fields[0] as int?,
-      beatsPerBar: fields[1] as int?,
-      clicksPerBeat: fields[2] as int?,
+      tempo: fields[0] as int,
+      beatsPerBar: fields[1] as int,
+      clicksPerBeat: fields[2] as int,
     );
   }
 

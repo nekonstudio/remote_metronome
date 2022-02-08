@@ -6,12 +6,9 @@ import '../models/metronome_settings.dart';
 import 'metronome_interface.dart';
 
 abstract class MetronomeBase implements MetronomeInterface {
-  MetronomeSettings? _settings;
   int? _currentBarBeat;
   bool _isPlaying = false;
   late StreamSubscription<dynamic> _currentBarBeatSubscription;
-
-  MetronomeSettings? get settings => _settings;
 
   @override
   bool get isPlaying => _isPlaying;
@@ -20,12 +17,12 @@ abstract class MetronomeBase implements MetronomeInterface {
   int? get currentBarBeat => _currentBarBeat;
 
   @override
-  void start(MetronomeSettings? settings) {
+  void start(MetronomeSettings settings) {
     _performIfIsPlayingEquals(false, () => _setupAndStart(settings));
   }
 
   @override
-  void change(MetronomeSettings? newSettings) {
+  void change(MetronomeSettings newSettings) {
     _performIfIsPlayingEquals(true, () => _change(newSettings));
   }
 
@@ -35,7 +32,6 @@ abstract class MetronomeBase implements MetronomeInterface {
   }
 
   void copy(MetronomeBase other) {
-    _settings = other.settings;
     _currentBarBeat = other.currentBarBeat;
     _isPlaying = other.isPlaying;
 
@@ -49,9 +45,9 @@ abstract class MetronomeBase implements MetronomeInterface {
   Stream<dynamic> getCurrentBarBeatStream();
 
   @protected
-  void onStart(MetronomeSettings? settings);
+  void onStart(MetronomeSettings settings);
   @protected
-  void onChange(MetronomeSettings? settings);
+  void onChange(MetronomeSettings settings);
   @protected
   void onStop();
 
@@ -61,8 +57,7 @@ abstract class MetronomeBase implements MetronomeInterface {
     }
   }
 
-  void _setupAndStart(MetronomeSettings? settings) {
-    _settings = settings;
+  void _setupAndStart(MetronomeSettings settings) {
     _isPlaying = true;
 
     _currentBarBeatSubscription = getCurrentBarBeatStream().listen((barBeat) {
@@ -71,17 +66,14 @@ abstract class MetronomeBase implements MetronomeInterface {
       print('_currentBarBeat: $_currentBarBeat');
     });
 
-    onStart(_settings);
+    onStart(settings);
   }
 
-  void _change(MetronomeSettings? newSettings) {
-    _settings = newSettings;
-
-    onChange(_settings);
+  void _change(MetronomeSettings settings) {
+    onChange(settings);
   }
 
   void _resetAndStop() {
-    _settings = null;
     _isPlaying = false;
     _currentBarBeat = 0;
 

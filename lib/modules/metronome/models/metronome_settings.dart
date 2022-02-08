@@ -11,13 +11,13 @@ part 'metronome_settings.g.dart';
 @HiveType(typeId: 0)
 class MetronomeSettings extends PropertyValidable {
   @HiveField(0)
-  final int? tempo;
+  final int tempo;
 
   @HiveField(1)
-  final int? beatsPerBar;
+  final int beatsPerBar;
 
   @HiveField(2)
-  final int? clicksPerBeat;
+  final int clicksPerBeat;
 
   const MetronomeSettings(
       {this.tempo = 120, this.beatsPerBar = 4, this.clicksPerBeat = 1});
@@ -36,7 +36,7 @@ class MetronomeSettings extends PropertyValidable {
       ];
 
   MetronomeSettings clampToValidTempo() => MetronomeSettings(
-        tempo: tempo!.clamp(minTempo, maxTempo),
+        tempo: tempo.clamp(minTempo, maxTempo),
         beatsPerBar: beatsPerBar,
         clicksPerBeat: clicksPerBeat,
       );

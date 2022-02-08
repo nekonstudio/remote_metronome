@@ -6,7 +6,8 @@ import '../../models/track.dart';
 import 'track_player.dart';
 
 class ComplexTrackPlayer extends TrackPlayer {
-  ComplexTrackPlayer(Track track, MetronomeBase metronome) : super(track, metronome) {
+  ComplexTrackPlayer(Track track, MetronomeBase metronome)
+      : super(track, metronome) {
     assert(track.isComplex == true);
 
     print('ComplexTrackPlayer(${track.name})');
@@ -46,7 +47,7 @@ class ComplexTrackPlayer extends TrackPlayer {
       _handleCurrentBarBeatChange(currentBarBeat as int?);
     });
 
-    metronome.start(_currentSection.settings);
+    metronome.start(_currentSection.settings!);
   }
 
   @override
@@ -86,15 +87,19 @@ class ComplexTrackPlayer extends TrackPlayer {
   void _changeToNextSectionOnLastBarBeat(int? currentBarBeat) {
     final isNotLastSection = _currentSectionIndex < track!.sections!.length - 1;
     final isLastSectionBar = _currentSectionBar == _currentSection.barsCount;
-    final isLastBarBeat = currentBarBeat == _currentSection.settings!.beatsPerBar;
+    final isLastBarBeat =
+        currentBarBeat == _currentSection.settings!.beatsPerBar;
 
     final sectionClicksPerBeat = _currentSection.settings!.clicksPerBeat;
-    final isPenultimateClickPerBeat =
-        sectionClicksPerBeat == 1 || _currentClickPerBeat == sectionClicksPerBeat;
+    final isPenultimateClickPerBeat = sectionClicksPerBeat == 1 ||
+        _currentClickPerBeat == sectionClicksPerBeat;
 
-    if (isNotLastSection && isLastSectionBar && isLastBarBeat && isPenultimateClickPerBeat) {
+    if (isNotLastSection &&
+        isLastSectionBar &&
+        isLastBarBeat &&
+        isPenultimateClickPerBeat) {
       final nextSection = track!.sections![_currentSectionIndex + 1];
-      metronome.change(nextSection.settings);
+      metronome.change(nextSection.settings!);
     }
   }
 
@@ -111,7 +116,7 @@ class ComplexTrackPlayer extends TrackPlayer {
 
     if (_currentSectionIndex < track!.sections!.length) {
       _currentClickPerBeat++;
-      if (_currentClickPerBeat > _currentSection.settings!.clicksPerBeat!) {
+      if (_currentClickPerBeat > _currentSection.settings!.clicksPerBeat) {
         _currentClickPerBeat = 1;
       }
     }
@@ -128,7 +133,7 @@ class ComplexTrackPlayer extends TrackPlayer {
   void _onSectionChange() {
     _currentSectionBar = 1;
 
-    metronome.change(_currentSection.settings);
+    metronome.change(_currentSection.settings!);
   }
 
   void _resetSectionDataToDefaults() {
