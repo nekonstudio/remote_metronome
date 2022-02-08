@@ -12,7 +12,7 @@ public:
     ~AudioEngine();
 
     void start(int tempo, int clicksPerBeat, int beatsPerBar);
-    void stop();
+    void requestStop();
 
     void setupAudioSources(AAssetManager &assetManager);
 
@@ -22,6 +22,7 @@ public:
     bool onError(oboe::AudioStream *audioStream, oboe::Result result) override;
 
 private:
+    void stop();
     void handleMetronomeControlData();
     void nextBeatPerBar();
 
@@ -33,6 +34,8 @@ private:
     std::atomic<int> _currentBeatPerBar { 0 };
     std::atomic<int> _currentClickPerBeat { 1 };
     std::atomic<int> _previousClicksPerBeat { 1};
+
+    std::atomic<bool> _isStopRequested {false};
 
     int _tempo;
     int _clicksPerBeat;

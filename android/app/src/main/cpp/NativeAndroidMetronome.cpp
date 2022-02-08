@@ -54,6 +54,6 @@ extern "C" {
     }
 
     void stop() {
-        audioEngine.stop();
+        audioEngine.requestStop();
     }
 }

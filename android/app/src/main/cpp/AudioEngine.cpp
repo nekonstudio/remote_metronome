@@ -62,23 +62,10 @@ void AudioEngine::start(int tempo, int clicksPerBeat, int beatsPerBar)
     }
 }
 
-void AudioEngine::stop()
+void AudioEngine::requestStop()
 {
-    _framesWritten = 0;
-    _isSynchronizedMetronome = false;
-    _playSynchronizedMetronome = false;
-
-    _currentBeatPerBar = 0;
-    _currentClickPerBeat = 1;
-    _previousClicksPerBeat = 1;
-
-    _currentSoundSource = _highSoundSource;
-
-    sendMsgToFlutter(_currentBeatPerBar);
-
-    if (_stream) {
-        _stream->requestStop();
-    }
+    sendMsgToFlutter(0);
+    _isStopRequested = true;
 }
 
 DataCallbackResult
@@ -99,6 +86,11 @@ AudioEngine::onAudioReady(AudioStream *audioStream, void *audioData, int32_t num
                 outputBuffer[i] = readSoundBuffer[_framesWritten];
             } else {
                 outputBuffer[i] = 0.0f;
+
+                if (_isStopRequested) {
+                    stop();
+                    return DataCallbackResult::Stop;
+                }
             }
 
             _framesWritten++;
@@ -167,4 +159,21 @@ void AudioEngine::nextBeatPerBar() {
     }
 
     sendMsgToFlutter(_currentBeatPerBar);
+}
+
+void AudioEngine::stop() {
+    _framesWritten = 0;
+    _isSynchronizedMetronome = false;
+    _playSynchronizedMetronome = false;
+    _isStopRequested = false;
+
+    _currentBeatPerBar = 0;
+    _currentClickPerBeat = 1;
+    _previousClicksPerBeat = 1;
+
+    _currentSoundSource = _highSoundSource;
+
+    if (_stream) {
+        _stream->requestStop();
+    }
 }

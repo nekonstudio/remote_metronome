@@ -70,7 +70,7 @@ class Metronome {
     void stop() {
         _isPlaying = false;
 
-//        _soundPlayer.stop();
+//        _soundPlayer.requestStop();
 
         _currentBeatPerBar = 1;
         _currentClickPerBeat = 1;

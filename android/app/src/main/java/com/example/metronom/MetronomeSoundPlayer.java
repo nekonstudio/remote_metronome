@@ -109,7 +109,7 @@ class MetronomeSoundPlayer {
     void stop() {
 //        _audioTrack.pause();
 //        _audioTrack.flush();
-//        _testSoundPlayer.stop();
+//        _testSoundPlayer.requestStop();
     }
 
 //    boolean canProceed() {

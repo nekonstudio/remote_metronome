@@ -11,7 +11,7 @@ public class SoundPlayer {
 //    public native void setMetronomeSettings(int tempo, int clicksPerBeat);
 //
 //    public native void start();
-//    public native void stop();
+//    public native void requestStop();
 //
 //    public native boolean shouldGoToNextBeat();
 //    public native void resetShouldGoToNextBeat();
