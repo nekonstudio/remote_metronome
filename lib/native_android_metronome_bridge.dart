@@ -9,6 +9,9 @@ typedef VoidCallback = void Function();
 typedef StartFunc = void Function(int, int, int);
 typedef StartFuncC = Void Function(Int32, Int32, Int32);
 
+typedef ChangeFunc = void Function(int, int);
+typedef ChangeFuncC = Void Function(Int32, Int32);
+
 typedef CurrentBarBeatCallback = Void Function(Int32);
 
 typedef SetCallbackFunc = void Function(
@@ -20,6 +23,7 @@ typedef SetCallbackFuncC = Void Function(
 class NativeAndroidMetronomeBridge {
   late StartFunc _start;
   late VoidCallback _stop;
+  late ChangeFunc _change;
 
   late Stream<dynamic> _currentBarBeatStream;
 
@@ -27,6 +31,7 @@ class NativeAndroidMetronomeBridge {
     final lib = DynamicLibrary.open('libnative-android-metronome.so');
     _start = lib.lookupFunction<StartFuncC, StartFunc>('start');
     _stop = lib.lookupFunction<VoidCallbackC, VoidCallback>('stop');
+    _change = lib.lookupFunction<ChangeFuncC, ChangeFunc>('change');
 
     initNativeMessenging(lib);
   }
@@ -56,6 +61,8 @@ class NativeAndroidMetronomeBridge {
       _start(tempo, clicksPerBeat, beatsPerBar);
 
   void stop() => _stop();
+
+  void change(int tempo, int clicksPerBeat) => _change(tempo, clicksPerBeat);
 
   Stream<dynamic> currentBarBeatStream() => _currentBarBeatStream;
 }

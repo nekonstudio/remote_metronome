@@ -177,3 +177,13 @@ void AudioEngine::stop() {
         _stream->requestStop();
     }
 }
+
+void AudioEngine::change(int tempo, int clicksPerBeat) {
+    if (tempo != _tempo) {
+        _tempo = tempo;
+    }
+
+    if (clicksPerBeat != _clicksPerBeat) {
+        _clicksPerBeat = clicksPerBeat;
+    }
+}

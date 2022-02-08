@@ -26,7 +26,7 @@ class Metronome extends MetronomeBase {
 
   @override
   void onChange(MetronomeSettings? settings) {
-    //TODO: implement change()
+    _metronomeLib.change(settings!.tempo!, settings.clicksPerBeat!);
   }
 
   @override

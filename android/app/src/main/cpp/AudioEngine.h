@@ -12,6 +12,7 @@ public:
     ~AudioEngine();
 
     void start(int tempo, int clicksPerBeat, int beatsPerBar);
+    void change(int tempo, int clicksPerBeat);
     void requestStop();
 
     void setupAudioSources(AAssetManager &assetManager);

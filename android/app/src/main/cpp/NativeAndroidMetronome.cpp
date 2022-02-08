@@ -53,6 +53,10 @@ extern "C" {
         audioEngine.start(tempo, clicksPerBeat, beatsPerBar);
     }
 
+    void change(int tempo, int clicksPerBeat) {
+        audioEngine.change(tempo, clicksPerBeat);
+    }
+
     void stop() {
         audioEngine.requestStop();
     }
