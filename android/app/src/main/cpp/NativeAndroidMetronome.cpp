@@ -53,6 +53,14 @@ extern "C" {
         audioEngine.start(tempo, clicksPerBeat, beatsPerBar);
     }
 
+    void prepareSynchronizedStart(int tempo, int clicksPerBeat, int beatsPerBar) {
+        audioEngine.prepareSynchronizedStart(tempo, clicksPerBeat, beatsPerBar);
+    }
+
+    void runSynchronizedStart() {
+        audioEngine.runSynchronizedStart();
+    }
+
     void change(int tempo, int clicksPerBeat) {
         audioEngine.change(tempo, clicksPerBeat);
     }

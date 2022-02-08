@@ -187,3 +187,10 @@ void AudioEngine::change(int tempo, int clicksPerBeat) {
         _clicksPerBeat = clicksPerBeat;
     }
 }
+
+void AudioEngine::prepareSynchronizedStart(int tempo, int clicksPerBeat, int beatsPerBar) {
+    _isSynchronizedMetronome= true;
+
+    start(tempo, clicksPerBeat, beatsPerBar);
+}
+

@@ -15,6 +15,9 @@ public:
     void change(int tempo, int clicksPerBeat);
     void requestStop();
 
+    void prepareSynchronizedStart(int tempo, int clicksPerBeat, int beatsPerBar);
+    void runSynchronizedStart() { _playSynchronizedMetronome = true; }
+
     void setupAudioSources(AAssetManager &assetManager);
 
     oboe::DataCallbackResult

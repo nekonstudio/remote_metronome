@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 
+import '../../../metronome/logic/metronome.dart';
 import '../../../metronome/models/metronome_settings.dart';
 import '../../providers/remote_launch_indicator_controller_provider.dart';
 import '../remote_commands/remote_command.dart';
@@ -26,7 +27,10 @@ class ClientSynchronizedMetronome extends RemoteSynchronizedMetronome {
 
     prepareSynchronizedStart(settings);
 
-    Future.delayed(RemoteSynchronizedMetronome.commandExecutionDuration, runSynchronizedStart);
+    Future.delayed(
+      RemoteSynchronizedMetronome.commandExecutionDuration,
+      runSynchronizedStart,
+    );
   }
 
   @override
@@ -35,7 +39,7 @@ class ClientSynchronizedMetronome extends RemoteSynchronizedMetronome {
       createStopCommand(),
     );
 
-    invokePlatformMethod('stop');
+    Metronome.metronomeLib.stop();
   }
 
   @protected
