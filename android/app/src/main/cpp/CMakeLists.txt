@@ -16,14 +16,13 @@ project("native-android-metronome")
 # Gradle automatically packages shared libraries with your APK.
 
 add_library( # Sets the name of the library.
-            native-android-metronome
+             native-android-metronome
 
              # Sets the library as a shared library.
              SHARED
 
              # Provides a relative path to your source file(s).
              AudioEngine.cpp
-             Oscillator.cpp
              AAssetDataSource.cpp
              NDKExtractor.cpp
              NativeAndroidMetronome.cpp

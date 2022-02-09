@@ -1,5 +1,4 @@
-import 'package:flutter/foundation.dart';
-import 'package:metronom/utils/validable/validable.dart';
+import 'validable.dart';
 
 class RangeValidableProperty implements Validable {
   final String name;
@@ -7,10 +6,12 @@ class RangeValidableProperty implements Validable {
   final dynamic minValue;
   final dynamic maxValue;
 
-  RangeValidableProperty(this.name,
-      {required this.propertyValue,
-      required this.minValue,
-      required this.maxValue});
+  RangeValidableProperty(
+    this.name, {
+    required this.propertyValue,
+    required this.minValue,
+    required this.maxValue,
+  });
 
   @override
   bool isValid() {

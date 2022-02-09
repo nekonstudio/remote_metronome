@@ -28,9 +28,10 @@ abstract class RemoteCommand {
     final separatedStringValues = stringData.split(';');
     final commandType = EnumStringConverter.enumFromString<RemoteCommandType>(
         separatedStringValues[0], RemoteCommandType.values);
-    final jsonParameters = _injectSenderIdToParameters(separatedStringValues[1], senderId);
+    final jsonParameters =
+        _injectSenderIdToParameters(separatedStringValues[1], senderId);
 
-    if (commandType == null || jsonParameters == null) {
+    if (commandType == null) {
       throw Exception('Invalid remote command');
     }
 
@@ -90,7 +91,8 @@ abstract class RemoteCommand {
     return utf8.encode(buffer.toString()) as Uint8List;
   }
 
-  static String _injectSenderIdToParameters(String parameters, String senderId) {
+  static String _injectSenderIdToParameters(
+      String parameters, String senderId) {
     if (parameters.isEmpty) return parameters;
 
     String output = parameters;
