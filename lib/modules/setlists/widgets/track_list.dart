@@ -25,7 +25,7 @@ class TrackList extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return NotificationListener<OverscrollIndicatorNotification>(
       onNotification: (OverscrollIndicatorNotification overscroll) {
-        overscroll.disallowGlow();
+        overscroll.disallowIndicator();
         return true;
       },
       child: ScrollablePositionedList.separated(
@@ -55,8 +55,9 @@ class TrackList extends ConsumerWidget {
                       : FontWeight.normal,
                 ),
               ),
-              subtitle: Text(
-                  track.isComplex! ? 'Złożony' : '${track.settings!.tempo} BPM'),
+              subtitle: Text(track.isComplex!
+                  ? 'Złożony'
+                  : '${track.settings!.tempo} BPM'),
             ),
           );
         },
