@@ -17,13 +17,13 @@ class Metronome extends MetronomeBase {
   }
 
   @override
-  void onChange(MetronomeSettings settings) {
-    metronomeLib.change(settings.tempo, settings.clicksPerBeat);
+  void onChange(MetronomeSettings settings, {bool immediate = true}) {
+    metronomeLib.change(settings.tempo, settings.clicksPerBeat, immediate);
   }
 
   @override
-  void onStop() {
-    metronomeLib.stop();
+  void onStop({bool immediate = true}) {
+    metronomeLib.stop(immediate: immediate);
   }
 
   @override

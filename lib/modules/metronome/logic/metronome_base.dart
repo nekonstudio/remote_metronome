@@ -22,13 +22,14 @@ abstract class MetronomeBase implements MetronomeInterface {
   }
 
   @override
-  void change(MetronomeSettings newSettings) {
-    _performIfIsPlayingEquals(true, () => _change(newSettings));
+  void change(MetronomeSettings newSettings, {bool immediate = true}) {
+    _performIfIsPlayingEquals(
+        true, () => _change(newSettings, immediate: immediate));
   }
 
   @override
-  void stop() {
-    _performIfIsPlayingEquals(true, _resetAndStop);
+  void stop({bool immediate = true}) {
+    _performIfIsPlayingEquals(true, () => _resetAndStop(immediate: immediate));
   }
 
   void copy(MetronomeBase other) {
@@ -47,9 +48,9 @@ abstract class MetronomeBase implements MetronomeInterface {
   @protected
   void onStart(MetronomeSettings settings);
   @protected
-  void onChange(MetronomeSettings settings);
+  void onChange(MetronomeSettings settings, {bool immediate = true});
   @protected
-  void onStop();
+  void onStop({bool immediate = true});
 
   void _performIfIsPlayingEquals(bool value, Function action) {
     if (value == _isPlaying) {
@@ -69,16 +70,18 @@ abstract class MetronomeBase implements MetronomeInterface {
     onStart(settings);
   }
 
-  void _change(MetronomeSettings settings) {
-    onChange(settings);
+  void _change(MetronomeSettings settings, {bool immediate = true}) {
+    onChange(settings, immediate: immediate);
   }
 
-  void _resetAndStop() {
-    _isPlaying = false;
-    _currentBarBeat = 0;
+  void _resetAndStop({bool immediate = true}) {
+    if (immediate) {
+      _isPlaying = false;
+      _currentBarBeat = 0;
 
-    _currentBarBeatSubscription.cancel();
+      _currentBarBeatSubscription.cancel();
+    }
 
-    onStop();
+    onStop(immediate: immediate);
   }
 }

@@ -15,7 +15,6 @@ class ComplexTrackPlayer extends TrackPlayer {
 
   int _currentSectionIndex = 0;
   int _currentSectionBar = 1;
-  int _currentClickPerBeat = 1;
   int _previousBarBeat = 1;
   StreamSubscription<dynamic>? _sub;
 
@@ -28,7 +27,7 @@ class ComplexTrackPlayer extends TrackPlayer {
 
     if (isPlaying) {
       _sub = metronome.getCurrentBarBeatStream().listen((currentBarBeat) {
-        _handleCurrentBarBeatChange(currentBarBeat as int?);
+        _handleCurrentBarBeatChange(currentBarBeat as int);
       });
     }
   }
@@ -44,7 +43,7 @@ class ComplexTrackPlayer extends TrackPlayer {
   @override
   void play() {
     _sub = metronome.getCurrentBarBeatStream().listen((currentBarBeat) {
-      _handleCurrentBarBeatChange(currentBarBeat as int?);
+      _handleCurrentBarBeatChange(currentBarBeat as int);
     });
 
     metronome.start(_currentSection.settings!);
@@ -72,34 +71,29 @@ class ComplexTrackPlayer extends TrackPlayer {
   void stop() {
     metronome.stop();
     _sub?.cancel();
-
     _resetSectionDataToDefaults();
   }
 
-  void _handleCurrentBarBeatChange(int? currentBarBeat) {
-    if (currentBarBeat == 0) return;
+  void _handleCurrentBarBeatChange(int currentBarBeat) {
+    if (currentBarBeat == 0) {
+      stop();
+      return;
+    }
 
     _changeToNextSectionOnLastBarBeat(currentBarBeat);
-    _updateSectionControlData(currentBarBeat!);
+    _updateSectionControlData(currentBarBeat);
     _stopIfEndOfSections();
   }
 
-  void _changeToNextSectionOnLastBarBeat(int? currentBarBeat) {
+  void _changeToNextSectionOnLastBarBeat(int currentBarBeat) {
     final isNotLastSection = _currentSectionIndex < track!.sections!.length - 1;
     final isLastSectionBar = _currentSectionBar == _currentSection.barsCount;
     final isLastBarBeat =
         currentBarBeat == _currentSection.settings!.beatsPerBar;
 
-    final sectionClicksPerBeat = _currentSection.settings!.clicksPerBeat;
-    final isPenultimateClickPerBeat = sectionClicksPerBeat == 1 ||
-        _currentClickPerBeat == sectionClicksPerBeat;
-
-    if (isNotLastSection &&
-        isLastSectionBar &&
-        isLastBarBeat &&
-        isPenultimateClickPerBeat) {
+    if (isNotLastSection && isLastSectionBar && isLastBarBeat) {
       final nextSection = track!.sections![_currentSectionIndex + 1];
-      metronome.change(nextSection.settings!);
+      metronome.change(nextSection.settings!, immediate: false);
     }
   }
 
@@ -114,19 +108,14 @@ class ComplexTrackPlayer extends TrackPlayer {
       }
     }
 
-    if (_currentSectionIndex < track!.sections!.length) {
-      _currentClickPerBeat++;
-      if (_currentClickPerBeat > _currentSection.settings!.clicksPerBeat) {
-        _currentClickPerBeat = 1;
-      }
-    }
-
     _previousBarBeat = currentBarBeat;
   }
 
   void _stopIfEndOfSections() {
-    if (_currentSectionIndex >= track!.sections!.length) {
-      stop();
+    if (_currentSectionIndex >= track!.sections!.length - 1) {
+      if (_currentSectionBar >= _currentSection.barsCount!) {
+        metronome.stop(immediate: false);
+      }
     }
   }
 
@@ -140,6 +129,5 @@ class ComplexTrackPlayer extends TrackPlayer {
     _currentSectionIndex = 0;
     _currentSectionBar = 1;
     _previousBarBeat = 1;
-    _currentClickPerBeat = 1;
   }
 }

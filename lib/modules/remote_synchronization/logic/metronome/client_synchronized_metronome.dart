@@ -34,12 +34,12 @@ class ClientSynchronizedMetronome extends RemoteSynchronizedMetronome {
   }
 
   @override
-  void stopMetronome() {
+  void stopMetronome({bool immediate = true}) {
     synchronization.broadcastRemoteCommand(
       createStopCommand(),
     );
 
-    Metronome.metronomeLib.stop();
+    Metronome.metronomeLib.stop(immediate: immediate);
   }
 
   @protected

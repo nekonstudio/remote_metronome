@@ -13,8 +13,8 @@ class WakelockMetronome extends Metronome {
   }
 
   @override
-  void onStop() {
-    stopMetronome();
+  void onStop({bool immediate = true}) {
+    stopMetronome(immediate: immediate);
 
     _toggleScreenWakelock();
   }
@@ -25,8 +25,8 @@ class WakelockMetronome extends Metronome {
   }
 
   @protected
-  void stopMetronome() {
-    super.onStop();
+  void stopMetronome({bool immediate = true}) {
+    super.onStop(immediate: immediate);
   }
 
   void _toggleScreenWakelock() => Wakelock.toggle(enable: isPlaying);

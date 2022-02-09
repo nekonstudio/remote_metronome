@@ -61,11 +61,11 @@ extern "C" {
         audioEngine.runSynchronizedStart();
     }
 
-    void change(int tempo, int clicksPerBeat) {
-        audioEngine.change(tempo, clicksPerBeat);
+    void change(int tempo, int clicksPerBeat, bool immediate) {
+        audioEngine.change(tempo, clicksPerBeat, immediate);
     }
 
-    void stop() {
-        audioEngine.requestStop();
+    void stop(bool immediate) {
+        audioEngine.requestStop(immediate);
     }
 }

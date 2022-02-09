@@ -12,8 +12,8 @@ public:
     ~AudioEngine();
 
     void start(int tempo, int clicksPerBeat, int beatsPerBar);
-    void change(int tempo, int clicksPerBeat);
-    void requestStop();
+    void change(int tempo, int clicksPerBeat, bool immediate);
+    void requestStop(bool immediate);
 
     void prepareSynchronizedStart(int tempo, int clicksPerBeat, int beatsPerBar);
     void runSynchronizedStart() { _playSynchronizedMetronome = true; }
@@ -40,10 +40,15 @@ private:
     std::atomic<int> _previousClicksPerBeat { 1};
 
     std::atomic<bool> _isStopRequested {false};
+    std::atomic<bool> _isChangePending {false};
+    std::atomic<bool> _waitToEndToStop {false};
 
     int _tempo;
     int _clicksPerBeat;
     int _beatsPerBar;
+
+    int _pendingTempo;
+    int _pendingClicksPerBeat;
 
     AAssetDataSource* _currentSoundSource = nullptr;
 

@@ -35,13 +35,13 @@ class NotifierMetronome with ChangeNotifier implements MetronomeInterface {
   }
 
   @override
-  void change(MetronomeSettings newSettings) {
-    impl.change(newSettings);
+  void change(MetronomeSettings newSettings, {bool immediate = true}) {
+    impl.change(newSettings, immediate: immediate);
   }
 
   @override
-  void stop() {
-    impl.stop();
+  void stop({bool immediate = true}) {
+    impl.stop(immediate: immediate);
   }
 
   void _subscribeToBarBeatChange() {

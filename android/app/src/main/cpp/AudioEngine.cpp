@@ -51,6 +51,7 @@ void AudioEngine::start(int tempo, int clicksPerBeat, int beatsPerBar)
     _tempo = tempo;
     _clicksPerBeat = clicksPerBeat;
     _beatsPerBar = beatsPerBar;
+    _isStopRequested = false;
 
     _currentBeatPerBar = 1;
     sendMsgToFlutter(_currentBeatPerBar);
@@ -62,10 +63,13 @@ void AudioEngine::start(int tempo, int clicksPerBeat, int beatsPerBar)
     }
 }
 
-void AudioEngine::requestStop()
+void AudioEngine::requestStop(bool immediate)
 {
-    sendMsgToFlutter(0);
-    _isStopRequested = true;
+    if (immediate) {
+        _isStopRequested = true;
+    } else {
+        _waitToEndToStop = true;
+    }
 }
 
 DataCallbackResult
@@ -97,6 +101,13 @@ AudioEngine::onAudioReady(AudioStream *audioStream, void *audioData, int32_t num
             if (_framesWritten >= framesToPlay) {
                 _framesWritten = 0;
 
+                if (_waitToEndToStop) {
+                    if (_currentBeatPerBar >= _beatsPerBar && _currentClickPerBeat >= _clicksPerBeat) {
+                        stop();
+                        return DataCallbackResult::Stop;
+                    }
+                }
+
                 handleMetronomeControlData();
 
                 _currentSoundSource = _currentBeatPerBar == 1
@@ -105,6 +116,15 @@ AudioEngine::onAudioReady(AudioStream *audioStream, void *audioData, int32_t num
 
                 readSoundBuffer = _currentSoundSource->getData();
                 bufferSize = _currentSoundSource->getSize();
+
+                if (_isChangePending) {
+                    if (_currentBeatPerBar == 1 && _currentClickPerBeat == 1) {
+                        _tempo = _pendingTempo;
+                        _clicksPerBeat = _pendingClicksPerBeat;
+
+                        _isChangePending = false;
+                    }
+                }
             }
         }
     }
@@ -138,15 +158,7 @@ void AudioEngine::setupAudioSources(AAssetManager &assetManager) {
 
 void AudioEngine::handleMetronomeControlData() {
     _currentClickPerBeat++;
-
-//    // switch to next beat when clicksPerBeat setting changed to higher value while playing
-//    if (_previousClicksPerBeat < _clicksPerBeat) {
-//        nextBeatPerBar();
-//
-//        _previousClicksPerBeat = _clicksPerBeat;
-//    }
-//    else
-        if (_currentClickPerBeat > _clicksPerBeat) {
+    if (_currentClickPerBeat > _clicksPerBeat) {
         nextBeatPerBar();
     }
 }
@@ -166,6 +178,7 @@ void AudioEngine::stop() {
     _isSynchronizedMetronome = false;
     _playSynchronizedMetronome = false;
     _isStopRequested = false;
+    _waitToEndToStop = false;
 
     _currentBeatPerBar = 0;
     _currentClickPerBeat = 1;
@@ -173,18 +186,22 @@ void AudioEngine::stop() {
 
     _currentSoundSource = _highSoundSource;
 
+    sendMsgToFlutter(_currentBeatPerBar);
+
     if (_stream) {
         _stream->requestStop();
     }
 }
 
-void AudioEngine::change(int tempo, int clicksPerBeat) {
-    if (tempo != _tempo) {
+void AudioEngine::change(int tempo, int clicksPerBeat, bool immediate) {
+    if (immediate) {
         _tempo = tempo;
-    }
-
-    if (clicksPerBeat != _clicksPerBeat) {
         _clicksPerBeat = clicksPerBeat;
+    } else {
+        _isChangePending = true;
+
+        _pendingTempo = tempo;
+        _pendingClicksPerBeat = clicksPerBeat;
     }
 }
 
