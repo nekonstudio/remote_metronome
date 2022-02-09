@@ -4,12 +4,12 @@ import 'circle_button.dart';
 
 class TextCircleButton extends StatelessWidget {
   final String text;
-  final double size;
-  final void Function() onPressed;
+  final double? size;
+  final void Function()? onPressed;
 
   const TextCircleButton(
     this.text, {
-    Key key,
+    Key? key,
     this.onPressed,
     this.size,
   }) : super(key: key);

@@ -1,54 +1,33 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'package:metronom/native_android_metronome_bridge.dart';
 
 import '../models/metronome_settings.dart';
 import 'metronome_base.dart';
 
 class Metronome extends MetronomeBase {
   @protected
-  static const platformChannel = const MethodChannel('com.example.metronom/metronom');
-
-  static Stream<dynamic> currentBarBeatStream =
-      const EventChannel('com.example.metronom/barBeatChannel').receiveBroadcastStream();
+  static final metronomeLib = NativeAndroidMetronomeBridge();
 
   @override
   void onStart(MetronomeSettings settings) {
-    invokePlatformMethod(
-      'start',
-      {
-        'tempo': settings.tempo,
-        'beatsPerBar': settings.beatsPerBar,
-        'clicksPerBeat': settings.clicksPerBeat,
-      },
-    );
+    metronomeLib.start(
+        settings.tempo, settings.clicksPerBeat, settings.beatsPerBar);
   }
 
   @override
-  void onChange(MetronomeSettings settings) {
-    invokePlatformMethod(
-      'change',
-      {
-        'tempo': settings.tempo,
-        'beatsPerBar': settings.beatsPerBar,
-        'clicksPerBeat': settings.clicksPerBeat,
-      },
-    );
+  void onChange(MetronomeSettings settings, {bool immediate = true}) {
+    metronomeLib.change(settings.tempo, settings.clicksPerBeat, immediate);
   }
 
   @override
-  void onStop() {
-    invokePlatformMethod('stop');
+  void onStop({bool immediate = true}) {
+    metronomeLib.stop(immediate: immediate);
   }
 
   @override
   Stream<dynamic> getCurrentBarBeatStream() {
-    return currentBarBeatStream;
-  }
-
-  @protected
-  void invokePlatformMethod(String methodName, [Map<String, dynamic> parameters]) {
-    platformChannel.invokeMethod(methodName, parameters);
+    return metronomeLib.currentBarBeatStream();
   }
 }

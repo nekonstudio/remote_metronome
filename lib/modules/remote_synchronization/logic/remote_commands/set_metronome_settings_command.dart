@@ -9,7 +9,7 @@ import 'remote_command.dart';
 import 'remote_command_type.dart';
 
 class SetMetronomeSettingsCommand extends RemoteCommand {
-  final MetronomeSettings metronomeSettings;
+  final MetronomeSettings? metronomeSettings;
 
   SetMetronomeSettingsCommand(this.metronomeSettings)
       : super(RemoteCommandType.SetMetronomeSettings);
@@ -25,10 +25,12 @@ class SetMetronomeSettingsCommand extends RemoteCommand {
 
   @override
   void execute(Reader providerReader) {
-    final remoteMetronomeScreenController = providerReader(remoteMetronomeScreenControllerProvider);
+    final remoteMetronomeScreenController =
+        providerReader(remoteMetronomeScreenControllerProvider);
     remoteMetronomeScreenController.setMetronomeSettings(metronomeSettings);
 
-    final remoteScreenState = providerReader(remoteScreenStateProvider);
+    final remoteScreenState =
+        providerReader(remoteScreenStateProvider.notifier);
     remoteScreenState.setSimpleMetronomeState();
   }
 
@@ -37,7 +39,7 @@ class SetMetronomeSettingsCommand extends RemoteCommand {
 
   Map<String, dynamic> toMap() {
     return {
-      'metronomeSettings': metronomeSettings.toMap(),
+      'metronomeSettings': metronomeSettings!.toMap(),
     };
   }
 }

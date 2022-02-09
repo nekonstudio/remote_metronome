@@ -3,12 +3,12 @@ import 'package:flutter/material.dart';
 import 'circle_button.dart';
 
 class IconCircleButton extends StatelessWidget {
-  final IconData icon;
-  final Color color;
-  final void Function() onPressed;
+  final IconData? icon;
+  final Color? color;
+  final void Function()? onPressed;
 
   const IconCircleButton({
-    Key key,
+    Key? key,
     this.icon,
     this.color,
     this.onPressed,

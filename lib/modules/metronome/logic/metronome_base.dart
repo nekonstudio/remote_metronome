@@ -6,18 +6,15 @@ import '../models/metronome_settings.dart';
 import 'metronome_interface.dart';
 
 abstract class MetronomeBase implements MetronomeInterface {
-  MetronomeSettings _settings;
-  int _currentBarBeat;
+  int? _currentBarBeat;
   bool _isPlaying = false;
-  StreamSubscription<dynamic> _currentBarBeatSubscription;
-
-  MetronomeSettings get settings => _settings;
+  late StreamSubscription<dynamic> _currentBarBeatSubscription;
 
   @override
   bool get isPlaying => _isPlaying;
 
   @override
-  int get currentBarBeat => _currentBarBeat;
+  int? get currentBarBeat => _currentBarBeat;
 
   @override
   void start(MetronomeSettings settings) {
@@ -25,17 +22,17 @@ abstract class MetronomeBase implements MetronomeInterface {
   }
 
   @override
-  void change(MetronomeSettings newSettings) {
-    _performIfIsPlayingEquals(true, () => _change(newSettings));
+  void change(MetronomeSettings newSettings, {bool immediate = true}) {
+    _performIfIsPlayingEquals(
+        true, () => _change(newSettings, immediate: immediate));
   }
 
   @override
-  void stop() {
-    _performIfIsPlayingEquals(true, _resetAndStop);
+  void stop({bool immediate = true}) {
+    _performIfIsPlayingEquals(true, () => _resetAndStop(immediate: immediate));
   }
 
   void copy(MetronomeBase other) {
-    _settings = other.settings;
     _currentBarBeat = other.currentBarBeat;
     _isPlaying = other.isPlaying;
 
@@ -51,9 +48,9 @@ abstract class MetronomeBase implements MetronomeInterface {
   @protected
   void onStart(MetronomeSettings settings);
   @protected
-  void onChange(MetronomeSettings settings);
+  void onChange(MetronomeSettings settings, {bool immediate = true});
   @protected
-  void onStop();
+  void onStop({bool immediate = true});
 
   void _performIfIsPlayingEquals(bool value, Function action) {
     if (value == _isPlaying) {
@@ -62,29 +59,29 @@ abstract class MetronomeBase implements MetronomeInterface {
   }
 
   void _setupAndStart(MetronomeSettings settings) {
-    _settings = settings;
     _isPlaying = true;
 
     _currentBarBeatSubscription = getCurrentBarBeatStream().listen((barBeat) {
       _currentBarBeat = barBeat;
+
+      print('_currentBarBeat: $_currentBarBeat');
     });
 
-    onStart(_settings);
+    onStart(settings);
   }
 
-  void _change(MetronomeSettings newSettings) {
-    _settings = newSettings;
-
-    onChange(_settings);
+  void _change(MetronomeSettings settings, {bool immediate = true}) {
+    onChange(settings, immediate: immediate);
   }
 
-  void _resetAndStop() {
-    _settings = null;
-    _isPlaying = false;
-    _currentBarBeat = 0;
+  void _resetAndStop({bool immediate = true}) {
+    if (immediate) {
+      _isPlaying = false;
+      _currentBarBeat = 0;
 
-    _currentBarBeatSubscription.cancel();
+      _currentBarBeatSubscription.cancel();
+    }
 
-    onStop();
+    onStop(immediate: immediate);
   }
 }

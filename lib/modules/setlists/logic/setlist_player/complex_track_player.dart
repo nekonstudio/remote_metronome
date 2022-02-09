@@ -6,7 +6,8 @@ import '../../models/track.dart';
 import 'track_player.dart';
 
 class ComplexTrackPlayer extends TrackPlayer {
-  ComplexTrackPlayer(Track track, MetronomeBase metronome) : super(track, metronome) {
+  ComplexTrackPlayer(Track track, MetronomeBase metronome)
+      : super(track, metronome) {
     assert(track.isComplex == true);
 
     print('ComplexTrackPlayer(${track.name})');
@@ -14,12 +15,11 @@ class ComplexTrackPlayer extends TrackPlayer {
 
   int _currentSectionIndex = 0;
   int _currentSectionBar = 1;
-  int _currentClickPerBeat = 1;
   int _previousBarBeat = 1;
-  StreamSubscription<dynamic> _sub;
+  StreamSubscription<dynamic>? _sub;
 
   @override
-  void copy(TrackPlayer other) {
+  void copy(TrackPlayer? other) {
     final complexTrackPlayer = other as ComplexTrackPlayer;
     _currentSectionIndex = complexTrackPlayer.currentSectionIndex;
     _currentSectionBar = complexTrackPlayer.currentSectionBar;
@@ -32,7 +32,7 @@ class ComplexTrackPlayer extends TrackPlayer {
     }
   }
 
-  Section get _currentSection => track.sections[_currentSectionIndex];
+  Section get _currentSection => track!.sections![_currentSectionIndex];
 
   @override
   int get currentSectionIndex => _currentSectionIndex;
@@ -46,12 +46,12 @@ class ComplexTrackPlayer extends TrackPlayer {
       _handleCurrentBarBeatChange(currentBarBeat as int);
     });
 
-    metronome.start(_currentSection.settings);
+    metronome.start(_currentSection.settings!);
   }
 
   @override
   void selectNextSection() {
-    if (_currentSectionIndex < track.sections.length - 1) {
+    if (_currentSectionIndex < track!.sections!.length - 1) {
       _currentSectionIndex++;
 
       _onSectionChange();
@@ -71,12 +71,14 @@ class ComplexTrackPlayer extends TrackPlayer {
   void stop() {
     metronome.stop();
     _sub?.cancel();
-
     _resetSectionDataToDefaults();
   }
 
   void _handleCurrentBarBeatChange(int currentBarBeat) {
-    if (currentBarBeat == 0) return;
+    if (currentBarBeat == 0) {
+      stop();
+      return;
+    }
 
     _changeToNextSectionOnLastBarBeat(currentBarBeat);
     _updateSectionControlData(currentBarBeat);
@@ -84,17 +86,14 @@ class ComplexTrackPlayer extends TrackPlayer {
   }
 
   void _changeToNextSectionOnLastBarBeat(int currentBarBeat) {
-    final isNotLastSection = _currentSectionIndex < track.sections.length - 1;
+    final isNotLastSection = _currentSectionIndex < track!.sections!.length - 1;
     final isLastSectionBar = _currentSectionBar == _currentSection.barsCount;
-    final isLastBarBeat = currentBarBeat == _currentSection.settings.beatsPerBar;
+    final isLastBarBeat =
+        currentBarBeat == _currentSection.settings!.beatsPerBar;
 
-    final sectionClicksPerBeat = _currentSection.settings.clicksPerBeat;
-    final isPenultimateClickPerBeat =
-        sectionClicksPerBeat == 1 || _currentClickPerBeat == sectionClicksPerBeat;
-
-    if (isNotLastSection && isLastSectionBar && isLastBarBeat && isPenultimateClickPerBeat) {
-      final nextSection = track.sections[_currentSectionIndex + 1];
-      metronome.change(nextSection.settings);
+    if (isNotLastSection && isLastSectionBar && isLastBarBeat) {
+      final nextSection = track!.sections![_currentSectionIndex + 1];
+      metronome.change(nextSection.settings!, immediate: false);
     }
   }
 
@@ -102,17 +101,10 @@ class ComplexTrackPlayer extends TrackPlayer {
     if (_previousBarBeat > currentBarBeat) {
       _currentSectionBar++;
 
-      if (_currentSectionBar > _currentSection.barsCount) {
+      if (_currentSectionBar > _currentSection.barsCount!) {
         _currentSectionBar = 1;
 
         _currentSectionIndex++;
-      }
-    }
-
-    if (_currentSectionIndex < track.sections.length) {
-      _currentClickPerBeat++;
-      if (_currentClickPerBeat > _currentSection.settings.clicksPerBeat) {
-        _currentClickPerBeat = 1;
       }
     }
 
@@ -120,21 +112,22 @@ class ComplexTrackPlayer extends TrackPlayer {
   }
 
   void _stopIfEndOfSections() {
-    if (_currentSectionIndex >= track.sections.length) {
-      stop();
+    if (_currentSectionIndex >= track!.sections!.length - 1) {
+      if (_currentSectionBar >= _currentSection.barsCount!) {
+        metronome.stop(immediate: false);
+      }
     }
   }
 
   void _onSectionChange() {
     _currentSectionBar = 1;
 
-    metronome.change(_currentSection.settings);
+    metronome.change(_currentSection.settings!);
   }
 
   void _resetSectionDataToDefaults() {
     _currentSectionIndex = 0;
     _currentSectionBar = 1;
     _previousBarBeat = 1;
-    _currentClickPerBeat = 1;
   }
 }

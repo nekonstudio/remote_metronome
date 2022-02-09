@@ -15,22 +15,45 @@ import '../widgets/metronome_settings_panel.dart';
 import '../widgets/metronome_visualization.dart';
 import '../widgets/tap_tempo_detector_button.dart';
 
-class SimpleMetronomeScreen extends ConsumerWidget {
+class SimpleMetronomeScreen extends ConsumerStatefulWidget {
+  @override
+  ConsumerState<ConsumerStatefulWidget> createState() =>
+      _SimpleMetronmeScreenState();
+}
+
+class _SimpleMetronmeScreenState extends ConsumerState<SimpleMetronomeScreen> {
   final _tapTempoDetectorProvider = ChangeNotifierProvider(
     (ref) => NotifierTapTempoDetector(),
   );
 
+  late final MetronomeSettingsController metronomeSettingsControllerReadonly;
+
   @override
-  Widget build(BuildContext context, ScopedReader watch) {
-    final remoteSynchronization = watch(synchronizationProvider);
+  void initState() {
+    super.initState();
 
-    final metronomeSettingsController = watch(simpleMetronomeSettingsControllerProvider);
-    metronomeSettingsController.addListener(() {
-      context.read(_tapTempoDetectorProvider).reset();
-      context.read(metronomeProvider).change(metronomeSettingsController.value);
-    });
+    metronomeSettingsControllerReadonly = ref
+        .read(simpleMetronomeSettingsControllerProvider)
+      ..addListener(_onMetronomeSettingsChanged);
+  }
 
-    final isSynchronized = watch(deviceSynchronizationModeNotifierProvider).isSynchronized;
+  @override
+  void dispose() {
+    metronomeSettingsControllerReadonly
+        .removeListener(_onMetronomeSettingsChanged);
+
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final remoteSynchronization = ref.watch(synchronizationProvider);
+
+    final metronomeSettingsController =
+        ref.watch(simpleMetronomeSettingsControllerProvider);
+
+    final isSynchronized =
+        ref.watch(deviceSynchronizationModeNotifierProvider).isSynchronized;
     if (isSynchronized) {
       remoteSynchronization.broadcastRemoteCommand(
         SetMetronomeSettingsCommand(metronomeSettingsController.value),
@@ -39,7 +62,7 @@ class SimpleMetronomeScreen extends ConsumerWidget {
 
     return WillPopScope(
       onWillPop: () {
-        context.read(metronomeProvider).stop();
+        ref.read(metronomeProvider).stop();
         return Future.value(true);
       },
       child: RemoteModeScreen(
@@ -54,7 +77,7 @@ class SimpleMetronomeScreen extends ConsumerWidget {
                 padding: const EdgeInsets.only(top: 20.0),
                 child: ValueListenableBuilder(
                   valueListenable: metronomeSettingsController,
-                  builder: (context, metronomeSettings, child) =>
+                  builder: (context, dynamic metronomeSettings, child) =>
                       MetronomeVisualization(metronomeSettings.beatsPerBar),
                 ),
               ),
@@ -66,13 +89,13 @@ class SimpleMetronomeScreen extends ConsumerWidget {
                 children: [
                   Expanded(
                     child: Consumer(
-                      builder: (context, watch, child) {
-                        final isPlaying = watch(isMetronomePlayingProvider);
+                      builder: (context, ref, child) {
+                        final isPlaying = ref.watch(isMetronomePlayingProvider);
                         return IconCircleButton(
                           icon: isPlaying ? Icons.pause : Icons.play_arrow,
                           color: Colors.red,
                           onPressed: () => _handleMetronomePlaying(
-                            context,
+                            ref,
                             metronomeSettingsController,
                           ),
                         );
@@ -81,9 +104,11 @@ class SimpleMetronomeScreen extends ConsumerWidget {
                   ),
                   Expanded(
                     child: Consumer(
-                      builder: (context, watch, child) {
-                        final tapTempoDetector = watch(_tapTempoDetectorProvider);
-                        final isMetronomePlaying = watch(metronomeProvider).isPlaying;
+                      builder: (context, ref, child) {
+                        final tapTempoDetector =
+                            ref.watch(_tapTempoDetectorProvider);
+                        final isMetronomePlaying =
+                            ref.watch(metronomeProvider).isPlaying;
 
                         return TapTempoDetectorButton(
                           isTempoDetectionActive: tapTempoDetector.isActive,
@@ -108,6 +133,13 @@ class SimpleMetronomeScreen extends ConsumerWidget {
     );
   }
 
+  void _onMetronomeSettingsChanged() {
+    ref.read(_tapTempoDetectorProvider).reset();
+    ref
+        .read(metronomeProvider)
+        .change(ref.read(simpleMetronomeSettingsControllerProvider).value);
+  }
+
   void _onTapTempoDetectorButtonPress(
     bool isMetronomePlaying,
     NotifierTapTempoDetector tapTempoDetector,
@@ -123,13 +155,13 @@ class SimpleMetronomeScreen extends ConsumerWidget {
   }
 
   void _handleMetronomePlaying(
-    BuildContext context,
+    WidgetRef ref,
     MetronomeSettingsController metronomeSettingsController,
   ) {
-    final metronome = context.read(metronomeProvider);
+    final metronome = ref.read(metronomeProvider);
     if (!metronome.isPlaying) {
       metronome.start(metronomeSettingsController.value);
-      context.read(_tapTempoDetectorProvider).reset();
+      ref.read(_tapTempoDetectorProvider).reset();
     } else {
       metronome.stop();
     }

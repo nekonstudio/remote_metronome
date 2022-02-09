@@ -9,14 +9,14 @@ class RemoteMetronomeTrackPanelWidgetList implements WidgetList {
   final SetlistPlayerInterface setlistPlayer;
 
   const RemoteMetronomeTrackPanelWidgetList({
-    @required this.setlistPlayer,
+    required this.setlistPlayer,
   });
 
   @override
   List<Widget> getWidgetList() {
-    final currentTrack = setlistPlayer.currentTrack;
+    final currentTrack = setlistPlayer.currentTrack!;
     final metronomeSettings =
-        currentTrack.isComplex ? setlistPlayer.currentSection.settings : currentTrack.settings;
+        currentTrack.isComplex! ? setlistPlayer.currentSection!.settings : currentTrack.settings;
 
     return [
       ...RemoteMetronomePanelWidgetList(metronomeSettings: metronomeSettings).getWidgetList(),
@@ -30,7 +30,7 @@ class RemoteMetronomeTrackPanelWidgetList implements WidgetList {
       SizedBox(
         height: 30,
       ),
-      if (currentTrack.isComplex)
+      if (currentTrack.isComplex!)
         Container(
           padding: const EdgeInsets.symmetric(vertical: 20),
           color: Colors.black38,

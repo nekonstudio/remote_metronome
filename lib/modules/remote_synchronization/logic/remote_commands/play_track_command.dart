@@ -9,27 +9,32 @@ import 'remote_command.dart';
 import 'remote_command_type.dart';
 
 class PlayTrackCommand extends RemoteCommand {
-  PlayTrackCommand({DateTime hostStartTime}) : super(RemoteCommandType.PlayTrack) {
+  PlayTrackCommand({DateTime? hostStartTime})
+      : super(RemoteCommandType.PlayTrack) {
     _hostStartTime = hostStartTime ?? DateTime.now();
   }
 
-  DateTime _hostStartTime;
+  DateTime? _hostStartTime;
 
-  factory PlayTrackCommand.fromJson(String source) => PlayTrackCommand.fromMap(json.decode(source));
+  factory PlayTrackCommand.fromJson(String source) =>
+      PlayTrackCommand.fromMap(json.decode(source));
 
   factory PlayTrackCommand.fromMap(Map<String, dynamic> map) =>
-      PlayTrackCommand(hostStartTime: DateTime.fromMillisecondsSinceEpoch(map['hostStartTime']));
+      PlayTrackCommand(
+          hostStartTime:
+              DateTime.fromMillisecondsSinceEpoch(map['hostStartTime']));
 
   @override
   void execute(Reader providerReader) {
-    final remoteScreenState = providerReader(remoteScreenStateProvider);
+    final remoteScreenState =
+        providerReader(remoteScreenStateProvider.notifier);
     final setlist = remoteScreenState.setlist;
 
     if (setlist != null) {
       final synchronization = providerReader(synchronizationProvider);
       synchronization.hostStartTime = _hostStartTime;
 
-      final setlistPlayer = providerReader(setlistPlayerProvider(setlist));
+      final setlistPlayer = providerReader(setlistPlayerProvider!(setlist));
       setlistPlayer.play();
     }
   }
@@ -39,7 +44,7 @@ class PlayTrackCommand extends RemoteCommand {
 
   Map<String, dynamic> toMap() {
     return {
-      'hostStartTime': _hostStartTime.millisecondsSinceEpoch,
+      'hostStartTime': _hostStartTime!.millisecondsSinceEpoch,
     };
   }
 }

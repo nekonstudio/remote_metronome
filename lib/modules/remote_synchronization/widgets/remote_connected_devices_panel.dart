@@ -6,15 +6,15 @@ import '../providers/nearby_devices_provider.dart';
 import '../providers/remote_synchronization_provider.dart';
 import 'connected_nearby_devices_list.dart';
 
-class RemoteConnectedDevicesPanel extends StatelessWidget {
+class RemoteConnectedDevicesPanel extends ConsumerWidget {
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Column(
       children: [
         ListTile(
           leading: Icon(
             Icons.connect_without_contact,
-            color: Get.theme.accentColor,
+            color: Get.theme.colorScheme.secondary,
           ),
           title: Text('Wspólne odtwarzanie'),
           subtitle: Text('Połączone urządzenia'),
@@ -40,8 +40,8 @@ class RemoteConnectedDevicesPanel extends StatelessWidget {
               ElevatedButton(
                 child: Text('Zakończ'),
                 onPressed: () {
-                  context.read(nearbyDevicesProvider).finish();
-                  context.read(synchronizationProvider).end();
+                  ref.read(nearbyDevicesProvider).finish();
+                  ref.read(synchronizationProvider).end();
                   Get.back();
                 },
               ),

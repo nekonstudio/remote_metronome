@@ -6,7 +6,7 @@ import '../models/setlist.dart';
 
 class SetlistForm extends StatelessWidget {
   final SetlistManager setlistManager;
-  final Setlist existingSetlist;
+  final Setlist? existingSetlist;
 
   SetlistForm(this.setlistManager, {this.existingSetlist});
 
@@ -30,7 +30,7 @@ class SetlistForm extends StatelessWidget {
                 leading:
                     Icon(existingSetlist == null ? Icons.playlist_add : Icons.playlist_add_check),
                 title: Text(existingSetlist == null ? 'Nowa setlista' : 'Edytuj setlistę'),
-                subtitle: existingSetlist == null ? null : Text(existingSetlist.name),
+                subtitle: existingSetlist == null ? null : Text(existingSetlist!.name!),
               ),
             ),
             Padding(
@@ -39,7 +39,7 @@ class SetlistForm extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   TextFormField(
-                    initialValue: existingSetlist == null ? '' : existingSetlist.name,
+                    initialValue: existingSetlist == null ? '' : existingSetlist!.name,
                     decoration: InputDecoration(labelText: 'Nazwa'),
                     autofocus: true,
                     validator: _validate,
@@ -66,8 +66,8 @@ class SetlistForm extends StatelessWidget {
     );
   }
 
-  String _validate(String value) {
-    if (value.isEmpty) {
+  String? _validate(String? value) {
+    if (value!.isEmpty) {
       return 'Wprowadź nazwę';
     }
 
@@ -75,12 +75,12 @@ class SetlistForm extends StatelessWidget {
   }
 
   void _onSubmit() {
-    if (_formKey.currentState.validate()) {
-      _formKey.currentState.save();
+    if (_formKey.currentState!.validate()) {
+      _formKey.currentState!.save();
     }
   }
 
-  void _save(BuildContext context, String name) {
+  void _save(BuildContext context, String? name) {
     if (existingSetlist == null) {
       setlistManager.addSetlist(name);
     } else {

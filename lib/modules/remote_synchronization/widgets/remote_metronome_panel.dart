@@ -16,19 +16,21 @@ class RemoteMetronomePanel extends ConsumerWidget {
   const RemoteMetronomePanel(this.hostName, this.showEndDialog);
 
   @override
-  Widget build(BuildContext context, ScopedReader watch) {
-    final controller = watch(remoteMetronomeScreenControllerProvider);
+  Widget build(BuildContext context, WidgetRef ref) {
+    final controller = ref.watch(remoteMetronomeScreenControllerProvider);
     if (!controller.isInitialized) {
       return Center(child: CircularProgressIndicator());
     }
 
-    final state = watch(remoteScreenStateProvider.state);
+    final state = ref.watch(remoteScreenStateProvider);
 
     WidgetList metronomePanel = state == ScreenState.SimpleMetronome
-        ? RemoteMetronomePanelWidgetList(metronomeSettings: controller.metronomeSettings)
+        ? RemoteMetronomePanelWidgetList(
+            metronomeSettings: controller.metronomeSettings)
         : RemoteMetronomeTrackPanelWidgetList(
-            setlistPlayer: watch(
-              setlistPlayerProvider(context.read(remoteScreenStateProvider).setlist),
+            setlistPlayer: ref.watch(
+              setlistPlayerProvider!(
+                  ref.read(remoteScreenStateProvider.notifier).setlist!),
             ),
           );
 
@@ -54,7 +56,7 @@ class RemoteMetronomePanel extends ConsumerWidget {
               ...metronomePanel.getWidgetList(),
             ],
           ),
-          RaisedButton(
+          ElevatedButton(
             child: Text('Zakończ'),
             onPressed: () async {
               final isEnded = await showEndDialog();

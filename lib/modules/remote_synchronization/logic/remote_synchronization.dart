@@ -11,15 +11,15 @@ class RemoteSynchronization {
 
   RemoteSynchronization(this.nearbyDevices, this.synchronizationMode);
 
-  DateTime hostStartTime;
+  DateTime? hostStartTime;
 
-  int _clockSyncLatency;
-  int _hostTimeDifference;
-  int _targetSynchronizedDevicesCount;
+  int? _clockSyncLatency;
+  int? _hostTimeDifference;
+  int? _targetSynchronizedDevicesCount;
   int _synchronizedDevicesCount = 0;
 
-  int get clockSyncLatency => _clockSyncLatency;
-  int get hostTimeDifference => _hostTimeDifference;
+  int? get clockSyncLatency => _clockSyncLatency;
+  int? get hostTimeDifference => _hostTimeDifference;
 
   void synchronize() {
     _targetSynchronizedDevicesCount = nearbyDevices.connectedDevicesCount;
@@ -53,7 +53,7 @@ class RemoteSynchronization {
   // Sender:    Client
   // Receiver:  Host
   void onClockSyncResponse(
-    String clientEndpointId,
+    String? clientEndpointId,
     DateTime startTime,
     DateTime clientResponseTime,
   ) {
@@ -61,26 +61,26 @@ class RemoteSynchronization {
 
     print('Clock sync latency: ($_clockSyncLatency ms)');
 
-    if (_clockSyncLatency > 15) {
+    if (_clockSyncLatency! > 15) {
       // perform clock sync as long as you get satisfying latency for reliable result
       print('To big latency, trying again');
 
       final timestamp = DateTime.now().millisecondsSinceEpoch;
       final command = ClockSyncRequestCommand(timestamp);
-      _sendRemoteCommand(clientEndpointId, command);
+      _sendRemoteCommand(clientEndpointId!, command);
     } else {
       print('Start time: $startTime');
       print('Client response time: $clientResponseTime');
 
       final remoteTimeDiff = clientResponseTime.difference(startTime).inMilliseconds;
       final timeDifference = (remoteTimeDiff >= 0)
-          ? remoteTimeDiff - _clockSyncLatency.toInt()
-          : remoteTimeDiff + _clockSyncLatency.toInt();
+          ? remoteTimeDiff - _clockSyncLatency!.toInt()
+          : remoteTimeDiff + _clockSyncLatency!.toInt();
 
       print('Host clock sync success! Remote time difference: $timeDifference');
 
       final command = ClockSyncSuccessCommand(-timeDifference, _clockSyncLatency);
-      _sendRemoteCommand(clientEndpointId, command);
+      _sendRemoteCommand(clientEndpointId!, command);
 
       _synchronizedDevicesCount++;
 
@@ -92,7 +92,7 @@ class RemoteSynchronization {
 
   // Sender:    Host
   // Receiver:  Client
-  void onClockSyncSuccess(int hostTimeDifference, int clockSyncLatency) {
+  void onClockSyncSuccess(int? hostTimeDifference, int? clockSyncLatency) {
     _hostTimeDifference = hostTimeDifference;
     _clockSyncLatency = clockSyncLatency;
 

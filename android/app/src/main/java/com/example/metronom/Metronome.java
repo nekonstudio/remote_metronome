@@ -3,13 +3,14 @@ package com.example.metronom;
 
 import android.os.Handler;
 import android.os.Looper;
+import android.util.Log;
 
 import io.flutter.plugin.common.EventChannel;
 
 class Metronome {
     private static final String TAG = "Metronome";
 
-    private MetronomeSoundPlayer _soundPlayer;
+    private SoundPlayer _soundPlayer;
     private EventChannel.EventSink _barBeatEventStream;
 
     private boolean _isPlaying;
@@ -17,12 +18,10 @@ class Metronome {
     private MetronomeSettings _settings;
 
     private int _previousClicksPerBeat;
-    private boolean _isSynchronizedMetronome;
-    private boolean _playSynchronizedMetronome;
     private Integer _currentBeatPerBar = 1;
     private int _currentClickPerBeat = 1;
 
-    Metronome(MetronomeSoundPlayer soundPlayer, EventChannel barBeatChannel) {
+    Metronome(SoundPlayer soundPlayer, EventChannel barBeatChannel) {
         _soundPlayer = soundPlayer;
 
         barBeatChannel.setStreamHandler(new EventChannel.StreamHandler() {
@@ -44,41 +43,38 @@ class Metronome {
         _settings = metronomeSettings;
         _previousClicksPerBeat = metronomeSettings.clicksPerBeat;
 
-        _soundPlayer.configure(metronomeSettings);
-        _soundPlayer.start();
+//        _soundPlayer.setMetronomeSettings(metronomeSettings.tempo, metronomeSettings.clicksPerBeat);
+//        _soundPlayer.start();
 
         new MetronomePlayerThread().start();
     }
 
     void prepareSynchronizedStart(MetronomeSettings metronomeSettings) {
-        _isSynchronizedMetronome = true;
-        _playSynchronizedMetronome = false;
+//        _soundPlayer.setIsSynchronizedMetronome(true);
+//        _soundPlayer.setPlaySynchronizedMetronome(false);
 
         start(metronomeSettings);
     }
 
     void synchronizedStart() {
-        _playSynchronizedMetronome = true;
+//        _soundPlayer.setPlaySynchronizedMetronome(true);
     }
 
     void change(MetronomeSettings metronomeSettings) {
         _previousClicksPerBeat = _settings.clicksPerBeat;
         _settings = metronomeSettings;
 
-        _soundPlayer.configure(metronomeSettings);
+//        _soundPlayer.setMetronomeSettings(metronomeSettings.tempo, metronomeSettings.clicksPerBeat);
     }
 
     void stop() {
         _isPlaying = false;
 
-        _soundPlayer.stop();
+//        _soundPlayer.requestStop();
 
         _currentBeatPerBar = 1;
         _currentClickPerBeat = 1;
         _previousClicksPerBeat = 1;
-
-        _isSynchronizedMetronome = false;
-        _playSynchronizedMetronome = false;
 
         _barBeatEventStream.success(0);
     }
@@ -92,15 +88,13 @@ class Metronome {
             while(_isPlaying)
             {
                 streamCurrentBeatsPerBar(handler);
-                _soundPlayer.generateCurrentSound(_currentBeatPerBar, _currentClickPerBeat);
 
-                if (_isSynchronizedMetronome) {
-                    while (!_playSynchronizedMetronome) {
-                        android.os.SystemClock.sleep(1);
-                    }
-                }
-
-                _soundPlayer.playCurrentSound();
+//                _soundPlayer.setCurrentBeatPerBar(_currentBeatPerBar, _currentClickPerBeat);
+//
+//                while (!_soundPlayer.shouldGoToNextBeat()) {
+//                }
+//
+//                _soundPlayer.resetShouldGoToNextBeat();
                 handleMetronomeControlData();
             }
         }
@@ -116,6 +110,7 @@ class Metronome {
         }
 
         private void handleMetronomeControlData() {
+            Log.d(TAG, "_currentClickPerBeat: " + _currentClickPerBeat);
             _currentClickPerBeat++;
 
             // switch to next beat when clicksPerBeat setting changed to higher value while playing
@@ -130,6 +125,7 @@ class Metronome {
         }
 
         private void nextBeatPerBar() {
+            Log.d(TAG, "nextBeatPerBar");
             _currentClickPerBeat = 1;
             _currentBeatPerBar++;
             if (_currentBeatPerBar > _settings.beatsPerBar) {

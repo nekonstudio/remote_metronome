@@ -1,10 +1,13 @@
 package com.example.metronom;
 
+import static android.content.ContentValues.TAG;
+
 import android.content.res.AssetFileDescriptor;
 import android.content.res.AssetManager;
 import android.media.AudioFormat;
 import android.media.AudioManager;
 import android.media.AudioTrack;
+import android.util.Log;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
@@ -36,10 +39,16 @@ class MetronomeSoundPlayer {
                     AudioFormat.ENCODING_PCM_16BIT),
             AudioTrack.MODE_STREAM);
 
-    private final Map<SoundId, byte[]> _soundBuffers = new HashMap<>();
+    private final SoundPlayer _testSoundPlayer = new SoundPlayer();
+
+    public final Map<SoundId, byte[]> _soundBuffers = new HashMap<>();
 
     private byte[] _currentSoundData;
     private int _currentSoundDataLength;
+
+//    void setupAudioSources(AssetManager assets) {
+//        _testSoundPlayer.setupAudioSources(assets);
+//    }
 
     void loadSoundsFromAssets(AssetManager assets) {
         final Map<SoundId, String> soundFileNames = new HashMap<SoundId, String>() {{
@@ -85,17 +94,31 @@ class MetronomeSoundPlayer {
     }
 
     void configure(MetronomeSettings metronomeSettings) {
-        _currentSoundDataLength = (int) (SOUND_SAMPLE_RATE * (((1 / ( (double) metronomeSettings.tempo / 60)) / metronomeSettings.clicksPerBeat) ) );
+//        _currentSoundDataLength = (int) (SOUND_SAMPLE_RATE * (((1 / ( (double) metronomeSettings.tempo / 60)) / metronomeSettings.clicksPerBeat) ) );
+//
+//        Log.d(TAG, "configure: _currentSoundDataLength - " + _currentSoundDataLength);
+
+//        _testSoundPlayer.setMetronomeSettings(metronomeSettings.tempo, metronomeSettings.clicksPerBeat);
     }
 
     void start() {
-        _audioTrack.play();
+//        _audioTrack.play();
+//        _testSoundPlayer.start();
     }
 
     void stop() {
-        _audioTrack.pause();
-        _audioTrack.flush();
+//        _audioTrack.pause();
+//        _audioTrack.flush();
+//        _testSoundPlayer.requestStop();
     }
+
+//    boolean canProceed() {
+//        return _testSoundPlayer.shouldGoToNextBeat();
+//    }
+//
+//    void setToDefault() {
+//        _testSoundPlayer.resetShouldGoToNextBeat();
+//    }
 
     void generateCurrentSound(int currentBeatsPerBar, int currentClickPerBeat) {
         SoundId soundId = currentBeatsPerBar == 1
@@ -114,6 +137,14 @@ class MetronomeSoundPlayer {
                 _currentSoundData[i] = 0;
             }
         }
+    }
+
+    byte[] getSoundBuffer(int currentBeatsPerBar, int currentClickPerBeat) {
+        SoundId soundId = currentBeatsPerBar == 1
+                ? currentClickPerBeat == 1 ? SoundId.HIGH_SOUND : SoundId.LOW_SOUND
+                : currentClickPerBeat == 1 ? SoundId.MEDIUM_SOUND : SoundId.LOW_SOUND;
+
+        return _soundBuffers.get(soundId);
     }
 
     void playCurrentSound() {

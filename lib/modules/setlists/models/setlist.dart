@@ -4,7 +4,7 @@ import 'track.dart';
 
 class Setlist {
   final String id = DateTime.now().toString();
-  String name;
+  String? name;
   final List<Track> _tracks = [];
 
   Setlist(
@@ -30,7 +30,8 @@ class Setlist {
   }
 
   void editTrack(String trackId, Track newTrack) {
-    final index = _tracks.indexOf(_tracks.firstWhere((element) => element.id == trackId));
+    final index =
+        _tracks.indexOf(_tracks.firstWhere((element) => element.id == trackId));
     _tracks[index] = newTrack;
   }
 
@@ -45,18 +46,17 @@ class Setlist {
   Map<String, dynamic> toMap() {
     return {
       'name': name,
-      'tracks': _tracks?.map((x) => x?.toMap())?.toList(),
+      'tracks': _tracks.map((x) => x.toMap()).toList(),
     };
   }
 
   factory Setlist.fromMap(Map<String, dynamic> map) {
-    if (map == null) return null;
-
     final setlist = Setlist(
       map['name'],
     );
 
-    final tracks = List<Track>.from(map['tracks']?.map((x) => Track.fromMap(x)));
+    final tracks =
+        List<Track>.from(map['tracks']?.map((x) => Track.fromMap(x)));
 
     for (final track in tracks) {
       setlist.addTrack(track);
@@ -67,7 +67,8 @@ class Setlist {
 
   String toJson() => json.encode(toMap());
 
-  factory Setlist.fromJson(String source) => Setlist.fromMap(json.decode(source));
+  factory Setlist.fromJson(String source) =>
+      Setlist.fromMap(json.decode(source));
 
   @override
   String toString() => 'Setlist(name: $name, tracks: $_tracks)';

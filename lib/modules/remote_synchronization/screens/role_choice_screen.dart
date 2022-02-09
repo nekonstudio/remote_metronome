@@ -6,10 +6,10 @@ import '../../metronome/providers/metronome_provider.dart';
 import 'client_connecting_screen.dart';
 import 'host_connecting_screen.dart';
 
-class RoleChoiceScreen extends StatelessWidget {
+class RoleChoiceScreen extends ConsumerWidget {
   @override
-  Widget build(BuildContext context) {
-    context.read(metronomeProvider).stop();
+  Widget build(BuildContext context, WidgetRef ref) {
+    ref.read(metronomeProvider).stop();
 
     return Scaffold(
       appBar: AppBar(
@@ -45,11 +45,11 @@ class _Option extends StatelessWidget {
   final Widget nextScreen;
 
   const _Option({
-    Key key,
-    @required this.title,
-    @required this.subtitle,
-    @required this.buttonText,
-    @required this.nextScreen,
+    Key? key,
+    required this.title,
+    required this.subtitle,
+    required this.buttonText,
+    required this.nextScreen,
   }) : super(key: key);
 
   @override
@@ -72,7 +72,7 @@ class _Option extends StatelessWidget {
             child: Text(buttonText),
             onPressed: () {
               Get.to(
-                nextScreen,
+                () => nextScreen,
               );
             },
           ),

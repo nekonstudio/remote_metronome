@@ -6,12 +6,12 @@ import '../controllers/metronome_settings_controller.dart';
 import 'change_tempo_button.dart';
 
 class MetronomeSettingsPanel extends StatelessWidget {
-  final MetronomeSettingsController metronomeSettingsController;
+  final MetronomeSettingsController? metronomeSettingsController;
   final bool compactLayout;
 
   const MetronomeSettingsPanel({
-    Key key,
-    @required this.metronomeSettingsController,
+    Key? key,
+    required this.metronomeSettingsController,
     this.compactLayout = false,
   }) : super(key: key);
 
@@ -32,8 +32,8 @@ class MetronomeSettingsPanel extends StatelessWidget {
                 value: -5,
               ),
               ValueListenableBuilder(
-                  valueListenable: metronomeSettingsController,
-                  builder: (context, metronomeSettings, child) => Text(
+                  valueListenable: metronomeSettingsController!,
+                  builder: (context, dynamic metronomeSettings, child) => Text(
                         '${metronomeSettings.tempo}',
                         style: TextStyle(fontSize: 60),
                       )),
@@ -70,18 +70,18 @@ class MetronomeSettingsPanel extends StatelessWidget {
                 TextCircleButton(
                   'x0.5',
                   size: 26,
-                  onPressed: metronomeSettingsController.halfTempo,
+                  onPressed: metronomeSettingsController!.halfTempo,
                 ),
                 ValueListenableBuilder(
-                    valueListenable: metronomeSettingsController,
-                    builder: (context, metronomeSettings, child) => Text(
+                    valueListenable: metronomeSettingsController!,
+                    builder: (context, dynamic metronomeSettings, child) => Text(
                           '${metronomeSettings.tempo}',
                           style: TextStyle(fontSize: 60),
                         )),
                 TextCircleButton(
                   'x2',
                   size: 26,
-                  onPressed: metronomeSettingsController.doubleTempo,
+                  onPressed: metronomeSettingsController!.doubleTempo,
                 ),
               ],
             ),
@@ -103,12 +103,12 @@ class MetronomeSettingsPanel extends StatelessWidget {
         ],
         SizedBox(height: 20),
         ValueListenableBuilder(
-          valueListenable: metronomeSettingsController,
-          builder: (context, metronomeSettings, child) => Slider(
+          valueListenable: metronomeSettingsController!,
+          builder: (context, dynamic metronomeSettings, child) => Slider(
             value: metronomeSettings.tempo.toDouble(),
             min: metronomeSettings.minTempo.toDouble(),
             max: metronomeSettings.maxTempo.toDouble(),
-            onChanged: (value) => metronomeSettingsController.setTempo(value.toInt()),
+            onChanged: (value) => metronomeSettingsController!.setTempo(value.toInt()),
           ),
         ),
         if (!compactLayout) SizedBox(height: 20),
@@ -116,21 +116,21 @@ class MetronomeSettingsPanel extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
             ValueListenableBuilder(
-              valueListenable: metronomeSettingsController,
-              builder: (context, metronomeSettings, child) => ValueChoicePanel(
+              valueListenable: metronomeSettingsController!,
+              builder: (context, dynamic metronomeSettings, child) => ValueChoicePanel(
                 value: metronomeSettings.beatsPerBar,
                 title: 'Uderzeń na takt',
-                onValueDecrement: metronomeSettingsController.decreaseBeatsPerBarBy1,
-                onValueIncrement: metronomeSettingsController.increaseBeatsPerBarBy1,
+                onValueDecrement: metronomeSettingsController!.decreaseBeatsPerBarBy1,
+                onValueIncrement: metronomeSettingsController!.increaseBeatsPerBarBy1,
               ),
             ),
             ValueListenableBuilder(
-              valueListenable: metronomeSettingsController,
-              builder: (context, metronomeSettings, child) => ValueChoicePanel(
+              valueListenable: metronomeSettingsController!,
+              builder: (context, dynamic metronomeSettings, child) => ValueChoicePanel(
                 value: metronomeSettings.clicksPerBeat,
                 title: 'Kliknięć na uderzenie',
-                onValueDecrement: metronomeSettingsController.decreaseClicksPerBeatBy1,
-                onValueIncrement: metronomeSettingsController.increaseClicksPerBeatBy1,
+                onValueDecrement: metronomeSettingsController!.decreaseClicksPerBeatBy1,
+                onValueIncrement: metronomeSettingsController!.increaseClicksPerBeatBy1,
               ),
             ),
           ],

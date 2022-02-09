@@ -13,23 +13,24 @@ class LocalStorage {
         defaultValue: MetronomeSettings(),
       );
 
-  void saveMetronomeSettings(MetronomeSettings value) => _data.put('metronomeSettings', value);
+  void saveMetronomeSettings(MetronomeSettings value) =>
+      _data.put('metronomeSettings', value);
 
   List<Setlist> getSetlists() {
     final jsonValue = _data.get(
       'setlists',
-    ) as String;
+    ) as String?;
 
     final setlistMap = jsonValue != null ? json.decode(jsonValue) : null;
-    final setlists = jsonValue != null
+    final List<Setlist> setlists = jsonValue != null
         ? List<Setlist>.from(setlistMap?.map((x) => Setlist.fromMap(x)))
-        : List<Setlist>();
+        : <Setlist>[];
 
     return setlists;
   }
 
-  Future<void> saveSetlists(List<Setlist> value) {
-    final jsonValue = json.encode(value?.map((x) => x?.toMap())?.toList());
+  Future<void> saveSetlists(List<Setlist?> value) {
+    final jsonValue = json.encode(value.map((x) => x?.toMap()).toList());
     return _data.put('setlists', jsonValue);
   }
 

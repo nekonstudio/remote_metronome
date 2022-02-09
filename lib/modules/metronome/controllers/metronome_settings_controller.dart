@@ -3,7 +3,8 @@ import 'package:flutter/foundation.dart';
 import '../models/metronome_settings.dart';
 
 class MetronomeSettingsController extends ValueNotifier<MetronomeSettings> {
-  MetronomeSettingsController({MetronomeSettings initialSettings = const MetronomeSettings()})
+  MetronomeSettingsController(
+      {MetronomeSettings initialSettings = const MetronomeSettings()})
       : super(initialSettings);
 
   static const HalfTimeTempoMultipler = 0.5;
@@ -33,7 +34,7 @@ class MetronomeSettingsController extends ValueNotifier<MetronomeSettings> {
       );
 
   @protected
-  void changeParameter({int tempo, int beatsPerBar, int clicksPerBeat}) {
+  void changeParameter({int? tempo, int? beatsPerBar, int? clicksPerBeat}) {
     final newSettings = value
         .copyWith(
           tempo: tempo,

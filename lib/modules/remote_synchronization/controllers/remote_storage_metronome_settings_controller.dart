@@ -12,7 +12,7 @@ class RemoteStorageMetronomeSettingsController extends StorageMetronomeSettingsC
       : super(storage);
 
   @override
-  void changeParameter({int tempo, int beatsPerBar, int clicksPerBeat}) {
+  void changeParameter({int? tempo, int? beatsPerBar, int? clicksPerBeat}) {
     if (!metronome.isPlaying) {
       super.changeParameter(tempo: tempo, beatsPerBar: beatsPerBar, clicksPerBeat: clicksPerBeat);
 

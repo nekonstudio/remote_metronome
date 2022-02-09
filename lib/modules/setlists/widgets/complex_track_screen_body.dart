@@ -8,7 +8,7 @@ import '../../metronome/widgets/metronome_settings_panel.dart';
 import '../models/section.dart';
 
 class ComplexTrackScreenBody extends StatefulWidget {
-  final List<Section> trackSections;
+  final List<Section>? trackSections;
 
   const ComplexTrackScreenBody(this.trackSections);
 
@@ -17,7 +17,7 @@ class ComplexTrackScreenBody extends StatefulWidget {
 }
 
 class _ComplexTrackScreenBodyState extends State<ComplexTrackScreenBody> {
-  MetronomeSettingsController _metronomeSettingsController;
+  MetronomeSettingsController? _metronomeSettingsController;
 
   @override
   Widget build(BuildContext context) {
@@ -49,7 +49,7 @@ class _ComplexTrackScreenBodyState extends State<ComplexTrackScreenBody> {
                   );
                 }),
           ),
-          widget.trackSections.isEmpty
+          widget.trackSections!.isEmpty
               ? Container(
                   color: Color.fromRGBO(36, 36, 36, 1),
                   height: 60,
@@ -58,23 +58,25 @@ class _ComplexTrackScreenBodyState extends State<ComplexTrackScreenBody> {
                   ),
                 )
               : Container(
-                  height: (72 * widget.trackSections.length).toDouble(),
+                  height: (72 * widget.trackSections!.length).toDouble(),
                   child: ClipRect(
                     child: ListView.separated(
                       separatorBuilder: (_, __) => Divider(
                         height: 0,
                       ),
                       physics: NeverScrollableScrollPhysics(),
-                      itemCount: widget.trackSections.length,
+                      itemCount: widget.trackSections!.length,
                       itemBuilder: (context, index) {
-                        final section = widget.trackSections[index];
+                        final section = widget.trackSections![index];
                         _metronomeSettingsController =
-                            MetronomeSettingsController(initialSettings: section.settings);
+                            MetronomeSettingsController(
+                                initialSettings: section.settings!);
                         return _SectionListItem(
                           index: index,
                           section: section,
                           settingsController: _metronomeSettingsController,
-                          onSectionEdit: (newSection) => _editSection(index, newSection),
+                          onSectionEdit: (newSection) =>
+                              _editSection(index, newSection),
                           onSectionDelete: _deleteSection,
                         );
                       },
@@ -86,33 +88,61 @@ class _ComplexTrackScreenBodyState extends State<ComplexTrackScreenBody> {
     );
   }
 
-  void _addSection(Section section) => setState(() => widget.trackSections.add(section));
+  void _addSection(Section section) =>
+      setState(() => widget.trackSections!.add(section));
   void _editSection(int currentSectionIndex, Section newSection) =>
-      setState(() => widget.trackSections[currentSectionIndex] = newSection);
-  void _deleteSection(Section section) => setState(() => widget.trackSections.remove(section));
+      setState(() => widget.trackSections![currentSectionIndex] = newSection);
+  void _deleteSection(Section section) =>
+      setState(() => widget.trackSections!.remove(section));
 }
 
 class _SectionListItem extends StatelessWidget {
   final int index;
   final Section section;
-  final MetronomeSettingsController settingsController;
+  final MetronomeSettingsController? settingsController;
   final void Function(Section) onSectionEdit;
   final void Function(Section) onSectionDelete;
 
   const _SectionListItem({
-    Key key,
-    @required this.index,
-    @required this.section,
-    @required this.settingsController,
-    @required this.onSectionEdit,
-    @required this.onSectionDelete,
+    Key? key,
+    required this.index,
+    required this.section,
+    required this.settingsController,
+    required this.onSectionEdit,
+    required this.onSectionDelete,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Slidable(
-      actionPane: SlidableScrollActionPane(),
-      actionExtentRatio: 0.2,
+      endActionPane: ActionPane(
+        motion: const DrawerMotion(),
+        extentRatio: 0.2,
+        children: [
+          SlidableAction(
+            label: 'Edytuj',
+            backgroundColor: Colors.blue,
+            icon: Icons.edit,
+            onPressed: (context) {
+              showModalBottomSheet(
+                isScrollControlled: true,
+                context: context,
+                builder: (_) => _SectionForm(
+                  section: section,
+                  onFormSubmit: onSectionEdit,
+                  controller: settingsController,
+                ),
+              );
+            },
+          ),
+          SlidableAction(
+            label: 'Usuń',
+            backgroundColor: Colors.red,
+            icon: Icons.delete,
+            onPressed: (context) => onSectionDelete(section),
+          ),
+        ],
+      ),
       child: Container(
         color: Color.fromRGBO(36, 36, 36, 1),
         child: ListTile(
@@ -120,8 +150,8 @@ class _SectionListItem extends StatelessWidget {
             backgroundColor: Colors.transparent,
             child: Text('${index + 1}.'),
           ),
-          title: Text(section.title),
-          subtitle: Text('${section.settings.tempo} BPM'),
+          title: Text(section.title!),
+          subtitle: Text('${section.settings!.tempo} BPM'),
           trailing: CircleAvatar(
             backgroundColor: Colors.transparent,
             child: Text(
@@ -131,42 +161,19 @@ class _SectionListItem extends StatelessWidget {
           ),
         ),
       ),
-      secondaryActions: [
-        IconSlideAction(
-          caption: 'Edytuj',
-          color: Colors.blue,
-          icon: Icons.edit,
-          onTap: () {
-            showModalBottomSheet(
-                isScrollControlled: true,
-                context: context,
-                builder: (_) => _SectionForm(
-                      section: section,
-                      onFormSubmit: onSectionEdit,
-                      controller: settingsController,
-                    ));
-          },
-        ),
-        IconSlideAction(
-          caption: 'Usuń',
-          color: Colors.red,
-          icon: Icons.delete,
-          onTap: () => onSectionDelete(section),
-        ),
-      ],
     );
   }
 }
 
 class _SectionForm extends StatefulWidget {
-  final MetronomeSettingsController controller;
+  final MetronomeSettingsController? controller;
   final void Function(Section) onFormSubmit;
-  final Section section;
+  final Section? section;
 
   const _SectionForm({
-    Key key,
-    @required this.controller,
-    @required this.onFormSubmit,
+    Key? key,
+    required this.controller,
+    required this.onFormSubmit,
     this.section,
   }) : super(key: key);
 
@@ -177,8 +184,8 @@ class _SectionForm extends StatefulWidget {
 class __SectionFormState extends State<_SectionForm> {
   final _formKey = GlobalKey<FormState>();
 
-  String _title;
-  int _barsCount;
+  String? _title;
+  int? _barsCount;
 
   @override
   Widget build(BuildContext context) {
@@ -190,7 +197,8 @@ class __SectionFormState extends State<_SectionForm> {
             color: Colors.black26,
             child: ListTile(
               leading: Icon(Icons.playlist_add),
-              title: Text(widget.section == null ? 'Dodaj sekcję' : 'Edytuj sekcję'),
+              title: Text(
+                  widget.section == null ? 'Dodaj sekcję' : 'Edytuj sekcję'),
             ),
           ),
           SizedBox(
@@ -216,24 +224,28 @@ class __SectionFormState extends State<_SectionForm> {
                     onSaved: (value) {
                       _title = value;
                     },
-                    validator: (text) => text.isEmpty ? 'To pole nie może być puste' : null,
+                    validator: (text) =>
+                        text!.isEmpty ? 'To pole nie może być puste' : null,
                   ),
                   Row(
                     children: [
                       Expanded(
                         child: TextFormField(
-                          initialValue: widget.section?.barsCount?.toString() ?? '',
+                          initialValue:
+                              widget.section?.barsCount?.toString() ?? '',
                           decoration: InputDecoration(
                             labelText: 'Ilość taktów',
                           ),
-                          keyboardType:
-                              TextInputType.numberWithOptions(decimal: false, signed: false),
-                          inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                          keyboardType: TextInputType.numberWithOptions(
+                              decimal: false, signed: false),
+                          inputFormatters: [
+                            FilteringTextInputFormatter.digitsOnly
+                          ],
                           onSaved: (value) {
-                            _barsCount = int.parse(value);
+                            _barsCount = int.parse(value!);
                           },
                           validator: (text) {
-                            if (text.isEmpty) {
+                            if (text!.isEmpty) {
                               return 'To pole nie może być puste';
                             }
                             if (int.parse(text) <= 0) {
@@ -247,7 +259,8 @@ class __SectionFormState extends State<_SectionForm> {
                       Padding(
                         padding: const EdgeInsets.only(top: 23, left: 20),
                         child: RaisedButton(
-                          child: Text(widget.section == null ? 'Dodaj' : 'Zmień'),
+                          child:
+                              Text(widget.section == null ? 'Dodaj' : 'Zmień'),
                           onPressed: () {
                             _submitForm();
                           },
@@ -265,14 +278,14 @@ class __SectionFormState extends State<_SectionForm> {
   }
 
   void _submitForm() {
-    final formState = _formKey.currentState;
+    final formState = _formKey.currentState!;
     if (formState.validate()) {
       formState.save();
 
       final section = Section(
         title: _title,
         barsCount: _barsCount,
-        settings: widget.controller.value,
+        settings: widget.controller!.value,
       );
 
       widget.onFormSubmit(section);

@@ -4,7 +4,7 @@ import '../../metronome/controllers/metronome_settings_controller.dart';
 import '../../metronome/widgets/metronome_settings_panel.dart';
 
 class SimpleTrackScreenBody extends StatelessWidget {
-  final MetronomeSettingsController controller;
+  final MetronomeSettingsController? controller;
 
   SimpleTrackScreenBody(this.controller);
 

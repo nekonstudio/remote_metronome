@@ -11,17 +11,11 @@ abstract class RemoteSynchronizedMetronome extends WakelockMetronome {
   RemoteSynchronizedMetronome(this.synchronization);
 
   void prepareSynchronizedStart(MetronomeSettings settings) {
-    Metronome.platformChannel.invokeMethod(
-      'prepareSynchronizedStart',
-      {
-        'tempo': settings.tempo,
-        'beatsPerBar': settings.beatsPerBar,
-        'clicksPerBeat': settings.clicksPerBeat,
-      },
-    );
+    Metronome.metronomeLib.prepareSynchronizedStart(
+        settings.tempo, settings.clicksPerBeat, settings.beatsPerBar);
   }
 
   void runSynchronizedStart() {
-    Metronome.platformChannel.invokeMethod('synchronizedStart');
+    Metronome.metronomeLib.runSynchronizedStart();
   }
 }

@@ -1,8 +1,11 @@
 package com.example.metronom;
 
+import android.content.res.AssetManager;
+import android.os.Bundle;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import io.flutter.embedding.android.FlutterActivity;
 import io.flutter.embedding.engine.FlutterEngine;
@@ -15,22 +18,28 @@ public class MainActivity extends FlutterActivity {
 
     private Metronome _metronome;
 
+    static {
+        System.loadLibrary("native-android-metronome");
+    }
+
     @Override
     public void configureFlutterEngine(@NonNull FlutterEngine flutterEngine) {
         super.configureFlutterEngine(flutterEngine);
 
-        initializeMetronome(flutterEngine);
-        handleMethodCall(flutterEngine);
+        setupAssetManager(getAssets());
     }
+
+    private native void setupAssetManager(AssetManager assetManager);
 
     private void initializeMetronome(@NonNull FlutterEngine flutterEngine) {
         final EventChannel barBeatChannel = new EventChannel(
                 flutterEngine.getDartExecutor().getBinaryMessenger(),
                 "com.example.metronom/barBeatChannel");
-        final MetronomeSoundPlayer metronomeSoundPlayer = new MetronomeSoundPlayer();
-        metronomeSoundPlayer.loadSoundsFromAssets(getAssets());
 
-        _metronome = new Metronome(metronomeSoundPlayer, barBeatChannel);
+        final SoundPlayer soundPlayer = new SoundPlayer();
+//        soundPlayer.setupAudioSources(getAssets());
+
+        _metronome = new Metronome(soundPlayer, barBeatChannel);
     }
 
     private void handleMethodCall(@NonNull FlutterEngine flutterEngine) {
@@ -66,11 +75,11 @@ public class MainActivity extends FlutterActivity {
                             break;
                     }
 
-                    if (isSuccess) {
-                        result.success(null);
-                    } else {
-                        result.notImplemented();
-                    }
+                     if (isSuccess) {
+                         result.success(null);
+                     } else {
+                         result.notImplemented();
+                     }
                 }
             );
     }

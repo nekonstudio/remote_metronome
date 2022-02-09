@@ -8,10 +8,18 @@ import '../providers/nearby_devices_provider.dart';
 import '../providers/remote_synchronization_provider.dart';
 import '../widgets/connected_nearby_devices_list.dart';
 
-class HostConnectingScreen extends StatelessWidget {
+class HostConnectingScreen extends ConsumerWidget {
   @override
-  Widget build(BuildContext context) {
-    context.read(nearbyDevicesProvider).advertise();
+  Widget build(BuildContext context, WidgetRef ref) {
+    ref.read(nearbyDevicesProvider).advertise();
+
+    ref.listen<DeviceSynchronizationModeNotifier>(
+        deviceSynchronizationModeNotifierProvider,
+        (_, deviceSynchronizationModeNotifier) {
+      if (deviceSynchronizationModeNotifier.isSynchronized) {
+        Get.back();
+      }
+    });
 
     return Scaffold(
       appBar: AppBar(
@@ -19,7 +27,7 @@ class HostConnectingScreen extends StatelessWidget {
       ),
       body: WillPopScope(
         onWillPop: () async {
-          context.read(nearbyDevicesProvider).finish();
+          ref.read(nearbyDevicesProvider).finish();
           return true;
         },
         child: Column(
@@ -32,37 +40,33 @@ class HostConnectingScreen extends StatelessWidget {
         ),
       ),
       floatingActionButton: Consumer(
-        builder: (context, watch, child) {
-          final hasConnections = watch(nearbyDevicesProvider).hasConnections;
+        builder: (context, ref, child) {
+          final hasConnections =
+              ref.watch(nearbyDevicesProvider).hasConnections;
 
           print('hasConnections? $hasConnections');
 
           return FloatingActionButton(
-            backgroundColor: hasConnections ? Get.theme.accentColor : Colors.grey,
+            backgroundColor:
+                hasConnections ? Get.theme.colorScheme.secondary : Colors.grey,
             child: child,
             onPressed: hasConnections
                 ? () async {
-                    context.read(nearbyDevicesProvider).stopAdvertising();
+                    ref.read(nearbyDevicesProvider).stopAdvertising();
 
-                    context.read(synchronizationProvider).synchronize();
+                    ref.read(synchronizationProvider).synchronize();
                     await showDialog(
                         context: context,
                         barrierDismissible: false,
-                        builder: (context) => ProviderListener<DeviceSynchronizationModeNotifier>(
-                              provider: deviceSynchronizationModeNotifierProvider,
-                              onChange: (context, deviceSynchronizationModeNotifier) {
-                                if (deviceSynchronizationModeNotifier.isSynchronized) {
-                                  Get.back();
-                                }
-                              },
-                              child: AlertDialog(
-                                title: Text('Proszę czekać...'),
-                                content: ListTile(
-                                  leading: CircularProgressIndicator(),
-                                  title: Text('Trwa synchronizacja'),
-                                ),
-                              ),
-                            ));
+                        builder: (context) {
+                          return AlertDialog(
+                            title: Text('Proszę czekać...'),
+                            content: ListTile(
+                              leading: CircularProgressIndicator(),
+                              title: Text('Trwa synchronizacja'),
+                            ),
+                          );
+                        });
 
                     Get.offAll(SimpleMetronomeScreen());
                   }

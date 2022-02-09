@@ -8,9 +8,9 @@ import '../logic/setlist_player/remote_synchronized_setlist_player.dart';
 import '../logic/setlist_player/setlist_player.dart';
 import '../models/setlist.dart';
 
-SetlistPlayer _setlistPlayerCopy;
+SetlistPlayer? _setlistPlayerCopy;
 
-final setlistPlayerProvider =
+final AutoDisposeChangeNotifierProviderFamily<NotifierSetlistPlayer, Setlist>? setlistPlayerProvider =
     ChangeNotifierProvider.autoDispose.family<NotifierSetlistPlayer, Setlist>(
   (ref, setlist) {
     final modeProvider = ref.watch(deviceSynchronizationModeNotifierProvider);
@@ -23,7 +23,7 @@ final setlistPlayerProvider =
     if (_setlistPlayerCopy != null) {
       if (modeProvider.previousMode == DeviceSynchronizationMode.Host) {
         modeProvider.resetPreviousMode();
-        impl.copy(_setlistPlayerCopy);
+        impl.copy(_setlistPlayerCopy!);
       }
     }
 
