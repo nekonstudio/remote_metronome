@@ -13,7 +13,6 @@ import '../providers/metronome_provider.dart';
 import '../providers/simple_metronome_settings_controller_provider.dart';
 import '../widgets/metronome_settings_panel.dart';
 import '../widgets/metronome_visualization.dart';
-import '../widgets/tap_tempo_detector_button.dart';
 
 class SimpleMetronomeScreen extends ConsumerStatefulWidget {
   @override
@@ -84,47 +83,18 @@ class _SimpleMetronmeScreenState extends ConsumerState<SimpleMetronomeScreen> {
               MetronomeSettingsPanel(
                 metronomeSettingsController: metronomeSettingsController,
               ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  Expanded(
-                    child: Consumer(
-                      builder: (context, ref, child) {
-                        final isPlaying = ref.watch(isMetronomePlayingProvider);
-                        return IconCircleButton(
-                          icon: isPlaying ? Icons.pause : Icons.play_arrow,
-                          color: Colors.red,
-                          onPressed: () => _handleMetronomePlaying(
-                            ref,
-                            metronomeSettingsController,
-                          ),
-                        );
-                      },
+              Consumer(
+                builder: (context, ref, child) {
+                  final isPlaying = ref.watch(isMetronomePlayingProvider);
+                  return IconCircleButton(
+                    icon: isPlaying ? Icons.pause : Icons.play_arrow,
+                    color: Colors.red,
+                    onPressed: () => _handleMetronomePlaying(
+                      ref,
+                      metronomeSettingsController,
                     ),
-                  ),
-                  Expanded(
-                    child: Consumer(
-                      builder: (context, ref, child) {
-                        final tapTempoDetector =
-                            ref.watch(_tapTempoDetectorProvider);
-                        final isMetronomePlaying =
-                            ref.watch(metronomeProvider).isPlaying;
-
-                        return TapTempoDetectorButton(
-                          isTempoDetectionActive: tapTempoDetector.isActive,
-                          isDisabled: isMetronomePlaying,
-                          onPressed: () {
-                            _onTapTempoDetectorButtonPress(
-                              isMetronomePlaying,
-                              tapTempoDetector,
-                              metronomeSettingsController,
-                            );
-                          },
-                        );
-                      },
-                    ),
-                  ),
-                ],
+                  );
+                },
               ),
             ],
           ),
@@ -138,20 +108,6 @@ class _SimpleMetronmeScreenState extends ConsumerState<SimpleMetronomeScreen> {
     ref
         .read(metronomeProvider)
         .change(ref.read(simpleMetronomeSettingsControllerProvider).value);
-  }
-
-  void _onTapTempoDetectorButtonPress(
-    bool isMetronomePlaying,
-    NotifierTapTempoDetector tapTempoDetector,
-    MetronomeSettingsController metronomeSettingsController,
-  ) {
-    if (!isMetronomePlaying) {
-      tapTempoDetector.registerTap();
-      final tempo = tapTempoDetector.calculatedTempo;
-      if (tempo != null) {
-        metronomeSettingsController.setTempo(tempo);
-      }
-    }
   }
 
   void _handleMetronomePlaying(

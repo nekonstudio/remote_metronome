@@ -18,6 +18,7 @@ class ValueChoicePanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final buttonSize = 14.0;
     return Column(
       children: [
         Text(
@@ -34,7 +35,7 @@ class ValueChoicePanel extends StatelessWidget {
             children: [
               TextCircleButton(
                 '-',
-                size: 13,
+                size: buttonSize,
                 onPressed: onValueDecrement,
               ),
               Text(
@@ -43,7 +44,7 @@ class ValueChoicePanel extends StatelessWidget {
               ),
               TextCircleButton(
                 '+',
-                size: 13,
+                size: buttonSize,
                 onPressed: onValueIncrement,
               ),
             ],

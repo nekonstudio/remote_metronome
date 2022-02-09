@@ -20,9 +20,9 @@ class IconCircleButton extends StatelessWidget {
       child: Icon(
         icon,
         color: Colors.white,
-        size: 35,
+        size: 45,
       ),
-      size: 30,
+      size: 38,
       color: color,
       onPressed: onPressed,
     );
