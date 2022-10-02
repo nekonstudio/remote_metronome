@@ -17,9 +17,7 @@ class LocalStorage {
       _data.put('metronomeSettings', value);
 
   List<Setlist> getSetlists() {
-    final jsonValue = _data.get(
-      'setlists',
-    ) as String?;
+    final jsonValue = _data.get('setlists') as String?;
 
     final setlistMap = jsonValue != null ? json.decode(jsonValue) : null;
     final List<Setlist> setlists = jsonValue != null
@@ -32,6 +30,15 @@ class LocalStorage {
   Future<void> saveSetlists(List<Setlist?> value) {
     final jsonValue = json.encode(value.map((x) => x?.toMap()).toList());
     return _data.put('setlists', jsonValue);
+  }
+
+  bool isFirstAppLaunch() {
+    final value = _data.get('isFirstAppLaunch') as bool? ?? true;
+    if (value == true) {
+      _data.put('isFirstAppLaunch', false);
+    }
+
+    return value;
   }
 
   Box<dynamic> get _data => Hive.box(BoxName);
