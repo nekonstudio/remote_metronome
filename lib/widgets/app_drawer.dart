@@ -1,10 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:get/get.dart';
-import 'package:metronom/modules/remote_synchronization/providers/nearby_devices_provider.dart';
 
-import '../modules/remote_synchronization/screens/role_choice_screen.dart';
-import '../modules/remote_synchronization/widgets/remote_connected_devices_panel.dart';
 import '../modules/setlists/screens/saved_setlists_screen.dart';
 
 class AppDrawer extends StatelessWidget {
@@ -38,37 +34,39 @@ class AppDrawer extends StatelessWidget {
             title: Text('Setlisty'),
             leading: Icon(Icons.format_list_numbered),
           ),
-          Consumer(
-            builder: (context, ref, child) {
-              final hasConnections =
-                  ref.watch(nearbyDevicesProvider).hasConnections;
-              final color = hasConnections
-                  ? Get.theme.colorScheme.secondary
-                  : Colors.white;
 
-              return ListTile(
-                onTap: () {
-                  if (hasConnections) {
-                    Get.back();
-                    showModalBottomSheet(
-                      context: context,
-                      builder: (context) => RemoteConnectedDevicesPanel(),
-                    );
-                  } else {
-                    Get.to(() => RoleChoiceScreen());
-                  }
-                },
-                title: Text(
-                  'Wspólne odtwarzanie',
-                  style: TextStyle(color: color),
-                ),
-                leading: Icon(
-                  Icons.wifi,
-                  color: color,
-                ),
-              );
-            },
-          ),
+          // INFO: Remote playing feature not enabled for v1.0.0
+          // Consumer(
+          //   builder: (context, ref, child) {
+          //     final hasConnections =
+          //         ref.watch(nearbyDevicesProvider).hasConnections;
+          //     final color = hasConnections
+          //         ? Get.theme.colorScheme.secondary
+          //         : Colors.white;
+
+          //     return ListTile(
+          //       onTap: () {
+          //         if (hasConnections) {
+          //           Get.back();
+          //           showModalBottomSheet(
+          //             context: context,
+          //             builder: (context) => RemoteConnectedDevicesPanel(),
+          //           );
+          //         } else {
+          //           Get.to(() => RoleChoiceScreen());
+          //         }
+          //       },
+          //       title: Text(
+          //         'Wspólne odtwarzanie',
+          //         style: TextStyle(color: color),
+          //       ),
+          //       leading: Icon(
+          //         Icons.wifi,
+          //         color: color,
+          //       ),
+          //     );
+          //   },
+          // ),
         ],
       ),
     );
