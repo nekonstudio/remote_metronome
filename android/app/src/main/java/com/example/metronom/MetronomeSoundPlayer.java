@@ -5,6 +5,8 @@ import android.content.res.AssetManager;
 import android.media.AudioFormat;
 import android.media.AudioManager;
 import android.media.AudioTrack;
+import android.media.audiofx.LoudnessEnhancer;
+import android.util.Log;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
@@ -17,6 +19,8 @@ import io.flutter.FlutterInjector;
 import io.flutter.embedding.engine.loader.FlutterLoader;
 
 class MetronomeSoundPlayer {
+
+    private static final String TAG = "MetronomeSoundPlayer";
 
     enum SoundId {
         HIGH_SOUND,
@@ -36,10 +40,18 @@ class MetronomeSoundPlayer {
                     AudioFormat.ENCODING_PCM_16BIT),
             AudioTrack.MODE_STREAM);
 
+    private final LoudnessEnhancer loudnessEnhancer;
+
     private final Map<SoundId, byte[]> _soundBuffers = new HashMap<>();
 
     private byte[] _currentSoundData;
     private int _currentSoundDataLength;
+
+    MetronomeSoundPlayer() {
+        loudnessEnhancer = new LoudnessEnhancer(_audioTrack.getAudioSessionId());
+        loudnessEnhancer.setTargetGain(500);
+        loudnessEnhancer.setEnabled(true);
+    }
 
     void loadSoundsFromAssets(AssetManager assets) {
         final Map<SoundId, String> soundFileNames = new HashMap<SoundId, String>() {{

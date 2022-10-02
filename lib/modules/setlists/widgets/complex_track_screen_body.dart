@@ -258,12 +258,12 @@ class __SectionFormState extends State<_SectionForm> {
                       ),
                       Padding(
                         padding: const EdgeInsets.only(top: 23, left: 20),
-                        child: RaisedButton(
-                          child:
-                              Text(widget.section == null ? 'Dodaj' : 'Zmień'),
-                          onPressed: () {
-                            _submitForm();
-                          },
+                        child: ElevatedButton(
+                          child: Text(
+                            widget.section == null ? 'Dodaj' : 'Zmień',
+                            style: TextStyle(color: Colors.white),
+                          ),
+                          onPressed: _submitForm,
                         ),
                       ),
                     ],

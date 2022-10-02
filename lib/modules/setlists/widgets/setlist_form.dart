@@ -27,10 +27,15 @@ class SetlistForm extends StatelessWidget {
             Container(
               color: Colors.black26,
               child: ListTile(
-                leading:
-                    Icon(existingSetlist == null ? Icons.playlist_add : Icons.playlist_add_check),
-                title: Text(existingSetlist == null ? 'Nowa setlista' : 'Edytuj setlistę'),
-                subtitle: existingSetlist == null ? null : Text(existingSetlist!.name!),
+                leading: Icon(existingSetlist == null
+                    ? Icons.playlist_add
+                    : Icons.playlist_add_check),
+                title: Text(existingSetlist == null
+                    ? 'Nowa setlista'
+                    : 'Edytuj setlistę'),
+                subtitle: existingSetlist == null
+                    ? null
+                    : Text(existingSetlist!.name!),
               ),
             ),
             Padding(
@@ -39,7 +44,8 @@ class SetlistForm extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   TextFormField(
-                    initialValue: existingSetlist == null ? '' : existingSetlist!.name,
+                    initialValue:
+                        existingSetlist == null ? '' : existingSetlist!.name,
                     decoration: InputDecoration(labelText: 'Nazwa'),
                     autofocus: true,
                     validator: _validate,
@@ -53,8 +59,11 @@ class SetlistForm extends StatelessWidget {
                   SizedBox(
                     height: 10,
                   ),
-                  RaisedButton(
-                    child: Text(existingSetlist == null ? 'Dodaj' : 'Zmień'),
+                  ElevatedButton(
+                    child: Text(
+                      existingSetlist == null ? 'Dodaj' : 'Zmień',
+                      style: TextStyle(color: Colors.white),
+                    ),
                     onPressed: _onSubmit,
                   ),
                 ],

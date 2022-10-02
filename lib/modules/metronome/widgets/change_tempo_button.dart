@@ -17,14 +17,31 @@ class ChangeTempoButton extends StatelessWidget {
     return SizedBox(
       width: 40,
       height: 40,
-      child: FlatButton(
-        padding: const EdgeInsets.all(0),
+      child: TextButton(
         onPressed: () {
           metronomeSettingsController!.changeTempoBy(value);
         },
-        child: Text((value >= 0) ? '+$value' : '$value'),
-        shape: Border.all(color: Colors.lightBlue),
+        child: Text(
+          (value >= 0) ? '+$value' : '$value',
+          style: TextStyle(color: Colors.white),
+        ),
+        style: TextButton.styleFrom(
+          shape: BeveledRectangleBorder(
+            side: BorderSide(
+              color: Colors.lightBlue,
+              width: 0.5,
+            ),
+          ),
+        ),
       ),
+      // child: FlatButton(
+      //   padding: const EdgeInsets.all(0),
+      //   onPressed: () {
+      //     metronomeSettingsController!.changeTempoBy(value);
+      //   },
+      //   child: Text((value >= 0) ? '+$value' : '$value'),
+      //   shape: Border.all(color: Colors.lightBlue),
+      // ),
     );
   }
 }

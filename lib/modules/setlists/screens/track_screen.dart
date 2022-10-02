@@ -99,7 +99,7 @@ class _TrackScreenState extends State<TrackScreen> {
     );
   }
 
-  void _toggleMode(int index) {
+  void _toggleMode(int? index) {
     setState(() {
       _isComplexTrack = index == 0 ? false : true;
       _screenModeSwitchIndex = index;

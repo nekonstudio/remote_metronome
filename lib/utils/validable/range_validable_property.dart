@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:metronom/utils/validable/validable.dart';
 
 class RangeValidableProperty implements Validable {

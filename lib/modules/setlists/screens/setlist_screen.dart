@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:get/get.dart';
-import 'package:metronom/modules/metronome/models/metronome_settings.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
 import '../../metronome/providers/metronome_provider.dart';

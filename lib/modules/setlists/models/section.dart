@@ -1,7 +1,5 @@
 import 'dart:convert';
 
-import 'package:flutter/foundation.dart';
-
 import '../../metronome/models/metronome_settings.dart';
 
 class Section {

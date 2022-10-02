@@ -68,8 +68,11 @@ class _Option extends StatelessWidget {
               style: Get.textTheme.caption,
             ),
           ),
-          RaisedButton(
-            child: Text(buttonText),
+          ElevatedButton(
+            child: Text(
+              buttonText,
+              style: TextStyle(color: Colors.white),
+            ),
             onPressed: () {
               Get.to(
                 () => nextScreen,
