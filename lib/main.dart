@@ -25,6 +25,7 @@ class MyApp extends StatelessWidget {
     );
     return ProviderScope(
       child: GetMaterialApp(
+        debugShowCheckedModeBanner: false,
         title: 'Metronom',
         defaultTransition: Transition.rightToLeft,
         theme: theme.copyWith(

@@ -117,7 +117,7 @@ class _SectionListItem extends StatelessWidget {
     return Slidable(
       endActionPane: ActionPane(
         motion: const DrawerMotion(),
-        extentRatio: 0.2,
+        extentRatio: 0.5,
         children: [
           SlidableAction(
             label: 'Edytuj',
