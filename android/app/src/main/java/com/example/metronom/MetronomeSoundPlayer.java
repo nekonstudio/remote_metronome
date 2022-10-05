@@ -1,4 +1,4 @@
-package com.example.metronom;
+package lislav.hms.metronom;
 
 import android.content.res.AssetFileDescriptor;
 import android.content.res.AssetManager;

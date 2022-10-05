@@ -67,7 +67,7 @@ class NearbyDevices with ChangeNotifier {
       onConnectionInitiated: _onConnectionInitiated,
       onConnectionResult: _onConnectionResult,
       onDisconnected: _onDisconnected,
-      serviceId: 'com.example.metronom',
+      serviceId: 'lislav.hms.metronom',
     );
   }
 
@@ -93,7 +93,7 @@ class NearbyDevices with ChangeNotifier {
         onConnectionResult: _onConnectionResult,
         onDisconnected: _onDisconnected,
       );
-    }, onEndpointLost: (endpointId) {}, serviceId: "com.example.metronom");
+    }, onEndpointLost: (endpointId) {}, serviceId: "lislav.hms.metronom");
   }
 
   void stopDiscovery() {

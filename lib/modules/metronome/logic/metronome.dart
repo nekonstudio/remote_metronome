@@ -9,10 +9,10 @@ import 'metronome_base.dart';
 class Metronome extends MetronomeBase {
   @protected
   static const platformChannel =
-      const MethodChannel('com.example.metronom/metronom');
+      const MethodChannel('lislav.hms.metronom/metronom');
 
   static Stream<dynamic> currentBarBeatStream =
-      const EventChannel('com.example.metronom/barBeatChannel')
+      const EventChannel('lislav.hms.metronom/barBeatChannel')
           .receiveBroadcastStream();
 
   @override

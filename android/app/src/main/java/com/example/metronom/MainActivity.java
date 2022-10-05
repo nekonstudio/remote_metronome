@@ -1,4 +1,4 @@
-package com.example.metronom;
+package lislav.hms.metronom;
 
 import android.util.Log;
 
@@ -10,7 +10,7 @@ import io.flutter.plugin.common.EventChannel;
 import io.flutter.plugin.common.MethodChannel;
 
 public class MainActivity extends FlutterActivity {
-    private static final String CHANNEL = "com.example.metronom/metronom";
+    private static final String CHANNEL = "lislav.hms.metronom/metronom";
     private static final String TAG = "MetronomePlugin";
 
     private Metronome _metronome;
@@ -27,7 +27,7 @@ public class MainActivity extends FlutterActivity {
     private void initializeMetronome(@NonNull FlutterEngine flutterEngine) {
         final EventChannel barBeatChannel = new EventChannel(
                 flutterEngine.getDartExecutor().getBinaryMessenger(),
-                "com.example.metronom/barBeatChannel");
+                "lislav.hms.metronom/barBeatChannel");
         final MetronomeSoundPlayer metronomeSoundPlayer = new MetronomeSoundPlayer();
         metronomeSoundPlayer.loadSoundsFromAssets(getAssets());
 

@@ -1,4 +1,4 @@
-package com.example.metronom;
+package lislav.hms.metronom;
 
 public class SoundPlayer {
     static {
