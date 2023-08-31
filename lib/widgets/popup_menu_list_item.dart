@@ -28,7 +28,8 @@ class _PopupMenuListItemState extends State<PopupMenuListItem> {
       onTap: widget.onPressed,
       onTapDown: (details) => _tapPosition = details.globalPosition,
       onLongPress: () async {
-        final RenderBox overlay = Overlay.of(context)!.context.findRenderObject() as RenderBox;
+        final RenderBox overlay =
+            Overlay.of(context).context.findRenderObject() as RenderBox;
         final handleSelectedOption = await showMenu(
           context: context,
           items: widget.popupMenuEntries,

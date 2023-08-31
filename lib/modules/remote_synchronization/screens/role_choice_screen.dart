@@ -59,13 +59,13 @@ class _Option extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Text(title, style: Get.textTheme.headline5),
+          Text(title, style: Get.textTheme.headlineSmall),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 14),
             child: Text(
               subtitle,
               textAlign: TextAlign.center,
-              style: Get.textTheme.caption,
+              style: Get.textTheme.bodySmall,
             ),
           ),
           ElevatedButton(

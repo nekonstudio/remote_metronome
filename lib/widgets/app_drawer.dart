@@ -14,7 +14,7 @@ class AppDrawer extends StatelessWidget {
             child: DrawerHeader(
               child: Text(
                 'Metronom',
-                style: Theme.of(context).textTheme.headline6,
+                style: Theme.of(context).textTheme.titleLarge,
               ),
               decoration: BoxDecoration(color: Colors.black45),
               padding: const EdgeInsets.only(top: 22, left: 22),
